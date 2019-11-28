@@ -11,6 +11,18 @@ contract IWithdraw {
         uint256 _penaltyAmount
     );
 
+    // function init(
+    //     address _penaltyContract,
+    //     address _pool,
+    //     bool _withdrawInViolation,
+
+    // ) 
+    //     public 
+    // {
+
+    // }
+    function recordDeposit(uint256 _amount) public;
+
     /**
       * @notice Allows the pool (and user) to check if they are able to 
       *         wtihdraw. If the withdraw contract does not allow for 
@@ -27,6 +39,7 @@ contract IWithdraw {
         uint256 _amount
     )
         public
+        view
         returns(bool, uint256);
 
     

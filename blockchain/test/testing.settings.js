@@ -2,15 +2,16 @@ const etherlime = require('etherlime-lib');
 const ethers = require('ethers');
 const BigNumber = require('bignumber.js');
 
-let prtAbi = require('../build/PRT.json');
+let cyclicWithdrawAbi = require('../build/CyclicWithdraw.json');
 
-const prt_settings = {
+const test_settings = {
 
 }
+
 module.exports = { 
     ethers,
     etherlime,
     BigNumber,
-    prtAbi,
-    prt_settings
+    cyclicWithdrawAbi,
+    test_settings
 }
