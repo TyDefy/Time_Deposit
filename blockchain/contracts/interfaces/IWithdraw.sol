@@ -29,6 +29,8 @@ contract IWithdraw {
         public
         returns(bool, uint256);
 
+    
+
     /**
       * @notice Tells the pool how much a user can withdraw. Emits the 
       *         withdrawCalculated event.
