@@ -13,22 +13,25 @@ describe("PRT tests", async () => {
     let user2 = accounts[4];
     
     let cyclicWithdrawInstance;
-  
-    beforeEach('', async () => {
-        deployer = new etherlime.EtherlimeGanacheDeployer(deployerInsecure.secretKey);
 
-        cyclicWithdrawInstance = await deployer.deploy(
-            cyclicWithdrawAbi, 
-            false, 
-            pool.signer.address,
-            1000,
-            true
-        );
-    });
+    describe("Isolated functionality", async () => {
+        beforeEach('', async () => {
+            deployer = new etherlime.EtherlimeGanacheDeployer(deployerInsecure.secretKey);
+    
+            cyclicWithdrawInstance = await deployer.deploy(
+                cyclicWithdrawAbi, 
+                false, 
+                pool.signer.address,
+                test_settings.cyclicWithdraw.cycleLength,
+                test_settings.cyclicWithdraw.withdrawViolation
+            );
+        });
 
-    describe("Basic functionality", async () => {
-        it("Adding user roles", async () => {
-            // Adding a PMO
+        it("All variables correctly initialized", async () => {
+            let cycleLength = await cyclicWithdrawInstance.getCycle();
+            console.log(cycleLength);
+
+
             let pmo_role_before = await prtInstance.getUserRole(pmo.signer.address);
             await prtInstance.from(api.signer.address).updateUser(
                 pmo.signer.address,

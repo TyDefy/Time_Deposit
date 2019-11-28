@@ -48,6 +48,10 @@ contract CyclicWithdraw is IWithdraw {
         );
     }
 
+    function getCycle() public view returns(uint256) {
+        return cycleLength_;
+    } 
+
     function canWithdraw(
         address _user,
         uint256 _amount
@@ -63,7 +67,7 @@ contract CyclicWithdraw is IWithdraw {
                 users_[_user].cantWithdrawInViolation,
                 "User cannot withdraw in violation"
             );
-            
+
         } else {
             // If the user is not within their penalty time (i.e can withdraw
             // without penalty)

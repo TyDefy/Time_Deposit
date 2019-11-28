@@ -29,8 +29,8 @@ contract BasicPool {
         public
     {
         admin_ = _admin;
-        receivingColalteralInstance_ = _basicCollateralToken;
-        collateralInstance_ = _interestEarningCollateralToken;
+        receivingColalteralInstance_ = IERC20(_basicCollateralToken);
+        collateralInstance_ = IERC20(_interestEarningCollateralToken);
     }
 
     /**
@@ -63,6 +63,6 @@ contract BasicPool {
             "Pool has not been approved as a spender"
         );
 
-        
+
     }
 }
