@@ -9,13 +9,7 @@ contract CyclicWithdraw is IWithdraw {
     uint256 internal cycleLength_;
     // Withdraw control for pool
     bool internal violationWithdraw_;
-    // struct of all user withdraw information
-    struct UserInfo {
-        uint256 lastDeposit;
-        bool cantWithdrawInViolation;
-    }
-    // A mapping of all active suers
-    mapping(address => UserInfo) internal users_;
+    
 
     modifier onlyPool() {
         require(msg.sender == pool_, "Access denied, incorrect permissions");
@@ -41,16 +35,26 @@ contract CyclicWithdraw is IWithdraw {
         _addUser(msg.sender, _amount, violationWithdraw_);
     }
 
-    function getUserInfo(address _user) public view returns(uint256, bool) {
-        return (
-            users_[_user].lastDeposit,
-            users_[_user].cantWithdrawInViolation
-        );
+
+    function calculateWithdraw(
+        address _user,
+        uint256 _amount
+    )
+        public 
+        returns(uint256, uint256) 
+    {
+        return (10, 10);
+    }
+
+    function cantWithdrawInViolation() public view returns(bool) {
+        return violationWithdraw_;
     }
 
     function getCycle() public view returns(uint256) {
         return cycleLength_;
     } 
+
+    
 
     function canWithdraw(
         address _user,
@@ -60,18 +64,18 @@ contract CyclicWithdraw is IWithdraw {
         view
         returns(bool, uint256) 
     {
-        // Checks if user is within penalty time
-        if(users_[_user].lastDeposit + cycleLength_ >= now) {
-            require(
-                violationWithdraw_ &&
-                users_[_user].cantWithdrawInViolation,
-                "User cannot withdraw in violation"
-            );
+        // // Checks if user is within penalty time
+        // if(users_[_user].lastDeposit + cycleLength_ >= now) {
+        //     require(
+        //         violationWithdraw_ &&
+        //         users_[_user].cantWithdrawInViolation,
+        //         "User cannot withdraw in violation"
+        //     );
 
-        } else {
-            // If the user is not within their penalty time (i.e can withdraw
-            // without penalty)
-        }
+        // } else {
+        //     // If the user is not within their penalty time (i.e can withdraw
+        //     // without penalty)
+        // }
     }
 
     function _addUser(
@@ -81,7 +85,8 @@ contract CyclicWithdraw is IWithdraw {
     )
         internal
     {
-        users_[_user].lastDeposit = now;
-        users_[_user].cantWithdrawInViolation = _withdrawInViolation;
+        // users_[_user].balance = _amount;
+        // users_[_user].lastDeposit = now;
+        // users_[_user].cantWithdrawInViolation = _withdrawInViolation;
     }
 }

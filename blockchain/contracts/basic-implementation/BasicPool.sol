@@ -8,10 +8,15 @@ contract BasicPool {
     // Instance of the withdraw library 
     IWithdraw internal withdrawInstance_;
     // Instance of the collateral token (DAI) that this
-    // contract will recive in deposit
-    IERC20 internal receivingColalteralInstance_;
     // Instance of the interest earning token (cDAI)
     IERC20 internal collateralInstance_;
+    // struct of all user withdraw information
+    struct UserInfo {
+        uint256 balance;
+        uint256 lastDeposit;
+    }
+    // A mapping of all active suers
+    mapping(address => UserInfo) internal users_;
 
     modifier onlyAdmin() {
         require(
@@ -23,14 +28,12 @@ contract BasicPool {
 
     constructor(
         address _admin,
-        address _basicCollateralToken,
-        address _interestEarningCollateralToken
+        address _collateralToken
     )
         public
     {
         admin_ = _admin;
-        receivingColalteralInstance_ = IERC20(_basicCollateralToken);
-        collateralInstance_ = IERC20(_interestEarningCollateralToken);
+        collateralInstance_ = IERC20(_collateralToken);
     }
 
     /**
@@ -54,15 +57,39 @@ contract BasicPool {
       * @param  _amount the amount of the raw token they  are depositng
       */
     function deposit(uint256 _amount) public {
-        // Ensures the user has approved this pool as a spender
+        // TODO intergrate with token
+        users_[msg.sender].balance += _amount;
+        users_[msg.sender].lastDeposit = now;
+    }
+
+    function balanceOf(address _user) public view returns(uint256) {
+        return users_[_user].balance;
+    }
+
+    function withdraw(uint256 _amount) public {
         require(
-            receivingColalteralInstance_.allowance(
-                msg.sender,
-                address(this)
-            ) >= _amount,
-            "Pool has not been approved as a spender"
+            users_[msg.sender].balance >= _amount,
+            "Insufficent balance"
         );
 
+        //TODO call withdraw library
 
+        users_[msg.sender].balance -= _amount;
+    }
+
+    function getUserInfo(
+        address _user
+    )
+        public
+        view
+        returns(
+            uint256,
+            uint256
+        )
+    {
+        return (
+            users_[_user].lastDeposit,
+            users_[_user].balance
+        );
     }
 }

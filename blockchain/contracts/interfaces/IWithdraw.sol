@@ -52,7 +52,7 @@ contract IWithdraw {
       * @dev    This function will revert if a user cannot withdraw
       *         during the penalty. 
       */
-    function withdraw(
+    function calculateWithdraw(
         address _user,
         uint256 _amount
     )
