@@ -7,7 +7,5 @@ export const connectMetamask = createAsyncAction(
     <void, 
     { 
       ethAddress: string, 
-      networkId: number, 
-      approvedNetwork: boolean, 
     }, 
     string>();

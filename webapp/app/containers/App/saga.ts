@@ -7,9 +7,10 @@ function* blockchain() {
   const blockchainContext: BlockchainContext = yield getContext('blockchain');
   try {
     const result: BlockchainContext = yield call(blockchainContext.enableEthereum);
-    console.log(result);
+    yield put(connectMetamask.success({
+      ethAddress: result.ethAddress || '0x'
+    }));
   } catch (error) {
-    console.log(error);
     yield put(connectMetamask.failure(error.message));  
   }
 }

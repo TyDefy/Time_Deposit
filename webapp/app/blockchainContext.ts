@@ -41,15 +41,19 @@ export class blockchainContext implements BlockchainContext {
     }
     this.isWeb3Enabled = true;
 
-    const accounts = await ethereum.send('eth_requestAccounts');
-
-    if (accounts.code && accounts.code === '4001') {
-      throw Error('The user denied account authorisation');
+    try {
+      const accounts = await ethereum.send('eth_requestAccounts')
+      this.ethAddress = accounts.result[0];
+    } catch (error) {
+      if (error.code === 4001) { 
+        throw Error('Please connect to MetaMask.');
+      } else {
+        throw Error(error);
+      }
     }
     this.isAppAuthorised = true;
     const web3Provider = new ethers.providers.Web3Provider(ethereum);
     this.signer = web3Provider.getSigner();
-    this.ethAddress = accounts.result[0];
     const writeableSimpleStorageContract = this.simpleStorageContract.connect(this.signer);
     this.simpleStorageContract = writeableSimpleStorageContract;
     return this;
