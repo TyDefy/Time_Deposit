@@ -1,4 +1,4 @@
-import { BaseProvider, Web3Provider } from "ethers/providers";
+import { BaseProvider } from "ethers/providers";
 import { getDefaultProvider, Signer, ethers, Contract } from "ethers";
 import { getNetwork } from "ethers/utils";
 import SimpleStorageContractAbi from '../../blockchain/build/abis/SimpleStorage-abi.json';
@@ -6,7 +6,7 @@ import SimpleStorageContractAbi from '../../blockchain/build/abis/SimpleStorage-
 export interface BlockchainContext {
   isWeb3Enabled: boolean
   isAppAuthorised: boolean;
-  provider: BaseProvider | Web3Provider;
+  provider: BaseProvider;
   signer?: Signer;
   simpleStorageContract: Contract;
   ethAddress?: string;
@@ -30,23 +30,27 @@ export class blockchainContext implements BlockchainContext {
     this.simpleStorageContract = new Contract(`${process.env.SIMPLE_STORAGE_CONTRACT_ADDRESS}`,
       SimpleStorageContractAbi,
       this.provider)
-    
-      this.enableEthereum = this.enableEthereum.bind(this);
+
+    this.enableEthereum = this.enableEthereum.bind(this);
+    const { ethereum } = window as any;
+    if (ethereum) {
+      this.isWeb3Enabled = true;
+    }
   }
 
   async enableEthereum(): Promise<BlockchainContext> {
-    const { ethereum } = window as any;
-    if (!ethereum) {
+    if (!this.isWeb3Enabled) {
       throw Error('The browser you are using is not web3 enabled. Functionality will be limited.')
     }
-    this.isWeb3Enabled = true;
+
+    const { ethereum } = window as any;
 
     try {
       const accounts = await ethereum.send('eth_requestAccounts')
       this.ethAddress = accounts.result[0];
     } catch (error) {
-      if (error.code === 4001) { 
-        throw Error('Please connect to MetaMask.');
+      if (error.code === 4001) {
+        throw Error('Please allow connection to MetaMask.');
       } else {
         throw Error(error);
       }

@@ -1,9 +1,9 @@
-import { getContext, takeEvery, put, call } from "redux-saga/effects";
+import { getContext, put, call, take, fork, race } from "redux-saga/effects";
 import { BlockchainContext } from "blockchainContext";
-import { connectMetamask } from "./actions";
+import { connectMetamask, setWeb3 } from "./actions";
 import { getType } from "typesafe-actions";
 
-function* blockchain() {
+function* connectMetamaskHandler() {
   const blockchainContext: BlockchainContext = yield getContext('blockchain');
   try {
     const result: BlockchainContext = yield call(blockchainContext.enableEthereum);
@@ -15,6 +15,20 @@ function* blockchain() {
   }
 }
 
+function* blockchain() {
+  const blockchainContext: BlockchainContext = yield getContext('blockchain');
+  yield put(setWeb3(blockchainContext.isWeb3Enabled));
+  while (blockchainContext.isWeb3Enabled) {
+    yield take(getType(connectMetamask.request));
+    yield fork(connectMetamaskHandler);
+    // const result = yield race({
+    //   success: take(connectMetamask.success),
+    //   failure: take(connectMetamask.failure)
+    // })
+    
+  }
+}
+
 export default function * root() {
-  yield takeEvery(getType(connectMetamask.request), blockchain);
+  yield fork(blockchain);
 }

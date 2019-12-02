@@ -8,7 +8,8 @@ enum UserType {
 
 /* --- STATE --- */
 interface AppState {
-
+  isMetamaskInstalled: boolean;
+  ethAddress?: string;
 }
 
 /* --- ACTIONS --- */

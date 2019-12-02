@@ -18,8 +18,11 @@ import { compose, Dispatch } from 'redux';
 import { Redirect, Route } from 'react-router-dom';
 
 import injectSaga from 'utils/injectSaga';
+import injectReducer from 'utils/injectReducer';
 import { DAEMON } from 'utils/constants';
 import saga from './saga';
+import reducer from './reducer';
+
 import selectApp from './selectors';
 
 import AppWrapper from '../../components/AppWrapper/index';
@@ -86,10 +89,13 @@ const withConnect = connect(
   mapDispatchToProps,
 );
 
+const withReducer = injectReducer<OwnProps>({ key: 'app', reducer: reducer });
 const withSaga = injectSaga<OwnProps>({ key: 'app', saga: saga, mode: DAEMON });
+
 
 export default compose(
   withRouter,
+  withReducer,
   withSaga,
   withConnect,
 )(App);
