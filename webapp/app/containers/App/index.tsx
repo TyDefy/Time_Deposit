@@ -27,8 +27,7 @@ import selectApp from './selectors';
 
 import AppWrapper from '../../components/AppWrapper/index';
 import Notifier from '../Notification/notifier';
-import { Button } from '@material-ui/core';
-import { connectMetamask } from './actions';
+import HomePage from 'containers/HomePage';
 
 interface OwnProps { }
 
@@ -37,7 +36,6 @@ export interface StateProps {
 }
 
 export interface DispatchProps {
-  connect(): void;
 }
 
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;
@@ -68,9 +66,7 @@ const App: React.FunctionComponent<Props> = (props: Props) => {
       <Notifier />
       <AppWrapper {...props}>
         <Switch>
-          <Route path='/'>
-            <Button onClick={() => props.connect()}>Connect with metamask</Button>
-          </Route>
+          <Route path='/' component={HomePage} />
           <Route component={NotFoundRedirect} />
         </Switch>
       </AppWrapper>
@@ -81,7 +77,7 @@ const App: React.FunctionComponent<Props> = (props: Props) => {
 const mapStateToProps = state => selectApp(state);
 
 const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
-  connect: () => dispatch(connectMetamask.request()),
+
 });
 
 const withConnect = connect(

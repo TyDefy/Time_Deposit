@@ -10,6 +10,12 @@ enum UserType {
 interface AppState {
   isMetamaskInstalled: boolean;
   ethAddress?: string;
+  storageValue?: number;
+  approvedChainId: number,
+  approvedNetworkName: string,
+  approvedNetwork: boolean,
+  networkName?: string,
+  chainId?: number,
 }
 
 /* --- ACTIONS --- */
