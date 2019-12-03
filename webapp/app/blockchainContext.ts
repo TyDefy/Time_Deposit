@@ -76,8 +76,12 @@ export class blockchainContext implements BlockchainContext {
     this.networkName = network.name;
     this.approvedNetwork = (this.approvedChainId === this.chainId)
     this.signer = web3Provider.getSigner();
-    const writeableSimpleStorageContract = this.simpleStorageContract.connect(this.signer);
-    this.simpleStorageContract = writeableSimpleStorageContract;
+    
+    if (this.approvedNetwork) {
+      const writeableSimpleStorageContract = this.simpleStorageContract.connect(this.signer);
+      this.simpleStorageContract = writeableSimpleStorageContract;
+    }
+    
     return this;
   }
 }

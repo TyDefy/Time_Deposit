@@ -28,7 +28,7 @@ function accountChangedEventChannel() {
 function chainChangedEventChannel() {
   return eventChannel(emit => {
     const { ethereum } = window as any;
-    ethereum.on('chainChanged', (chainId) => emit(chainId));
+    ethereum.on('networkChanged', (chainId) => emit(chainId));
     
     return () => { };
   })
@@ -38,7 +38,10 @@ function* chainChangeListener() {
   const blockchainContext: BlockchainContext = yield getContext('blockchain');
   const chainChangedChannel = yield call(chainChangedEventChannel)
   while (true) {
+    console.log('waiting for chain change');
     yield take(chainChangedChannel);
+    console.log('chain change');
+
     const result: BlockchainContext = yield call(blockchainContext.enableEthereum);
     yield put(connectMetamask.success({
       ethAddress: result.ethAddress || '0x',
@@ -55,7 +58,9 @@ function* addressChangeListener() {
   const accountChangedChannel = yield call(accountChangedEventChannel)
 
   while (true) {
+    console.log('waiting for address change');
     yield take(accountChangedChannel);
+    console.log('address change');
     const result: BlockchainContext = yield call(blockchainContext.enableEthereum);
     yield put(connectMetamask.success({
       ethAddress: result.ethAddress || '0x',
