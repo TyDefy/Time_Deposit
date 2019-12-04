@@ -8,7 +8,6 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { compose, Dispatch } from 'redux';
 
-import { Button } from '@material-ui/core';
 import selectHomePage from './selectors';
 
 interface OwnProps {}
