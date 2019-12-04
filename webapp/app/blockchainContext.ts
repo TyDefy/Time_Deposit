@@ -46,14 +46,13 @@ export class blockchainContext implements BlockchainContext {
 
     this.enableEthereum = this.enableEthereum.bind(this);
     const { ethereum } = window as any;
-    if (ethereum) {
+    if (ethereum && ethereum.isMetaMask) {
       this.isMetamaskInstalled = true;
     }
   }
 
   async enableEthereum(): Promise<BlockchainContext> {
     if (!this.isMetamaskInstalled) {
-      console.log('error enabling. non-web3 browser');
       throw Error('The browser you are using is not web3 enabled. Functionality will be limited.')
     }
 

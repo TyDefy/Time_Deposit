@@ -19,18 +19,23 @@ function* simpleStorageContractSaga() {
 function accountChangedEventChannel() {
   return eventChannel(emit => {
     const { ethereum } = window as any;
-    ethereum.on('accountsChanged', accounts => emit(accounts));
-
-    return () => { };
+    const accountChangedHandler = (accounts) => emit(accounts);
+    ethereum.on('accountsChanged', accountChangedHandler);
+    return () => {
+      ethereum.off('accountsChanged', accountChangedHandler);
+    };
   });
 }
 
 function chainChangedEventChannel() {
   return eventChannel(emit => {
     const { ethereum } = window as any;
-    ethereum.on('networkChanged', (chainId) => emit(chainId));
+    const chainChangedHandler = (chainId) => emit(chainId);
+    ethereum.on('networkChanged', chainChangedHandler);
     
-    return () => { };
+    return () => {
+      ethereum.off('networkChanged', chainChangedHandler);
+    };
   })
 }
 
