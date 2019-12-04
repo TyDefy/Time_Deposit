@@ -1,4 +1,5 @@
 import { Reducer, Store } from 'redux';
+import {ContainerState as AppState} from '../containers/App/types';
 
 export interface LifeStore extends Store<ApplicationRootState> {
   injectedReducers: any;
@@ -20,5 +21,5 @@ export interface InjectSagaParams {
 
 // Your root reducer type, which is your redux state types also
 export interface ApplicationRootState {
-  readonly app: never;
+  readonly app: AppState;
 }

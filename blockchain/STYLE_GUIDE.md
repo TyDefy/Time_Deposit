@@ -90,7 +90,7 @@ uint256 internal _poolBalance;
 
 ## Contract and functions
 
-For the anglo-rpp contracts NatSpec docs are used. The `/** */` is used over `///`.
+For the nobuntu contracts NatSpec docs are used. The `/** */` is used over `///`.
 Tags are listed in the following order:
 
 ```

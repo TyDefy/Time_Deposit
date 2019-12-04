@@ -100,9 +100,9 @@ module.exports = require('./webpack.base.babel')({
       minRatio: 0.8,
     }),
     new WebpackPwaManifest({
-      name: 'anglo-rpp Webapp',
-      short_name: 'anglo-rpp Webapp',
-      description: 'anglo-rpp Webapp',
+      name: 'nobuntu Webapp',
+      short_name: 'nobuntu Webapp',
+      description: 'nobuntu Webapp',
       background_color: '#fafafa',
       theme_color: '#b1624d',
       inject: true,

@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const simpleStorageABI = require('../build/simpleStorage.json');
 
-DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
+let DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
 const etherlime = require('etherlime-lib');
 

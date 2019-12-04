@@ -18,12 +18,16 @@ import { compose, Dispatch } from 'redux';
 import { Redirect, Route } from 'react-router-dom';
 
 import injectSaga from 'utils/injectSaga';
+import injectReducer from 'utils/injectReducer';
 import { DAEMON } from 'utils/constants';
 import saga from './saga';
+import reducer from './reducer';
+
 import selectApp from './selectors';
 
 import AppWrapper from '../../components/AppWrapper/index';
 import Notifier from '../Notification/notifier';
+import HomePage from 'containers/HomePage';
 
 interface OwnProps { }
 
@@ -32,7 +36,6 @@ export interface StateProps {
 }
 
 export interface DispatchProps {
-
 }
 
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;
@@ -63,7 +66,7 @@ const App: React.FunctionComponent<Props> = (props: Props) => {
       <Notifier />
       <AppWrapper {...props}>
         <Switch>
-          <Route path='/'>Hi there</Route>
+          <Route path='/' component={HomePage} />
           <Route component={NotFoundRedirect} />
         </Switch>
       </AppWrapper>
@@ -82,10 +85,13 @@ const withConnect = connect(
   mapDispatchToProps,
 );
 
+const withReducer = injectReducer<OwnProps>({ key: 'app', reducer: reducer });
 const withSaga = injectSaga<OwnProps>({ key: 'app', saga: saga, mode: DAEMON });
+
 
 export default compose(
   withRouter,
+  withReducer,
   withSaga,
   withConnect,
 )(App);
