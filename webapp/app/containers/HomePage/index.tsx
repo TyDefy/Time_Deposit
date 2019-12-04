@@ -8,14 +8,12 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { compose, Dispatch } from 'redux';
 
-import { connectMetamask } from 'containers/App/actions';
 import { Button } from '@material-ui/core';
 import selectHomePage from './selectors';
 
 interface OwnProps {}
 
 interface DispatchProps {
-  connect(): void;
 }
 
 export interface StateProps {
@@ -36,7 +34,7 @@ const HomePage: React.FunctionComponent<Props> = (props: Props) => {
     return <div>Please install metamask</div> 
   }
   if (props.isMetamaskInstalled && !props.ethAddress) {
-    return <Button onClick={() => props.connect()}>Connect with metamask</Button>
+    return <Button onClick={() => alert('connect')}>Connect with metamask</Button>
   }
   return <>
     <div>{`Hi ${props.ethAddress}`}</div>
@@ -58,7 +56,7 @@ const mapDispatchToProps = (
   ownProps: OwnProps,
 ): DispatchProps => {
   return {
-    connect: () => dispatch(connectMetamask.request()),
+
   };
 };
 

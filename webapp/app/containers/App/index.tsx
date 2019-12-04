@@ -28,8 +28,14 @@ import selectApp from './selectors';
 import AppWrapper from '../../components/AppWrapper/index';
 import Notifier from '../Notification/notifier';
 import HomePage from 'containers/HomePage';
+import { connectMetamask } from './actions';
+import PoolListing from 'components/PoolListing';
+import AdminPoolsOverviewPage from 'containers/AdminPoolsOverviewPage';
 
-interface OwnProps { }
+interface OwnProps {
+  isMetamaskInstalled: boolean,
+  ethAddress?: string,
+}
 
 export interface StateProps {
 
@@ -38,7 +44,12 @@ export interface StateProps {
 export interface DispatchProps {
 }
 
+
+
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;
+
+
+
 
 const NotFoundRedirect = () => <Redirect to='/404' />
 // const RoleRoute: React.FunctionComponent<any> = ({ component: Component, isAuthorized, ...rest }) => (
@@ -60,13 +71,16 @@ const NotFoundRedirect = () => <Redirect to='/404' />
 //   />
 // );
 
+// Keep most specific routes
+
 const App: React.FunctionComponent<Props> = (props: Props) => {
   return (
     <>
       <Notifier />
       <AppWrapper {...props}>
         <Switch>
-          <Route path='/' component={HomePage} />
+          <Route exact path='/admin/pools' component={AdminPoolsOverviewPage} />
+          <Route exact path='/'  component={HomePage} />
           <Route component={NotFoundRedirect} />
         </Switch>
       </AppWrapper>
@@ -77,7 +91,7 @@ const App: React.FunctionComponent<Props> = (props: Props) => {
 const mapStateToProps = state => selectApp(state);
 
 const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
-
+  connect: () => dispatch(connectMetamask.request()),
 });
 
 const withConnect = connect(

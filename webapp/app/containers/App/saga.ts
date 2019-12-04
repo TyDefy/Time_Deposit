@@ -83,7 +83,7 @@ function* initialiseWallet() {
     ethAddress: result.ethAddress || '0x',
     approvedNetwork: result.approvedNetwork,
     networkName: result.networkName,
-    chainId: result.chainId ?? -1, //this should never be possible
+    chainId: result.chainId ?? -1,
   }));
 }
 
