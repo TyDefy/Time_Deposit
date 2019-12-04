@@ -29,7 +29,6 @@ import AppWrapper from '../../components/AppWrapper/index';
 import Notifier from '../Notification/notifier';
 import HomePage from 'containers/HomePage';
 import { connectMetamask } from './actions';
-import PoolListing from 'components/PoolListing';
 import AdminPoolsOverviewPage from 'containers/AdminPoolsOverviewPage';
 
 interface OwnProps {
@@ -42,14 +41,20 @@ export interface StateProps {
 }
 
 export interface DispatchProps {
+  connect(): void;
 }
 
-
+export interface Pool {
+  address: string;
+  name: string;
+  type: string;
+  period: number;
+  cap: number;
+  participants: number;
+  interestRate: number;
+}
 
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;
-
-
-
 
 const NotFoundRedirect = () => <Redirect to='/404' />
 // const RoleRoute: React.FunctionComponent<any> = ({ component: Component, isAuthorized, ...rest }) => (
@@ -80,7 +85,7 @@ const App: React.FunctionComponent<Props> = (props: Props) => {
       <AppWrapper {...props}>
         <Switch>
           <Route exact path='/admin/pools' component={AdminPoolsOverviewPage} />
-          <Route exact path='/'  component={HomePage} />
+          <Route exact path='/' component={HomePage} />
           <Route component={NotFoundRedirect} />
         </Switch>
       </AppWrapper>

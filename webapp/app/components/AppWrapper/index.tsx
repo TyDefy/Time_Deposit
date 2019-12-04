@@ -92,6 +92,7 @@ interface OwnProps extends WithStyles<typeof styles> {
   children: React.ReactNode;
   isMetamaskInstalled: boolean;
   ethAddress?: string;
+  connect(): void
 }
 
 
@@ -102,6 +103,7 @@ const AppWrapper: React.FunctionComponent<Props> = ({
   children,
   isMetamaskInstalled,
   ethAddress,
+  connect
 }: Props) => {
   const [anchorEl, setAnchorEl] = useState<EventTarget | null>(null);
   return (
@@ -123,7 +125,7 @@ const AppWrapper: React.FunctionComponent<Props> = ({
               ) : 
                 !ethAddress ? (
                   <div className={classes.connectButton}>
-                    <Button onClick={() => alert('connect')}>Connect with Metamask</Button>
+                    <Button onClick={() => connect()}>Connect with Metamask</Button>
                   </div>
                 ) : (
                   <>

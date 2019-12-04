@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Theme, createStyles, withStyles, WithStyles, Container, Typography, Button, Table, TableHead, TableCell, TableBody, TableRow } from '@material-ui/core';
-import { Pool } from "containers/Pool";
+import { Pool } from 'containers/App';
 
 const styles = (theme: Theme) =>
   createStyles({

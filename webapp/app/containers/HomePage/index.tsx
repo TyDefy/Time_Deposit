@@ -34,7 +34,7 @@ const HomePage: React.FunctionComponent<Props> = (props: Props) => {
     return <div>Please install metamask</div> 
   }
   if (props.isMetamaskInstalled && !props.ethAddress) {
-    return <Button onClick={() => alert('connect')}>Connect with metamask</Button>
+    return <div>Click connect above</div>
   }
   return <>
     <div>{`Hi ${props.ethAddress}`}</div>

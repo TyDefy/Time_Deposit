@@ -8,7 +8,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { compose, Dispatch } from 'redux';
 import PoolListing from 'components/PoolListing';
-import { Pool } from "containers/Pool";
+import { Pool } from 'containers/App';
 
 interface OwnProps { }
 
