@@ -29,7 +29,7 @@ const pools: Array<Pool> = [
 const AdminPoolsOverviewPage: React.FunctionComponent<Props> = (
   props: Props,
 ) => {
-  return <PoolListing pools={pools} />
+  return <PoolListing pools={pools} createPool={() => console.log('creating new pool')}/>
 };
 
 const mapDispatchToProps = (

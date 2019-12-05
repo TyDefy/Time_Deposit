@@ -5,24 +5,33 @@
  */
 
 import React from 'react';
-import { Theme, createStyles, withStyles, WithStyles, Container, Typography, Button, Table, TableHead, TableCell, TableBody, TableRow } from '@material-ui/core';
+import { Theme, createStyles, withStyles, WithStyles, Container, Typography, Button, Table, TableHead, TableCell, TableBody, TableRow, Grid } from '@material-ui/core';
 import { Pool } from 'containers/App';
 
-const styles = (theme: Theme) =>
+const styles = ({ palette }: Theme) =>
   createStyles({
+    pageHeader: {
+      justifyContent: 'space-between',
+    },
+    tableHeader: {
+      backgroundColor: 'lightgrey',
+      borderTop: '#fd9920 2px solid',
+    }
   });
 
 interface OwnProps extends WithStyles<typeof styles> {
   pools: Array<Pool>,
+  createPool(): void,
 }
 
-const PoolListing: React.FunctionComponent<OwnProps> = ({ pools }: OwnProps) => (
+const PoolListing: React.FunctionComponent<OwnProps> = ({ pools, classes, createPool }: OwnProps) => (
   <Container maxWidth='lg'>
-    <Typography variant='h1'>Pool Overview</Typography>
-    <Button> Create New Pool</Button>
-
+    <Grid container direction='row' className={classes.pageHeader}>
+      <Typography variant='h3'>Pool Overview</Typography>
+      <Button onClick={() => createPool()}> Create New Pool</Button>
+    </Grid>
     <Table>
-      <TableHead>
+      <TableHead className={classes.tableHeader}>
         <TableRow>
           <TableCell>Pool Name</TableCell>
           <TableCell>Type</TableCell>
@@ -40,7 +49,7 @@ const PoolListing: React.FunctionComponent<OwnProps> = ({ pools }: OwnProps) => 
             <TableCell>{p.period}</TableCell>
             <TableCell>{p.cap}</TableCell>
             <TableCell>{p.participants}</TableCell>
-            <TableCell>{p.interestRate}</TableCell>
+            <TableCell>{(p.interestRate * 100).toFixed(2)}</TableCell>
           </TableRow>))}
       </TableBody>
     </Table>
