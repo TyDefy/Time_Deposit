@@ -4,18 +4,17 @@
  *
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
 import { compose, Dispatch } from 'redux';
 
-import { connectMetamask } from 'containers/App/actions';
-import { Button } from '@material-ui/core';
 import selectHomePage from './selectors';
+import { setNewStorageValue } from 'containers/App/actions';
 
-interface OwnProps {}
+interface OwnProps { }
 
 interface DispatchProps {
-  connect(): void;
+  setValue(newValue: number): void;
 }
 
 export interface StateProps {
@@ -31,22 +30,37 @@ export interface StateProps {
 
 type Props = StateProps & DispatchProps & OwnProps;
 
-const HomePage: React.FunctionComponent<Props> = (props: Props) => {
-  if (!props.isMetamaskInstalled) { 
-    return <div>Please install metamask</div> 
+const HomePage: React.FunctionComponent<Props> = ({
+  chainId,
+  networkName = '',
+  isMetamaskInstalled,
+  ethAddress = '',
+  approvedNetwork,
+  approvedNetworkName,
+  approvedChainId,
+  storageValue,
+  setValue,
+}: Props) => {
+  const [newValue, setNewValue] = useState<number>(0);
+
+  if (!isMetamaskInstalled) {
+    return <div>Please install metamask</div>
   }
-  if (props.isMetamaskInstalled && !props.ethAddress) {
-    return <Button onClick={() => props.connect()}>Connect with metamask</Button>
+  if (isMetamaskInstalled && !ethAddress) {
+    return <div>Click connect above</div>
   }
   return <>
-    <div>{`Hi ${props.ethAddress}`}</div>
-    <div>{`You are using ${props.networkName} (${props.chainId})`}</div>
-    {props.approvedNetwork ?  
+    <div>{`Hi ${ethAddress}`}</div>
+    <div>{`You are using ${networkName} network (chainId: ${chainId})`}</div>
+    <div>{`The current value is ${storageValue}`}</div>
+    {approvedNetwork ?
       <div>
-        <input type='number' />
-        <button>Set value</button>
-      </div>: 
-      <div>{`Please select the ${props.approvedNetworkName} (${props.approvedChainId}) network in metamask`}</div>
+        <input type='number' onChange={(e) => setNewValue(parseInt(e.target.value))} value={newValue} />
+        <button onClick={() => setValue(newValue)}>Set value</button>
+      </div> : 
+      <>
+        <div>{`Please select the ${approvedNetworkName} (${approvedChainId}) network in metamask`}</div>
+      </>
     }
   </>
 };
@@ -58,7 +72,7 @@ const mapDispatchToProps = (
   ownProps: OwnProps,
 ): DispatchProps => {
   return {
-    connect: () => dispatch(connectMetamask.request()),
+    setValue: (newValue) => dispatch(setNewStorageValue.request(newValue))
   };
 };
 

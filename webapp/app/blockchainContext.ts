@@ -40,6 +40,7 @@ export class blockchainContext implements BlockchainContext {
     this.approvedNetworkName = network.name;
     this.approvedChainId = network.chainId;
 
+    // Instantiate a read-only version of the contract
     this.simpleStorageContract = new Contract(`${process.env.SIMPLE_STORAGE_CONTRACT_ADDRESS}`,
       SimpleStorageContractAbi,
       this.provider)

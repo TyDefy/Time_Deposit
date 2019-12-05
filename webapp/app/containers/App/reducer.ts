@@ -33,7 +33,7 @@ function appReducer(state: ContainerState = initialState, action: ContainerActio
         ...action.payload,
       }
     }
-    case getType(AppActions.setStorageValue): {
+    case getType(AppActions.saveStorageValue): {
       return {
         ...state,
         storageValue: action.payload,
