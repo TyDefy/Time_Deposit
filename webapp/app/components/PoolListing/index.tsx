@@ -5,8 +5,9 @@
  */
 
 import React from 'react';
-import { Theme, createStyles, withStyles, WithStyles, Container, Typography, Button, Table, TableHead, TableCell, TableBody, TableRow, Grid } from '@material-ui/core';
+import { Theme, createStyles, withStyles, WithStyles, Container, Typography, Button, Table, TableHead, TableCell, TableBody, TableRow, Grid, Chip } from '@material-ui/core';
 import { Pool } from 'containers/App';
+import { forwardTo } from 'utils/history';
 
 const styles = ({ palette }: Theme) =>
   createStyles({
@@ -16,6 +17,9 @@ const styles = ({ palette }: Theme) =>
     tableHeader: {
       backgroundColor: 'lightgrey',
       borderTop: '#fd9920 2px solid',
+    },
+    poolRow: {
+      cursor: 'pointer'
     }
   });
 
@@ -43,10 +47,10 @@ const PoolListing: React.FunctionComponent<OwnProps> = ({ pools, classes, create
       </TableHead>
       <TableBody>
         {pools.map(p => (
-          <TableRow key={p.address}>
+          <TableRow key={p.address} onClick={() => forwardTo(`/admin/pool/${p.address}`)} className={classes.poolRow}>
             <TableCell>{p.name}</TableCell>
             <TableCell>{p.type}</TableCell>
-            <TableCell>{p.period}</TableCell>
+            <TableCell><Chip label={`${p.period} months`}/></TableCell>
             <TableCell>{p.cap}</TableCell>
             <TableCell>{p.participants}</TableCell>
             <TableCell>{(p.interestRate * 100).toFixed(2)}</TableCell>

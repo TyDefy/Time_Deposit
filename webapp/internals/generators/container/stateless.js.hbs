@@ -12,9 +12,7 @@ import { Helmet } from 'react-helmet';
 {{#if wantMessages}}
 import { FormattedMessage } from 'react-intl';
 {{/if}}
-{{#if wantActionsAndReducer}}
-import { createStructuredSelector } from 'reselect';
-{{/if}}
+
 import { compose, Dispatch } from 'redux';
 
 {{#if wantSaga}}
@@ -42,7 +40,7 @@ interface DispatchProps {
 }
 
 {{#if wantActionsAndReducer}}
-interface StateProps {
+export interface StateProps {
 
 }
 
@@ -69,9 +67,7 @@ const {{ properCase name }}: React.FunctionComponent<Props> = (props: Props) => 
 };
 
 {{#if wantActionsAndReducer}}
-const mapStateToProps = createStructuredSelector({
-  {{ camelCase name }}: makeSelect{{properCase name}}(),
-});
+const mapStateToProps = (state) => select{{ properCase name }}(state);
 {{/if}}
 
 const mapDispatchToProps = (dispatch: Dispatch, ownProps: OwnProps): DispatchProps => {

@@ -1,28 +1,13 @@
-import { createSelector } from 'reselect';
+import { createStructuredSelector } from 'reselect';
 import { ApplicationRootState } from 'types';
 import { initialState } from './reducer';
+import { RootState } from 'containers/App/types';
+import { StateProps } from '.';
 
 
-/**
- * Direct selector to the {{ camelCase name }} state domain
- */
-
-const select{{ properCase name }}Domain = (state: ApplicationRootState) => {
-  return state ? state : initialState;
-};
-
-/**
- * Other specific selectors
- */
-
-/**
- * Default selector used by {{ properCase name }}
- */
-
-const select{{ properCase name }} = () =>
-  createSelector(select{{ properCase name }}Domain, substate => {
-    return substate;
-  });
+const select{{ properCase name }} = createStructuredSelector<RootState, StateProps>({
+  
+});
 
 export default select{{ properCase name }};
 export { select{{ properCase name }}Domain };
