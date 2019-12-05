@@ -4,18 +4,19 @@
  *
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { connect } from 'react-redux';
 import { compose, Dispatch } from 'redux';
 
-import { connectMetamask } from 'containers/App/actions';
+
 import { Button, Container, Typography, Paper } from '@material-ui/core';
 import selectHomePage from './selectors';
+import { setNewStorageValue } from 'containers/App/actions';
 
-interface OwnProps {}
+interface OwnProps { }
 
 interface DispatchProps {
-  connect(): void;
+  setValue(newValue: number): void;
 }
 
 export interface StateProps {
@@ -31,12 +32,24 @@ export interface StateProps {
 
 type Props = StateProps & DispatchProps & OwnProps;
 
-const HomePage: React.FunctionComponent<Props> = (props: Props) => {
-  if (!props.isMetamaskInstalled) { 
-    return <div>Please install metamask</div> 
+const HomePage: React.FunctionComponent<Props> = ({
+  chainId,
+  networkName = '',
+  isMetamaskInstalled,
+  ethAddress = '',
+  approvedNetwork,
+  approvedNetworkName,
+  approvedChainId,
+  storageValue,
+  setValue,
+}: Props) => {
+  const [newValue, setNewValue] = useState<number>(0);
+
+  if (!isMetamaskInstalled) {
+    return <div>Please install metamask</div>
   }
-  if (props.isMetamaskInstalled && !props.ethAddress) {
-    return <Button onClick={() => props.connect()}>Connect with metamask</Button>
+  if (isMetamaskInstalled && !ethAddress) {
+    return <div>Click connect above</div>
   }
   return <>
     <Container>
@@ -86,7 +99,7 @@ const mapDispatchToProps = (
   ownProps: OwnProps,
 ): DispatchProps => {
   return {
-    connect: () => dispatch(connectMetamask.request()),
+    setValue: (newValue) => dispatch(setNewStorageValue.request(newValue))
   };
 };
 

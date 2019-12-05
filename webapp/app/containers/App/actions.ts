@@ -1,10 +1,10 @@
 import { createAsyncAction, createStandardAction } from "typesafe-actions";
 
 export const connectMetamask = createAsyncAction(
-    'CONNECT_METAMASK_REQUEST',
-    'CONNECT_METAMASK_SUCCESS',
-    'CONNECT_METAMASK_FAILURE')
-    <void, 
+    'REQUEST/CONNECT_METAMASK',
+    'SUCCESS/CONNECT_METAMASK',
+    'FAILURE/CONNECT_METAMASK')
+    <undefined, 
     { 
       approvedNetwork: boolean,
       ethAddress: string,
@@ -19,4 +19,8 @@ export const setWeb3 = createStandardAction('BLOCKCHAIN_READY')<{
   approvedChainId: number
 }>();
 
-export const setStorageValue = createStandardAction('SIMPLE_STORAGE_VALUE')<number>();
+export const saveStorageValue = createStandardAction('SAVE_STORAGE_VALUE')<number>();
+export const setNewStorageValue = createAsyncAction(
+  '@TX_REQUEST/UPDATE_CONTRACT_VALUE',
+  '@TX_SUCCESS/UPDATE_CONTRACT_VALUE',
+  '@TX_FAILURE/UPDATE_CONTRACT_VALUE')<number,undefined,string>();
