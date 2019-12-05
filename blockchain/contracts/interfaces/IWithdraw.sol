@@ -11,52 +11,42 @@ contract IWithdraw {
         uint256 _penaltyAmount
     );
 
-    // function init(
-    //     address _penaltyContract,
-    //     address _pool,
-    //     bool _withdrawInViolation,
-
-    // ) 
-    //     public 
-    // {
-
-    // }
-    function recordDeposit(uint256 _amount) public;
-
     /**
       * @notice Allows the pool (and user) to check if they are able to 
       *         wtihdraw. If the withdraw contract does not allow for 
       *         withdrawing inside of penalty, this function will return false
       *         inside penalty.
-      * @param  _user The address of the user being checked
       * @param  _amount The amount the user wants to withdraw
+	  * @param	_lastWithdraw The time stamp from the last withdraw
       * @return bool If the user can withdraw (false if they cannot)
       * @return uint256 If the user can withdraw, this is how much they will get
       *         _amount - penalty.
+      * @return uint256 If the user can withdraw and there is a penalty, this is
+      *         the penalty.
       */
     function canWithdraw(
-        address _user,
-        uint256 _amount
+        uint256 _amount,
+		uint256 _lastWithdraw
     )
-        public
-        view
-        returns(bool, uint256);
-
-    
+		public
+		view
+		returns(bool, uint256, uint256);
 
     /**
       * @notice Tells the pool how much a user can withdraw. Emits the 
       *         withdrawCalculated event.
       * @return uint256 The amount the user can withdraw
       * @return uint256 The amount of penalty (0 if there is non)
+      * @return uint256 The timestamp of the last withdraw
       * @dev    This function will revert if a user cannot withdraw
       *         during the penalty. 
       */
     function calculateWithdraw(
-        address _user,
-        uint256 _amount
+        uint256 _amount,
+        uint256 _lastWithdraw
     )
-        public 
+        public
+		view
         returns(uint256, uint256);
 }
 

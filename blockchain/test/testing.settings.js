@@ -4,6 +4,7 @@ const BigNumber = require('bignumber.js');
 
 let basicPoolAbi = require('../build/BasicPool.json');
 let cyclicWithdrawAbi = require('../build/CyclicWithdraw.json');
+let penaltyAbi = require('../build/BasicPenalty.json');
 let pDaiAbi = require('../build/pDai.json');
 let cDaiAbi = require('../build/pcToken.json');
 
@@ -11,6 +12,9 @@ const test_settings = {
     cyclicWithdraw: {
         cycleLength: "1000",
         withdrawViolation: true
+    },
+    penalty: {
+        percentage: 15
     },
     basicPool: {
         deposit: ethers.utils.parseUnits("100", 18),
@@ -37,6 +41,7 @@ module.exports = {
     BigNumber,
     basicPoolAbi,
     cyclicWithdrawAbi,
+    penaltyAbi,
     pDaiAbi,
     cDaiAbi,
     test_settings

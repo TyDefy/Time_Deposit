@@ -32,28 +32,16 @@ contract BasicPool {
 
     constructor(
         address _admin,
+        address _withdraw,
         address _collateralToken,
         address _cToken
     )
         public
     {
         admin_ = _admin;
+        withdrawInstance_ = IWithdraw(_withdraw);
         collateralInstance_ = IERC20(_collateralToken);
         cTokenInstance_ = ICToken(_cToken);
-    }
-
-    /**
-      * @notice Allows the admin to add the address of the withdraw
-      *         library for this pool.
-      * @param  _withdraw the address of the withdraw library
-      */
-    function init(
-        address _withdraw
-    )
-        public
-        onlyAdmin()
-    {
-        withdrawInstance_ = IWithdraw(_withdraw);
     }
 
     /**
@@ -79,7 +67,7 @@ contract BasicPool {
             ),
             "Transfering collateral failed"
         );
-
+// move to constructor
         require(
             collateralInstance_.approve(
                 address(cTokenInstance_),
@@ -103,37 +91,42 @@ contract BasicPool {
             users_[msg.sender].lastWtihdraw = now;
         }
         //TODO emit
-
-        /**
-        TODO intergrate with token
-        
-        ✅ User approves this contract to spend their dai
-
-        ✅ Contract approves cToken to spend its tokens
-
-        ✅ Contract mints cTokens 
-
-        ✅ Get the number of tokens minted from the cToken
-
-        Contract stores how many cTokens user gets, as well
-        as the vaule of the tokens in Dai (when they deposited)
-
-         */
     }
 
     function withdraw(uint256 _amount) public {
         require(
-            users_[msg.sender].balance >= _amount,
+            users_[msg.sender].collateralInvested >= _amount,
             "Insufficent balance"
         );
 
-        //TODO call withdraw library
+        uint256 withdrawAllowed;
+        uint256 penalty;
 
-        users_[msg.sender].balance -= _amount;
+        (withdrawAllowed, penalty) = withdrawInstance_.calculateWithdraw(
+            _amount,
+            users_[msg.sender].lastWtihdraw
+        );
+
+        require(
+            withdrawAllowed > 0,
+            "Withdraw not allowed"
+        );
+
+
+
+        /**
+        TODO 
+        Exchange cDai to dai 
+
+        send dai to user
+
+         */
+
+        users_[msg.sender].collateralInvested -= _amount;
     }
 
     function balanceOf(address _user) public view returns(uint256) {
-        return users_[_user].balance;
+        return users_[_user].collateralInvested;
     }
 
     function getUserInfo(

@@ -26,7 +26,7 @@ contract IPenalty {
       *         applies it. It is the withdraw library that checks if the
       *         penality applies.
       */
-    function penalize(uint256 _amount) public returns(uint256, uint256);
+    function penalize(uint256 _amount) public view returns(uint256, uint256);
 }
 
 // has a function called calculate penality takes in amounts, returns penalty amount and how
