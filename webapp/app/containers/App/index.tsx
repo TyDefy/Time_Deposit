@@ -31,6 +31,7 @@ import HomePage from 'containers/HomePage';
 import { connectMetamask } from './actions';
 import AdminPoolsOverviewPage from 'containers/AdminPoolsOverviewPage';
 import TransactionModal from 'containers/TransactionModal';
+import AdminPoolDetailsPage from 'containers/AdminPoolDetailsPage';
 
 interface OwnProps {
   isMetamaskInstalled: boolean,
@@ -87,6 +88,7 @@ const App: React.FunctionComponent<Props> = (props: Props) => {
       <AppWrapper {...props}>
         <Switch>
           <Route exact path='/admin/pools' component={AdminPoolsOverviewPage} />
+          <Route exact path='/admin/pool/:id' component={AdminPoolDetailsPage} />
           <Route exact path='/' component={HomePage} />
           <Route exact path='/404'>Not Found</Route>
           <Route component={NotFoundRedirect} />
