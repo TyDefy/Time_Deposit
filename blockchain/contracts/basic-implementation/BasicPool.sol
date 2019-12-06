@@ -12,6 +12,9 @@ contract BasicPool {
     IERC20 internal collateralInstance_;
     // Instance of the interest earning token (cDAI)
     ICToken internal cTokenInstance_;
+    // Mutex variable
+    bool internal lock_;
+
     // struct of all user withdraw information
     struct UserInfo {
         uint256 collateralInvested;
@@ -28,6 +31,16 @@ contract BasicPool {
             "Access denided - incorrect permissions"
         );
         _;
+    }
+
+    modifier mutex() {
+        require(
+            lock_,
+            "Contract locked, please try again"
+        );
+        lock_ = false;
+        _;
+        lock_ = true;
     }
 
     constructor(
@@ -107,22 +120,33 @@ contract BasicPool {
             users_[msg.sender].lastWtihdraw
         );
 
-        require(
-            withdrawAllowed > 0,
-            "Withdraw not allowed"
+        // require(
+        //     withdrawAllowed > 0,
+        //     "Withdraw not allowed"
+        // );
+
+
+
+        // /**
+        // TODO 
+        // Exchange cDai to dai 
+
+        // send dai to user
+
+        //  */
+
+        // users_[msg.sender].collateralInvested -= _amount;
+    }
+
+    function canWithdraw(uint256 _amount) public returns(bool, uint256, uint256) {
+        bool withdrawAllowed = true;
+        uint256 withdrawAmount = _amount;
+        uint256 penaltyAmount = 0;
+        (withdrawAllowed, withdrawAmount, penaltyAmount) = withdrawInstance_.canWithdraw(
+            _amount,
+            users_[msg.sender].lastWtihdraw
         );
-
-
-
-        /**
-        TODO 
-        Exchange cDai to dai 
-
-        send dai to user
-
-         */
-
-        users_[msg.sender].collateralInvested -= _amount;
+        return (withdrawAllowed, withdrawAmount, penaltyAmount);
     }
 
     function balanceOf(address _user) public view returns(uint256) {

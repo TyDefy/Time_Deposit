@@ -10,7 +10,7 @@ let cDaiAbi = require('../build/pcToken.json');
 
 const test_settings = {
     cyclicWithdraw: {
-        cycleLength: "1000",
+        cycleLength: "10",
         withdrawViolation: true
     },
     penalty: {

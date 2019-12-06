@@ -14,6 +14,7 @@ describe("Basic Pool Tests", async () => {
     let deployerInsecure = accounts[1];
     let admin = accounts[2];
     let user1 = accounts[3];
+    let deployer;
     
     let basicPoolInstance, cyclicWithdrawInstance, penaltyInstance, pDaiInstance, cDaiInstance;
 
@@ -55,7 +56,7 @@ describe("Basic Pool Tests", async () => {
             basicPoolAbi, 
             false, 
             admin.signer.address,
-            cyclicWithdrawInstance.signer.address,
+            cyclicWithdrawInstance.contract.address,
             pDaiInstance.contract.address,
             cDaiInstance.contract.address,
         );
@@ -65,7 +66,6 @@ describe("Basic Pool Tests", async () => {
     });
 
     describe("Core Functionality", async () => {
-        
         it("💵 Can deposit", async () => {
             let userInfoBeforeDeposit = await basicPoolInstance.getUserInfo(user1.signer.address);
             let userBalanceDaiBeforeDeposit = await pDaiInstance.balanceOf(user1.signer.address);
@@ -256,22 +256,31 @@ describe("Basic Pool Tests", async () => {
             );
             let balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
             
-            await basicPoolInstance.from(user1).withdraw(
+            // await utils.timeTravel(deployer.provider, test_settings.cyclicWithdraw.cycleLength);
+
+            let thing = await basicPoolInstance.from(user1).withdraw(
                 test_settings.basicPool.withdraw
             );
+            console.log(thing);
+            // console.log(thing[1].toString());
+            // console.log(thing[2].toString());
 
-            let balanceAfter = await basicPoolInstance.getUserInfo(user1.signer.address);
+            // await basicPoolInstance.from(user1).withdraw(
+            //     test_settings.basicPool.withdraw
+            // );
+            // console.log("0");
+            // let balanceAfter = await basicPoolInstance.getUserInfo(user1.signer.address);
             
-            console.log(balanceBefore[0].toString());
-            console.log(balanceBefore[1].toString());
-            console.log(balanceAfter[0].toString())
-            console.log(balanceAfter[1].toString())
+            // console.log(balanceBefore[0].toString());
+            // console.log(balanceBefore[1].toString());
+            // console.log(balanceAfter[0].toString())
+            // console.log(balanceAfter[1].toString())
 
-            assert.equal(
-                balanceBefore.toString(),
-                test_settings.basicPool.deposit,
-                "user has incorrect balance after"
-            );
+            // assert.equal(
+            //     balanceBefore.toString(),
+            //     test_settings.basicPool.deposit,
+            //     "user has incorrect balance after"
+            // );
             // assert.equal(
             //     balanceAfter.toString(),
             //     test_settings.basicPool.withdraw,
@@ -374,6 +383,40 @@ describe("Basic Pool Tests", async () => {
                 test_settings.basicPool.deposit,
                 "User balance has not updated correctly"
             );
+        });
+
+        it("Can withdraw", async () => {
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+            let balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
+            // console.log(balanceBefore);
+            // await utils.timeTravel(deployer.provider, test_settings.cyclicWithdraw.cycleLength);
+
+            let thing = await basicPoolInstance.from(user1).canWithdraw(
+                test_settings.basicPool.withdraw
+            );
+            console.log(thing);
+        });
+
+        it("", async () => {
+
+        });
+
+        it("", async () => {
+
+        });
+
+        it("", async () => {
+
+        });
+
+        it("", async () => {
+
         });
 
         it("", async () => {
