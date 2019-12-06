@@ -255,15 +255,15 @@ describe("Basic Pool Tests", async () => {
                 test_settings.basicPool.deposit
             );
             let balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
-            
+            console.log(balanceBefore)
             // await utils.timeTravel(deployer.provider, test_settings.cyclicWithdraw.cycleLength);
 
-            let thing = await basicPoolInstance.from(user1).withdraw(
+            await basicPoolInstance.from(user1).withdraw(
                 test_settings.basicPool.withdraw
             );
-            console.log(thing);
-            // console.log(thing[1].toString());
-            // console.log(thing[2].toString());
+
+            balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
+            console.log(balanceBefore)
 
             // await basicPoolInstance.from(user1).withdraw(
             //     test_settings.basicPool.withdraw
@@ -403,7 +403,7 @@ describe("Basic Pool Tests", async () => {
             console.log(thing);
         });
 
-        it("", async () => {
+        it("User info", async () => {
 
         });
 

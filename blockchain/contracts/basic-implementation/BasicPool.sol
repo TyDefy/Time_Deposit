@@ -138,7 +138,12 @@ contract BasicPool {
         // users_[msg.sender].collateralInvested -= _amount;
     }
 
-    function canWithdraw(uint256 _amount) public returns(bool, uint256, uint256) {
+    function canWithdraw(
+        uint256 _amount
+    )
+        public
+        returns(bool, uint256, uint256) 
+    {
         bool withdrawAllowed = true;
         uint256 withdrawAmount = _amount;
         uint256 penaltyAmount = 0;
