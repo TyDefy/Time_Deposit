@@ -25,15 +25,15 @@ export interface StateProps {
 type Props = StateProps & DispatchProps & OwnProps;
 
 const HomePage: React.FunctionComponent<Props> = ({}: Props) => {
-
+  var pool = { address: "0x", name:"",type: "",period: 2,cap: 0, participants:2,interestRate: 2};
   return <>
     <Container>
      <HomeHeader runningTotal="50,000.43"></HomeHeader>
-     <PoolCardList pools={[]}></PoolCardList>
      <br></br>
      <br></br>
      <br></br>
     </Container>
+    <PoolCardList pools={[pool,pool,pool]}></PoolCardList>
   </>
 };
 
