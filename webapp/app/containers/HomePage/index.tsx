@@ -4,64 +4,36 @@
  *
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 import { compose, Dispatch } from 'redux';
 
+
+import {  Container } from '@material-ui/core';
 import selectHomePage from './selectors';
-import { setNewStorageValue } from 'containers/App/actions';
+import HomeHeader from 'components/HomeHeader';
+import PoolCardList from 'components/PoolCardList';
 
 interface OwnProps { }
 
 interface DispatchProps {
-  setValue(newValue: number): void;
 }
 
 export interface StateProps {
-  isMetamaskInstalled: boolean;
-  ethAddress?: string;
-  storageValue?: number;
-  approvedChainId: number,
-  approvedNetworkName: string,
-  approvedNetwork: boolean,
-  networkName?: string,
-  chainId?: number,
 }
 
 type Props = StateProps & DispatchProps & OwnProps;
 
-const HomePage: React.FunctionComponent<Props> = ({
-  chainId,
-  networkName = '',
-  isMetamaskInstalled,
-  ethAddress = '',
-  approvedNetwork,
-  approvedNetworkName,
-  approvedChainId,
-  storageValue,
-  setValue,
-}: Props) => {
-  const [newValue, setNewValue] = useState<number>(0);
+const HomePage: React.FunctionComponent<Props> = ({}: Props) => {
 
-  if (!isMetamaskInstalled) {
-    return <div>Please install metamask</div>
-  }
-  if (isMetamaskInstalled && !ethAddress) {
-    return <div>Click connect above</div>
-  }
   return <>
-    <div>{`Hi ${ethAddress}`}</div>
-    <div>{`You are using ${networkName} network (chainId: ${chainId})`}</div>
-    <div>{`The current value is ${storageValue}`}</div>
-    {approvedNetwork ?
-      <div>
-        <input type='number' onChange={(e) => setNewValue(parseInt(e.target.value))} value={newValue} />
-        <button onClick={() => setValue(newValue)}>Set value</button>
-      </div> : 
-      <>
-        <div>{`Please select the ${approvedNetworkName} (${approvedChainId}) network in metamask`}</div>
-      </>
-    }
+    <Container>
+     <HomeHeader runningTotal="50,000.43"></HomeHeader>
+     <PoolCardList pools={[]}></PoolCardList>
+     <br></br>
+     <br></br>
+     <br></br>
+    </Container>
   </>
 };
 
@@ -72,7 +44,7 @@ const mapDispatchToProps = (
   ownProps: OwnProps,
 ): DispatchProps => {
   return {
-    setValue: (newValue) => dispatch(setNewStorageValue.request(newValue))
+
   };
 };
 
