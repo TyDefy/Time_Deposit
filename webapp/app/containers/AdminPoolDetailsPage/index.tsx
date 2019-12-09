@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import { compose, Dispatch } from 'redux';
 
 import selectAdminPoolDetailsPage from './selectors';
-import PoolDetails from 'components/PoolDetails';
+import AdminPoolDetails from 'components/AdminPoolDetails';
 import { Pool } from 'containers/App';
 
 interface OwnProps {}
@@ -57,7 +57,7 @@ const poolDetails: PoolDetails = {
 }
 
 const AdminPoolDetailsPage: React.FunctionComponent<Props> = (props: Props) => {
-  return <PoolDetails {...poolDetails} />
+  return <AdminPoolDetails {...poolDetails} />
 };
 
 const mapStateToProps = (state) => selectAdminPoolDetailsPage(state);
