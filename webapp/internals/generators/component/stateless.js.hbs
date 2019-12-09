@@ -4,7 +4,7 @@
  *
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 {{#if wantMUIStyles}}
 import { Theme, createStyles, withStyles, WithStyles } from '@material-ui/core';
 
@@ -19,12 +19,12 @@ interface OwnProps { }
 {{/if}}
 
 const {{ properCase name }}: React.FunctionComponent<OwnProps> = (props: OwnProps) => (
-  <Fragment>
+  <>
     {{#if wantMessages}}
     <FormattedMessage {...messages.header} />
     {{/if}}
     {{ properCase name }}
-  </Fragment>
+  </>
 );
 
 

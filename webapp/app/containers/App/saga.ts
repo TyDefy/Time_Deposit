@@ -48,38 +48,14 @@ function accountChangedEventChannel() {
     const { ethereum } = window as any;
     const accountChangedHandler = (accounts) => emit(accounts);
     ethereum.on('accountsChanged', accountChangedHandler);
-    return () => {
-      ethereum.off('accountsChanged', accountChangedHandler);
-    };
-  });
-}
-
-function chainChangedEventChannel() {
-  return eventChannel(emit => {
-    const { ethereum } = window as any;
     const chainChangedHandler = (chainId) => emit(chainId);
     ethereum.on('networkChanged', chainChangedHandler);
-    
     return () => {
+      ethereum.off('accountsChanged', accountChangedHandler);
       ethereum.off('networkChanged', chainChangedHandler);
+
     };
-  })
-}
-
-function* chainChangeListener() {
-  const blockchainContext: BlockchainContext = yield getContext('blockchain');
-  const chainChangedChannel = yield call(chainChangedEventChannel)
-  while (true) {
-    yield take(chainChangedChannel);
-
-    const result: BlockchainContext = yield call(blockchainContext.enableEthereum);
-    yield put(connectMetamask.success({
-      ethAddress: result.ethAddress || '0x',
-      approvedNetwork: result.approvedNetwork,
-      networkName: result.networkName,
-      chainId: result.chainId ?? -1,
-    }));
-  }
+  });
 }
 
 function* addressChangeListener() {
@@ -88,9 +64,7 @@ function* addressChangeListener() {
   const accountChangedChannel = yield call(accountChangedEventChannel)
 
   while (true) {
-    console.log('waiting for address change');
     yield take(accountChangedChannel);
-    console.log('address change');
     const result: BlockchainContext = yield call(blockchainContext.enableEthereum);
     yield put(connectMetamask.success({
       ethAddress: result.ethAddress || '0x',
@@ -135,7 +109,6 @@ function* blockchain() {
   while (blockchainContext.isMetamaskInstalled) {
     yield call(connectMetamaskSaga);
     yield spawn(addressChangeListener);
-    yield spawn(chainChangeListener);
   }
 }
 

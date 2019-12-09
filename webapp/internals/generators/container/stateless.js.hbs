@@ -4,7 +4,7 @@
  *
  */
 
-import React, {Fragment} from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 {{#if wantHeaders}}
 import { Helmet } from 'react-helmet';
@@ -20,7 +20,7 @@ import injectSaga from 'utils/injectSaga';
 {{/if}}
 {{#if wantActionsAndReducer}}
 import injectReducer from 'utils/injectReducer';
-import makeSelect{{properCase name}} from './selectors';
+import select{{properCase name}} from './selectors';
 import reducer from './reducer';
 {{/if}}
 {{#if wantSaga}}
@@ -51,7 +51,7 @@ type Props = DispatchProps & OwnProps;
 
 const {{ properCase name }}: React.FunctionComponent<Props> = (props: Props) => {
   return (
-    <Fragment>
+    <>
     {{#if wantHeaders}}
       <Helmet>
         <title>{{properCase name}}</title>
@@ -62,7 +62,7 @@ const {{ properCase name }}: React.FunctionComponent<Props> = (props: Props) => 
       <FormattedMessage {...messages.header} />
     {{/if}}
       {{ properCase name }}
-    </Fragment>
+    </>
   );
 };
 

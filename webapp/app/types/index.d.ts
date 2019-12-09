@@ -24,4 +24,5 @@ export interface InjectSagaParams {
 export interface ApplicationRootState {
   readonly app: AppState;
   readonly transactionModal: TransactionModalState;
+  readonly createPool: never;
 }

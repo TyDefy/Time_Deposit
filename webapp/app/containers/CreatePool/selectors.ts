@@ -2,8 +2,6 @@ import { createStructuredSelector } from 'reselect';
 import { RootState } from 'containers/App/types';
 import { StateProps } from '.';
 
-const select{{ properCase name }} = createStructuredSelector<RootState, StateProps>({
-  
-});
+const selectCreatePool = createStructuredSelector<RootState, StateProps>({});
 
-export default select{{ properCase name }};
+export default selectCreatePool;
