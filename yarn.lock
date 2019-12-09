@@ -15241,7 +15241,21 @@ socketcluster-client@^14.2.1:
     uuid "3.2.1"
     ws "7.1.0"
 
-solc@0.5.13, solc@^0.5.1, solc@^0.5.5:
+solc@0.5.10:
+  version "0.5.10"
+  resolved "https://registry.yarnpkg.com/solc/-/solc-0.5.10.tgz#e57d789b1028f3d35f7989e5134d6ddc0e3b32aa"
+  integrity sha512-Stdrh/MDkopsXYPRzPehTNYuV80Grr2CnQMuFvWj+EeRVbe3piGHxW47KebWn1sGdmK8FLaMfUehccqJP0KovQ==
+  dependencies:
+    command-exists "^1.2.8"
+    fs-extra "^0.30.0"
+    keccak "^1.0.2"
+    memorystream "^0.3.1"
+    require-from-string "^2.0.0"
+    semver "^5.5.0"
+    tmp "0.0.33"
+    yargs "^11.0.0"
+
+solc@^0.5.1, solc@^0.5.5:
   version "0.5.13"
   resolved "https://registry.yarnpkg.com/solc/-/solc-0.5.13.tgz#2a5ba2b7681898c6293759441e0a768fb6955def"
   integrity sha512-osybDVPGjAqcmSKLU3vh5iHuxbhGlJjQI5ZvI7nRDR0fgblQqYte4MGvNjbew8DPvCrmoH0ZBiz/KBBLlPxfMg==
@@ -18487,6 +18501,24 @@ yargs@^10.0.3:
     which-module "^2.0.0"
     y18n "^3.2.1"
     yargs-parser "^8.1.0"
+
+yargs@^11.0.0:
+  version "11.1.1"
+  resolved "https://registry.yarnpkg.com/yargs/-/yargs-11.1.1.tgz#5052efe3446a4df5ed669c995886cc0f13702766"
+  integrity sha512-PRU7gJrJaXv3q3yQZ/+/X6KBswZiaQ+zOmdprZcouPYtQgvNU35i+68M4b1ZHLZtYFT5QObFLV+ZkmJYcwKdiw==
+  dependencies:
+    cliui "^4.0.0"
+    decamelize "^1.1.1"
+    find-up "^2.1.0"
+    get-caller-file "^1.0.1"
+    os-locale "^3.1.0"
+    require-directory "^2.1.1"
+    require-main-filename "^1.0.1"
+    set-blocking "^2.0.0"
+    string-width "^2.0.0"
+    which-module "^2.0.0"
+    y18n "^3.2.1"
+    yargs-parser "^9.0.2"
 
 yargs@^12.0.2, yargs@^12.0.5:
   version "12.0.5"

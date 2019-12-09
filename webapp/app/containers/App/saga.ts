@@ -1,47 +1,8 @@
-import { getContext, put, call, take, fork, spawn, takeEvery } from "redux-saga/effects";
+import { getContext, put, call, take, fork, spawn } from "redux-saga/effects";
 import { BlockchainContext } from "blockchainContext";
-import { connectMetamask, setWeb3, saveStorageValue, setNewStorageValue } from "./actions";
+import { connectMetamask, setWeb3 } from "./actions";
 import { getType } from "typesafe-actions";
-import { BigNumber, bigNumberify } from "ethers/utils";
 import { eventChannel } from "redux-saga";
-import { Contract } from "ethers";
-
-function* setStorageSaga(action) {
-  const { simpleStorageContract }: BlockchainContext = yield getContext('blockchain');
-  try {
-    debugger;
-    const txReceipt = yield call(simpleStorageContract.set(bigNumberify(action.payload)));
-    console.log(txReceipt);
-  } catch (error) {
-    yield put(setNewStorageValue.failure(error));
-  }
-}
-
-function storageChangedEventChannel(contract: Contract) {
-  return eventChannel(emit => {
-    const storageChangedHandler = (newValue: BigNumber) => {
-      emit(newValue.toNumber())
-    };
-    contract.on(contract.filters.StorageUpdated(), storageChangedHandler)
-    
-    return () => {
-      contract.off(contract.filters.StorageUpdated(), storageChangedHandler);
-    };
-  })
-}
-
-function* simpleStorageContractSaga() {
-  const { simpleStorageContract }: BlockchainContext = yield getContext('blockchain');
-  const storageChangedChannel = yield call(storageChangedEventChannel, simpleStorageContract);
-  try {
-    const value: BigNumber = yield call(simpleStorageContract.get);
-    yield put(saveStorageValue(value.toNumber()));
-    yield takeEvery(getType(setNewStorageValue.request), setStorageSaga);
-    yield takeEvery(storageChangedChannel, (newValue: number) => saveStorageValue(newValue));
-  } catch (error) {
-    console.log('something went wrong', error);
-  }
-}
 
 function accountChangedEventChannel() {
   return eventChannel(emit => {
@@ -53,7 +14,6 @@ function accountChangedEventChannel() {
     return () => {
       ethereum.off('accountsChanged', accountChangedHandler);
       ethereum.off('networkChanged', chainChangedHandler);
-
     };
   });
 }

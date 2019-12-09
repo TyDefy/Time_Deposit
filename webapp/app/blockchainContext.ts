@@ -1,8 +1,8 @@
 import { BaseProvider } from "ethers/providers";
 import { getDefaultProvider, Signer, ethers, Contract } from "ethers";
 import { getNetwork } from "ethers/utils";
-import SimpleStorageContractAbi from '../../blockchain/build/abis/SimpleStorage-abi.json';
-
+import PoolRegistryContractAbi from '../../blockchain/build/abis/BasicRegistry-abi.json';
+y
 export interface BlockchainContext {
   isMetamaskInstalled: boolean
   isAppAuthorised: boolean;
@@ -13,7 +13,7 @@ export interface BlockchainContext {
   networkName?: string;
   provider: BaseProvider;
   signer?: Signer;
-  simpleStorageContract: Contract;
+  poolRegistryContract: Contract;
   ethAddress?: string;
   enableEthereum();
 }
@@ -29,7 +29,7 @@ export class blockchainContext implements BlockchainContext {
   provider: BaseProvider;
   signer?: Signer;
   ethAddress?: string;
-  simpleStorageContract: Contract;
+  poolRegistryContract: Contract;
 
   constructor() {
     const network = getNetwork(parseInt(`${process.env.CHAIN_ID}`));
@@ -41,8 +41,8 @@ export class blockchainContext implements BlockchainContext {
     this.approvedChainId = network.chainId;
 
     // Instantiate a read-only version of the contract
-    this.simpleStorageContract = new Contract(`${process.env.SIMPLE_STORAGE_CONTRACT_ADDRESS}`,
-      SimpleStorageContractAbi,
+    this.poolRegistryContract = new Contract(`${process.env.POOL_REGISTRY}`,
+      PoolRegistryContractAbi,
       this.provider)
 
     this.enableEthereum = this.enableEthereum.bind(this);
@@ -78,8 +78,8 @@ export class blockchainContext implements BlockchainContext {
     this.signer = web3Provider.getSigner();
     
     if (this.approvedNetwork) {
-      const writeableSimpleStorageContract = this.simpleStorageContract.connect(this.signer);
-      this.simpleStorageContract = writeableSimpleStorageContract;
+      const writeablePoolRegistryContract = this.poolRegistryContract.connect(this.signer);
+      this.poolRegistryContract = writeablePoolRegistryContract;
     }
     
     return this;
