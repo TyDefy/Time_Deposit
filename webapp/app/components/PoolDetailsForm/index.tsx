@@ -21,7 +21,7 @@ interface OwnProps extends WithStyles<typeof styles> {
 
 const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
   { poolTypes, periods }: OwnProps,
-) => <Container maxWidth='lg'>
+) => <Container maxWidth='sm'>
     <Form>
       <Typography variant='h3'>Create Pool</Typography>
       <Grid container direction='column'>
