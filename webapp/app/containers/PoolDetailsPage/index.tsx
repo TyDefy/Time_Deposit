@@ -29,7 +29,9 @@ export interface Transaction {
 }
 
 export interface UserPoolDetails extends Pool {
-  totalInterest: number;
+  contribution: number;
+  interestAccrued: number;
+  availableInterest: number;
   transactions: Array<Transaction>;
 }
 
@@ -40,8 +42,10 @@ const pool: UserPoolDetails = {
     interestRate: 0.07,
     type: 'cDAI',
     balance: 900,
-    totalInterest: 10,
     participants: 5,
+    availableInterest: 0,
+    interestAccrued: 10,
+    contribution: 50,
     transactions: [
       { address: '0x2', time: new Date(), type: 'Contribute', amount: 1 },
       { address: '0x3', time: new Date(), type: 'Contribute', amount: 1 },

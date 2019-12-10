@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, Chip, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
+import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, Chip, Table, TableHead, TableRow, TableCell, TableBody, Button } from '@material-ui/core';
 import dayjs from 'dayjs';
 import { UserPoolDetails } from 'containers/PoolDetailsPage';
 
@@ -30,7 +30,6 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
   interestRate,
   balance: totalStaked,
   participants,
-  totalInterest,
   transactions
 }: OwnProps) => (
     <Container maxWidth='lg'>
@@ -54,18 +53,28 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
           <Typography>Pool Participants</Typography>
           <Typography>{participants}</Typography>
         </Grid>
+      </Grid>
+      <Grid container direction='row' className={classes.poolDetailsRow}>
         <Grid item>
-          <Typography>Total Interest</Typography>
-          <Typography>{totalInterest.toFixed(2)}</Typography>
+          <Typography>Your contribution</Typography>
+          <Typography>{type}</Typography>
+        </Grid>
+        <Grid item>
+          <Typography>Your Interest</Typography>
+          <Typography>{totalStaked.toFixed(2)}</Typography>
+        </Grid>
+        <Grid item>
+          <Typography>Available Interest</Typography>
+          <Typography>{participants}</Typography>
         </Grid>
       </Grid>
       <Table>
         <TableHead className={classes.tableHeader}>
           <TableRow>
             <TableCell>Participant</TableCell>
-            <TableCell>Date Joined</TableCell>
-            <TableCell>Contributed</TableCell>
-            <TableCell>Interest</TableCell>
+            <TableCell>Time</TableCell>
+            <TableCell>Type</TableCell>
+            <TableCell>Amount</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -78,6 +87,11 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
             </TableRow>)}
         </TableBody>
       </Table>
+      <Grid container direction='row' justify='space-around'>
+        <Button color='primary' onClick={() => {}}>INVEST</Button>
+        <Button color='primary' onClick={() => {}}>WITHDRAW INTEREST</Button>
+        <Button color='primary' onClick={() => {}}>WITHDRAW & CLOSE</Button>
+      </Grid>
     </Container>
   );
 
