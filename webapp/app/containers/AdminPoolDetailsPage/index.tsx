@@ -26,7 +26,6 @@ export interface PoolParticipant {
 }
 
 export interface PoolDetails extends Pool {
-  totalStaked: number;
   totalInterest: number;
   feeRate: number;
   pentalyRate: number;
@@ -41,8 +40,7 @@ const poolDetails: PoolDetails = {
   period: 3,
   interestRate: 0.07,
   type: 'cDAI',
-  cap: 1000,
-  totalStaked: 900,
+  balance: 900,
   feeRate: 0.01,
   pentalyRate: 0.01,
   totalInterest: 10,

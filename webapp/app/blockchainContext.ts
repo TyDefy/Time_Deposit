@@ -46,7 +46,7 @@ export class blockchainContext implements BlockchainContext {
     this.approvedChainId = network.chainId;
 
     // Instantiate a read-only version of the contract
-    this.poolRegistryContract = new Contract(`${process.env.POOL_REGISTRY}`,
+    this.poolRegistryContract = new Contract(`${process.env.POOL_REGISTRY_ADDRESS}`,
       PoolRegistryContractAbi,
       this.provider)
 

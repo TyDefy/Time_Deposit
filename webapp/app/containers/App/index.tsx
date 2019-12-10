@@ -53,7 +53,7 @@ export interface Pool {
   name: string;
   type: string;
   period: number;
-  cap: number;
+  balance: number;
   participants: number;
   interestRate: number;
 }

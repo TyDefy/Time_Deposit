@@ -11,12 +11,25 @@ import { compose, Dispatch } from 'redux';
 
 import selectPoolDetailsPage from './selectors';
 import PoolDetails from 'components/PoolDetails';
+import { Pool } from 'containers/App';
 
 interface OwnProps {}
 
 interface DispatchProps {}
 
 export interface StateProps {}
+
+export interface Transaction {
+  address: string;
+  time: Date;
+  type: 'Contribute' |'Withdraw';
+  amount: number;
+}
+
+export interface UserPoolDetails extends Pool {
+  totalInterest: number;
+  transactions: Array<Transaction>;
+}
 
 type Props = StateProps & DispatchProps & OwnProps;
 

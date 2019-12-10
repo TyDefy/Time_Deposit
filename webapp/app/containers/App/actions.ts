@@ -26,3 +26,4 @@ export const setNewStorageValue = createAsyncAction(
   '@TX_FAILURE/UPDATE_CONTRACT_VALUE')<number,undefined,string>();
 
 export const setDaiBalance = createStandardAction('SET_DAI_BALANCE')<number>();
+export const setIsAdmin = createStandardAction('SET_IS_ADMIN')<boolean>();

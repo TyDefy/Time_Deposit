@@ -9,14 +9,14 @@ import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typograph
 import { PoolDetails } from 'containers/AdminPoolDetailsPage';
 import dayjs from 'dayjs';
 
-const styles = (theme: Theme) =>
+const styles = ({palette}: Theme) =>
   createStyles({
     poolDetailsRow: {
       justifyContent: 'space-around'
     },
     tableHeader: {
       backgroundColor: 'lightgrey',
-      borderTop: '#fd9920 2px solid',
+      borderTop: `${palette.primary.main} 2px solid`,
     },
   });
 
@@ -30,7 +30,7 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
   period,
   type,
   interestRate,
-  totalStaked,
+  balance: totalStaked,
   participants,
   totalInterest,
   feeRate,

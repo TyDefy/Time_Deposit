@@ -1,13 +1,12 @@
 import { getContext, put, call, take, fork, spawn } from "redux-saga/effects";
 import { BlockchainContext } from "blockchainContext";
-import { connectMetamask, setWeb3, setDaiBalance } from "./actions";
+import { connectMetamask, setWeb3, setDaiBalance, setIsAdmin } from "./actions";
 import { getType } from "typesafe-actions";
 import { eventChannel } from "redux-saga";
 import { BigNumber, formatEther } from "ethers/utils";
 
 export function* daiBalanceListener() {
-  const {daiContract, ethAddress}: BlockchainContext = yield getContext('blockchain');
-  debugger;
+  const { daiContract, ethAddress }: BlockchainContext = yield getContext('blockchain');
 
   const filterTo = daiContract.filters.Transfer(null, ethAddress, null);
   const filterFrom = daiContract.filters.Transfer(ethAddress, null, null);
@@ -83,8 +82,21 @@ function* connectMetamaskSaga() {
   }
 }
 
+function* getUserType() {
+  const { poolRegistryContract, ethAddress }: BlockchainContext = yield getContext('blockchain');
+  try {
+    const isAdmin = yield call(poolRegistryContract.isWhitelistAdmin, ethAddress);
+    console.log(isAdmin);
+    yield put(setIsAdmin(isAdmin));
+  } catch (error) {
+    debugger;
+    console.log('error');
+    yield put(setIsAdmin(false));
+  }
+}
+
 function* blockchain() {
-  const {approvedChainId, approvedNetworkName, isMetamaskInstalled}: BlockchainContext = yield getContext('blockchain');
+  const { approvedChainId, approvedNetworkName, isMetamaskInstalled }: BlockchainContext = yield getContext('blockchain');
   yield put(setWeb3({
     approvedChainId: approvedChainId,
     approvedNetworkName: approvedNetworkName,
@@ -93,6 +105,7 @@ function* blockchain() {
 
   while (isMetamaskInstalled) {
     yield call(connectMetamaskSaga);
+    yield fork(getUserType);
     yield spawn(addressChangeListener);
     yield spawn(daiBalanceListener);
   }

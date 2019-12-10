@@ -9,14 +9,14 @@ import { Theme, createStyles, withStyles, WithStyles, Container, Typography, But
 import { Pool } from 'containers/App';
 import { forwardTo } from 'utils/history';
 
-const styles = ({ palette }: Theme) =>
+const styles = ({palette}: Theme) =>
   createStyles({
     pageHeader: {
       justifyContent: 'space-between',
     },
     tableHeader: {
       backgroundColor: 'lightgrey',
-      borderTop: '#fd9920 2px solid',
+      borderTop: `${palette.primary.main} 2px solid`,
     },
     poolRow: {
       cursor: 'pointer'
@@ -51,7 +51,7 @@ const PoolListing: React.FunctionComponent<OwnProps> = ({ pools, classes, create
             <TableCell>{p.name}</TableCell>
             <TableCell>{p.type}</TableCell>
             <TableCell><Chip label={`${p.period} months`}/></TableCell>
-            <TableCell>{p.cap}</TableCell>
+            <TableCell>{p.balance}</TableCell>
             <TableCell>{p.participants}</TableCell>
             <TableCell>{(p.interestRate * 100).toFixed(2)}</TableCell>
           </TableRow>))}

@@ -11,12 +11,13 @@ import { getType } from 'typesafe-actions';
 export const initialState: ContainerState = {
   ethAddress: '',
   isMetamaskInstalled: false,
-  storageValue: undefined,
   approvedChainId: 0,
   approvedNetworkName: '',
   approvedNetwork: false,
   networkName: '',
   chainId: 0,
+  isAdmin: false,
+  daiBalance: 0,
 };
 
 function appReducer(state: ContainerState = initialState, action: ContainerActions ) {
@@ -33,10 +34,16 @@ function appReducer(state: ContainerState = initialState, action: ContainerActio
         ...action.payload,
       }
     }
-    case getType(AppActions.saveStorageValue): {
+    case getType(AppActions.setIsAdmin): {
       return {
         ...state,
-        storageValue: action.payload,
+        isAdmin: action.payload,
+      }
+    }
+    case getType(AppActions.setDaiBalance): {
+      return {
+        ...state,
+        daiBalance: action.payload,
       }
     }
     default:
