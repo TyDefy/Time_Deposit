@@ -49,22 +49,20 @@ type Props = StateProps & DispatchProps & OwnProps;
 type Props = DispatchProps & OwnProps;
 {{/if}}
 
-const {{ properCase name }}: React.FunctionComponent<Props> = (props: Props) => {
-  return (
+const {{ properCase name }}: React.FC<Props> = (props: Props) => (
     <>
-    {{#if wantHeaders}}
+      {{#if wantHeaders}}
       <Helmet>
         <title>{{properCase name}}</title>
         <meta name="description" content="Description of {{properCase name}}" />
       </Helmet>
-    {{/if}}
-    {{#if wantMessages}}
+      {{/if}}
+      {{#if wantMessages}}
       <FormattedMessage {...messages.header} />
-    {{/if}}
+      {{/if}}
       {{ properCase name }}
     </>
   );
-};
 
 {{#if wantActionsAndReducer}}
 const mapStateToProps = (state) => select{{ properCase name }}(state);

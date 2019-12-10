@@ -17,12 +17,14 @@ interface OwnProps {}
 
 interface DispatchProps {}
 
-export interface StateProps {}
+export interface StateProps {
+  // pool: UserPoolDetails,
+}
 
 export interface Transaction {
   address: string;
   time: Date;
-  type: 'Contribute' |'Withdraw';
+  type: 'Contribute' | 'Withdraw';
   amount: number;
 }
 
@@ -31,10 +33,28 @@ export interface UserPoolDetails extends Pool {
   transactions: Array<Transaction>;
 }
 
+const pool: UserPoolDetails = {
+    address: '0x1',
+    name: 'Test',
+    period: 3,
+    interestRate: 0.07,
+    type: 'cDAI',
+    balance: 900,
+    totalInterest: 10,
+    participants: 5,
+    transactions: [
+      { address: '0x2', time: new Date(), type: 'Contribute', amount: 1 },
+      { address: '0x3', time: new Date(), type: 'Contribute', amount: 1 },
+      { address: '0x4', time: new Date(), type: 'Contribute', amount: 1 },
+      { address: '0x5', time: new Date(), type: 'Contribute', amount: 1 },
+      { address: '0x6', time: new Date(), type: 'Contribute', amount: 1 },
+    ]
+  }
+
 type Props = StateProps & DispatchProps & OwnProps;
 
 const PoolDetailsPage: React.FunctionComponent<Props> = (props: Props) => {
-  return <PoolDetails />;
+  return <PoolDetails {...pool}/>;
 };
 
 const mapStateToProps = state => selectPoolDetailsPage(state);
