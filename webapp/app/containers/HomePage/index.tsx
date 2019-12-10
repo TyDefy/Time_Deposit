@@ -9,11 +9,9 @@ import { connect } from 'react-redux';
 import { compose, Dispatch } from 'redux';
 
 
-import {  Container } from '@material-ui/core';
 import selectHomePage from './selectors';
-import HomeHeader from 'components/HomeHeader';
-import PoolCardList from 'components/PoolCardList';
 import { Pool } from 'containers/App';
+import Dashboard from 'components/Dashboard';
 
 interface OwnProps { }
 
@@ -21,6 +19,8 @@ interface DispatchProps {
 }
 
 export interface StateProps {
+  // pools: Array<Pool>,
+  // poolsBalance: number,
 }
 
 type Props = StateProps & DispatchProps & OwnProps;
@@ -31,17 +31,11 @@ const pools: Array<Pool> = [
   { address: '0x3', name: 'Test 3', type: 'cDAI', period: 3, balance: 2000, participants: 500, interestRate: 0.105 },
 ]
 
-const HomePage: React.FunctionComponent<Props> = ({}: Props) => {
-  return <>
-    <Container>
-     <HomeHeader runningTotal="50,000.43"></HomeHeader>
-     <br></br>
-     <br></br>
-     <br></br>
-    </Container>
-    <PoolCardList pools={pools} />
-  </>
-};
+const allPoolsBalance = 50000.43;
+
+const HomePage: React.FunctionComponent<Props> = ({}: Props) => (
+    <Dashboard pools={pools} allPoolsBalance={allPoolsBalance} />
+);
 
 const mapStateToProps = state => selectHomePage(state);
 
