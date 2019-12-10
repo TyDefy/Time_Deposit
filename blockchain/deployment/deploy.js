@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const poolRegistryABI = require('../build/BasicRegistry.json');
+const PseudoDaiABI = require('../build/PseudoDaiToken.json');
 
 let DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
@@ -26,12 +27,23 @@ const deploy = async (network, secret) => {
     const deployer = new etherlime.JSONRPCPrivateKeyDeployer(secret, 'http://localhost:8545/', defaultConfigs);
 
     const deploy = (...args) => deployer.deploy(...args);
+
+    const pseudoDaiInstance = await deploy(
+			PseudoDaiABI,
+			false,
+			"PseudoDai",
+			"pDAI",
+			18
+    );
+    
     const poolRegistryInstance = await deploy(
       poolRegistryABI,
       false,
       ADMIN_ADDRESS
     )
+
     const CONTRACT_ADDRESSES = `
+    DAI_ADDRESS=${pseudoDaiInstance.contract.address}
     POOL_REGISTRY_ADDRESS=${poolRegistryInstance.contract.address}
     `;
     console.log(CONTRACT_ADDRESSES);

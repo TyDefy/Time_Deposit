@@ -1,11 +1,44 @@
 import { getContext, put, call, take, fork, spawn } from "redux-saga/effects";
 import { BlockchainContext } from "blockchainContext";
-import { connectMetamask, setWeb3 } from "./actions";
+import { connectMetamask, setWeb3, setDaiBalance } from "./actions";
 import { getType } from "typesafe-actions";
 import { eventChannel } from "redux-saga";
+import { BigNumber, formatEther } from "ethers/utils";
 
-function accountChangedEventChannel() {
-  return eventChannel(emit => {
+export function* daiBalanceListener() {
+  const {daiContract, ethAddress}: BlockchainContext = yield getContext('blockchain');
+  debugger;
+
+  const filterTo = daiContract.filters.Transfer(null, ethAddress, null);
+  const filterFrom = daiContract.filters.Transfer(ethAddress, null, null);
+
+  const transferEventChannel = eventChannel(emit => {
+    const daiBalanceChangedHandler = (value) => emit(value)
+    try {
+      daiContract.on(filterTo, daiBalanceChangedHandler);
+      daiContract.on(filterFrom, daiBalanceChangedHandler);
+    }
+    catch (e) {
+      console.log(e);
+    }
+    return () => {
+      daiContract.off(filterTo, daiBalanceChangedHandler);
+      daiContract.off(filterFrom, daiBalanceChangedHandler);
+    };
+  });
+
+  while (true) {
+    const daiBalance: BigNumber = yield call(daiContract.balanceOf, ethAddress);
+    yield put(setDaiBalance(parseFloat(formatEther(daiBalance))));
+    yield take(transferEventChannel);
+  }
+}
+
+
+function* addressChangeListener() {
+  const blockchainContext: BlockchainContext = yield getContext('blockchain');
+
+  const accountChangedChannel = eventChannel(emit => {
     const { ethereum } = window as any;
     const accountChangedHandler = (accounts) => emit(accounts);
     ethereum.on('accountsChanged', accountChangedHandler);
@@ -16,12 +49,6 @@ function accountChangedEventChannel() {
       ethereum.off('networkChanged', chainChangedHandler);
     };
   });
-}
-
-function* addressChangeListener() {
-  const blockchainContext: BlockchainContext = yield getContext('blockchain');
-
-  const accountChangedChannel = yield call(accountChangedEventChannel)
 
   while (true) {
     yield take(accountChangedChannel);
@@ -57,18 +84,17 @@ function* connectMetamaskSaga() {
 }
 
 function* blockchain() {
-  const blockchainContext: BlockchainContext = yield getContext('blockchain');
+  const {approvedChainId, approvedNetworkName, isMetamaskInstalled}: BlockchainContext = yield getContext('blockchain');
   yield put(setWeb3({
-    approvedChainId: blockchainContext.approvedChainId,
-    approvedNetworkName: blockchainContext.approvedNetworkName,
-    isMetamaskInstalled: blockchainContext.isMetamaskInstalled,
+    approvedChainId: approvedChainId,
+    approvedNetworkName: approvedNetworkName,
+    isMetamaskInstalled: isMetamaskInstalled,
   }));
 
-  yield spawn(simpleStorageContractSaga);
-
-  while (blockchainContext.isMetamaskInstalled) {
+  while (isMetamaskInstalled) {
     yield call(connectMetamaskSaga);
     yield spawn(addressChangeListener);
+    yield spawn(daiBalanceListener);
   }
 }
 

@@ -2,7 +2,9 @@ import { BaseProvider } from "ethers/providers";
 import { getDefaultProvider, Signer, ethers, Contract } from "ethers";
 import { getNetwork } from "ethers/utils";
 import PoolRegistryContractAbi from '../../blockchain/build/abis/BasicRegistry-abi.json';
-y
+import DaiContractAbi from '../../blockchain/build/abis/PseudoDaiToken-abi.json';
+
+
 export interface BlockchainContext {
   isMetamaskInstalled: boolean
   isAppAuthorised: boolean;
@@ -13,7 +15,9 @@ export interface BlockchainContext {
   networkName?: string;
   provider: BaseProvider;
   signer?: Signer;
+  signerAddress?: string;
   poolRegistryContract: Contract;
+  daiContract: Contract;
   ethAddress?: string;
   enableEthereum();
 }
@@ -30,6 +34,7 @@ export class blockchainContext implements BlockchainContext {
   signer?: Signer;
   ethAddress?: string;
   poolRegistryContract: Contract;
+  daiContract: Contract;
 
   constructor() {
     const network = getNetwork(parseInt(`${process.env.CHAIN_ID}`));
@@ -43,6 +48,10 @@ export class blockchainContext implements BlockchainContext {
     // Instantiate a read-only version of the contract
     this.poolRegistryContract = new Contract(`${process.env.POOL_REGISTRY}`,
       PoolRegistryContractAbi,
+      this.provider)
+
+    this.daiContract = new Contract(`${process.env.DAI_ADDRESS}`,
+      DaiContractAbi,
       this.provider)
 
     this.enableEthereum = this.enableEthereum.bind(this);
@@ -76,12 +85,12 @@ export class blockchainContext implements BlockchainContext {
     this.networkName = network.name;
     this.approvedNetwork = (this.approvedChainId === this.chainId)
     this.signer = web3Provider.getSigner();
-    
+
     if (this.approvedNetwork) {
       const writeablePoolRegistryContract = this.poolRegistryContract.connect(this.signer);
       this.poolRegistryContract = writeablePoolRegistryContract;
     }
-    
+
     return this;
   }
 }
