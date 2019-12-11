@@ -4,6 +4,7 @@
   "description": "",
   "scripts": {
     "start": "etherlime ganache --networkId=1337",
+    "start:dev": "run-p start deploy:local",
     "build": "etherlime compile --runs=999 --exportAbi",
     "deploy:local": "etherlime deploy --runs=500",
     "deploy:rinkeby": "etherlime deploy --network=rinkeby --runs=500",
@@ -23,5 +24,9 @@
     "ethers": "4.0.31",
     "solc": "0.5.10",
     "openzeppelin-solidity": "2.3.0"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5",
+    "typescript": "3.7.2"
   }
 }

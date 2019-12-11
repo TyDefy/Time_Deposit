@@ -4,7 +4,7 @@
  *
  */
 
-import React, {Fragment} from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 {{#if wantHeaders}}
 import { Helmet } from 'react-helmet';
@@ -12,9 +12,7 @@ import { Helmet } from 'react-helmet';
 {{#if wantMessages}}
 import { FormattedMessage } from 'react-intl';
 {{/if}}
-{{#if wantActionsAndReducer}}
-import { createStructuredSelector } from 'reselect';
-{{/if}}
+
 import { compose, Dispatch } from 'redux';
 
 {{#if wantSaga}}
@@ -22,7 +20,7 @@ import injectSaga from 'utils/injectSaga';
 {{/if}}
 {{#if wantActionsAndReducer}}
 import injectReducer from 'utils/injectReducer';
-import makeSelect{{properCase name}} from './selectors';
+import select{{properCase name}} from './selectors';
 import reducer from './reducer';
 {{/if}}
 {{#if wantSaga}}
@@ -42,7 +40,7 @@ interface DispatchProps {
 }
 
 {{#if wantActionsAndReducer}}
-interface StateProps {
+export interface StateProps {
 
 }
 
@@ -51,27 +49,23 @@ type Props = StateProps & DispatchProps & OwnProps;
 type Props = DispatchProps & OwnProps;
 {{/if}}
 
-const {{ properCase name }}: React.FunctionComponent<Props> = (props: Props) => {
-  return (
-    <Fragment>
-    {{#if wantHeaders}}
+const {{ properCase name }}: React.FC<Props> = (props: Props) => (
+    <>
+      {{#if wantHeaders}}
       <Helmet>
         <title>{{properCase name}}</title>
         <meta name="description" content="Description of {{properCase name}}" />
       </Helmet>
-    {{/if}}
-    {{#if wantMessages}}
+      {{/if}}
+      {{#if wantMessages}}
       <FormattedMessage {...messages.header} />
-    {{/if}}
+      {{/if}}
       {{ properCase name }}
-    </Fragment>
+    </>
   );
-};
 
 {{#if wantActionsAndReducer}}
-const mapStateToProps = createStructuredSelector({
-  {{ camelCase name }}: makeSelect{{properCase name}}(),
-});
+const mapStateToProps = (state) => select{{ properCase name }}(state);
 {{/if}}
 
 const mapDispatchToProps = (dispatch: Dispatch, ownProps: OwnProps): DispatchProps => {

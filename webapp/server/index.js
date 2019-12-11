@@ -2,7 +2,8 @@
 
 const express = require('express');
 const logger = require('./logger');
-
+const dotenv = require('dotenv');
+dotenv.config();
 const argv = require('./argv');
 const port = require('./port');
 const setup = require('./middlewares/frontendMiddleware');

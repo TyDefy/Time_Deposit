@@ -1,5 +1,9 @@
 require('dotenv').config();
-DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
+
+const poolRegistryABI = require('../build/BasicRegistry.json');
+const PseudoDaiABI = require('../build/PseudoDaiToken.json');
+
+let DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
 const etherlime = require('etherlime-lib');
 
@@ -10,21 +14,40 @@ const defaultConfigs = {
 };
 
 const deploy = async (network, secret) => {
-  if(!secret) {
+  if (!secret) {
     secret = DEPLOYER_PRIVATE_KEY;
   }
-  if(!network) {
-    network = 'rinkeby';
+  if (!network) {
+    network = 'local';
   }
 
-  const deployer = new etherlime.InfuraPrivateKeyDeployer(secret, network, process.env.INFURA_API_KEY, defaultConfigs);
-  // const deployer = new etherlime.JSONRPCPrivateKeyDeployer(secret, 'http://localhost:8545/', defaultConfigs);
+  const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS;
 
-  const deploy = (...args) => deployer.deployAndVerify(...args);
+  if (network === 'local') {
+    const deployer = new etherlime.JSONRPCPrivateKeyDeployer(secret, 'http://localhost:8545/', defaultConfigs);
 
+    const deploy = (...args) => deployer.deploy(...args);
 
-  const CONTRACT_ADDRESSES = ``;
-  console.log(CONTRACT_ADDRESSES);
+    const pseudoDaiInstance = await deploy(
+			PseudoDaiABI,
+			false,
+			"PseudoDai",
+			"pDAI",
+			18
+    );
+    
+    const poolRegistryInstance = await deploy(
+      poolRegistryABI,
+      false,
+      ADMIN_ADDRESS
+    )
+
+    const CONTRACT_ADDRESSES = `
+    DAI_ADDRESS=${pseudoDaiInstance.contract.address}
+    POOL_REGISTRY_ADDRESS=${poolRegistryInstance.contract.address}
+    `;
+    console.log(CONTRACT_ADDRESSES);
+  }
 };
 
 module.exports = {
