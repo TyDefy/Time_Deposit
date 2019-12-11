@@ -14,7 +14,7 @@ const styles = ({ palette }: Theme) =>
     },
     tableHeader: {
       backgroundColor: 'lightgrey',
-      borderTop: '#fd9920 2px solid',
+      borderTop: `${palette.primary.main} 2px solid`,
     },
     mainHeading: {
       paddingTop: '64px',
