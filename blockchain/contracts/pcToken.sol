@@ -43,7 +43,7 @@ contract pcToken is ICToken, ERC20 {
 
     /// @notice Mints 100 000 000 free tokens to a user.
     function mint(uint mintAmount) public returns(uint) {
-        uint mintedAmount = mintAmount/exchangeRateCurrent();
+        uint cTokenAmount = mintAmount*exchangeRateCurrent();
 
         require(
             collateralInstance_.transferFrom(
@@ -54,9 +54,9 @@ contract pcToken is ICToken, ERC20 {
             "Transerfer failed"
         );
 
-        totalSupply_.add(mintedAmount);
-        balances[msg.sender] = balances[msg.sender].add(mintedAmount);
-        emit Transfer(address(0), msg.sender, mintedAmount);
+        totalSupply_.add(cTokenAmount);
+        balances[msg.sender] = balances[msg.sender].add(cTokenAmount);
+        emit Transfer(address(0), msg.sender, cTokenAmount);
         // Success 
         return 0;
     }
@@ -66,19 +66,26 @@ contract pcToken is ICToken, ERC20 {
     }
 
     function redeem(uint redeemTokens) public returns (uint) {
-        require(
-            balances[msg.sender] >= redeemTokens,
-            "User has insuficient balance"
-        );
+        // require(
+        //     balances[msg.sender] >= redeemTokens,
+        //     "User has insuficient balance"
+        // );
+
+        uint tokenAmount = redeemTokens/exchangeRateCurrent();
 
         require(
-            collateralInstance_.transferFrom(
-                address(this),
+            collateralInstance_.transfer(
                 msg.sender,
-                redeemTokens*exchangeRateCurrent()
+                tokenAmount
             ),
             "Transerfer failed"
         );
+
+        // totalSupply_.sub(redeemTokens);
+        // balances[msg.sender] = balances[msg.sender].sub(redeemTokens);
+        // emit Transfer(address(this), msg.sender, redeemTokens);
+
+        // return tokenAmount;
     }
 
     // function exchangeRateCurrent() returns (uint) {

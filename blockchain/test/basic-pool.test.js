@@ -304,20 +304,45 @@ describe("Basic Pool Tests", async () => {
 
             console.log("before withdraw")
 
-            let tx = await basicPoolInstance.from(user1).withdraw(
+            let tx = await(await basicPoolInstance.from(user1).withdraw(
                 test_settings.basicPool.withdraw
-            );
-            utils.parseLogs(tx, basicPoolInstance, "log")
+            )).wait();
 
-            balanceInPcToken = await cDaiInstance.balanceOf(user1.signer.address);
-            console.log("cDai balance after:\n" + balanceInPcToken.toString())
+            let balanceInPcTokenAfter = await cDaiInstance.balanceOf(user1.signer.address);
+            console.log("cDai balance after:\n" + balanceInPcTokenAfter.toString())
+            let balanceDaiAFter = await pDaiInstance.balanceOf(user1.signer.address);
+            console.log("cDai balance after:\n" + balanceDaiAFter.toString())
 
             balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
             console.log("collateral and cdai invested:\n" + balanceBefore[0].toString())
             console.log(balanceBefore[1].toString())
             console.log("Time stamp of last deposit and withdraw:\n" + balanceBefore[2].toString())
-            console.log(balanceBefore[3].toString())
+            console.log(balanceBefore[3].toString() + "\n")
 
+            console.log("\n\n<<<<<<<<<<<<<<\nLogs\n>>>>>>>>>>>>>>>>>>>>>")
+            console.log(tx.events[0].args._msg)
+            console.log(tx.events[0].args._number.toString())
+
+            // console.log(tx.events[1].args._msg)
+            // console.log(tx.events[1].args._number.toString())
+
+            // console.log(tx.events[2].args._msg)
+            // console.log(tx.events[2].args._number.toString())
+
+            // console.log(tx.events[3].args._msg)
+            // console.log(tx.events[3].args._number.toString())
+
+            // console.log(tx.events[4].args._msg)
+            // console.log(tx.events[4].args._number.toString())
+
+            // console.log(tx.events[5].args._msg)
+            // console.log(tx.events[5].args._number.toString())
+
+            // console.log(tx.events[6].args._msg)
+            // console.log(tx.events[6].args._number.toString())
+
+            // console.log(tx.events[7].args._msg)
+            // console.log(tx.events[7].args._number.toString())
             // await basicPoolInstance.from(user1).withdraw(
             //     test_settings.basicPool.withdraw
             // );
