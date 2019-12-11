@@ -25,7 +25,7 @@ const styles = ({ palette, spacing }: Theme) =>
       textAlign: 'center',
     },
     poolPaper: {
-      borderTop: '#fd9920 2px solid',
+      borderTop: `${palette.primary.main} 2px solid`,
       paddingBottom: '16px',
     },
     poolGrid: {

@@ -20,7 +20,9 @@ const styles = ({ palette }: Theme) =>
     },
   });
 
-interface OwnProps extends WithStyles<typeof styles>, UserPoolDetails { }
+interface OwnProps extends WithStyles<typeof styles>, UserPoolDetails { 
+  showModal(value: 'invest' | 'withdraw' | 'withdrawAll'): void
+}
 
 const PoolDetails: React.FunctionComponent<OwnProps> = ({
   classes,
@@ -33,7 +35,8 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
   contribution,
   interestAccrued,
   availableInterest,
-  transactions
+  transactions,
+  showModal,
 }: OwnProps) => (
     <Container maxWidth='lg'>
       <Grid container direction='row' className={classes.poolDetailsRow}>
@@ -91,9 +94,9 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         </TableBody>
       </Table>
       <Grid container direction='row' justify='space-around'>
-        <Button color='primary' onClick={() => {}}>INVEST</Button>
-        <Button color='primary' onClick={() => {}}>WITHDRAW INTEREST</Button>
-        <Button color='primary' onClick={() => {}}>WITHDRAW & CLOSE</Button>
+        <Button color='primary' onClick={() => showModal('invest')}>INVEST</Button>
+        <Button color='primary' onClick={() => showModal('withdraw')}>WITHDRAW INTEREST</Button>
+        <Button color='primary' onClick={() => showModal('withdrawAll')}>WITHDRAW & CLOSE</Button>
       </Grid>
     </Container>
   );
