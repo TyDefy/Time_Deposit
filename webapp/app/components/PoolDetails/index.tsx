@@ -28,8 +28,11 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
   period,
   type,
   interestRate,
-  balance: totalStaked,
+  balance,
   participants,
+  contribution,
+  interestAccrued,
+  availableInterest,
   transactions
 }: OwnProps) => (
     <Container maxWidth='lg'>
@@ -47,7 +50,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         </Grid>
         <Grid item>
           <Typography>Pool Total</Typography>
-          <Typography>{totalStaked.toFixed(2)}</Typography>
+          <Typography>{balance.toFixed(2)}</Typography>
         </Grid>
         <Grid item>
           <Typography>Pool Participants</Typography>
@@ -57,15 +60,15 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
       <Grid container direction='row' className={classes.poolDetailsRow}>
         <Grid item>
           <Typography>Your contribution</Typography>
-          <Typography>{type}</Typography>
+          <Typography>{contribution}</Typography>
         </Grid>
         <Grid item>
           <Typography>Your Interest</Typography>
-          <Typography>{totalStaked.toFixed(2)}</Typography>
+          <Typography>{interestAccrued.toFixed(2)}</Typography>
         </Grid>
         <Grid item>
           <Typography>Available Interest</Typography>
-          <Typography>{participants}</Typography>
+          <Typography>{availableInterest}</Typography>
         </Grid>
       </Grid>
       <Table>
