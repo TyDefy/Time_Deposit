@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import { compose, Dispatch } from 'redux';
 
 import selectAdminPoolDetailsPage from './selectors';
-import PoolDetails from 'components/PoolDetails';
+import AdminPoolDetails from 'components/AdminPoolDetails';
 import { Pool } from 'containers/App';
 
 interface OwnProps {}
@@ -26,7 +26,6 @@ export interface PoolParticipant {
 }
 
 export interface PoolDetails extends Pool {
-  totalStaked: number;
   totalInterest: number;
   feeRate: number;
   pentalyRate: number;
@@ -41,8 +40,7 @@ const poolDetails: PoolDetails = {
   period: 3,
   interestRate: 0.07,
   type: 'cDAI',
-  cap: 1000,
-  totalStaked: 900,
+  balance: 900,
   feeRate: 0.01,
   pentalyRate: 0.01,
   totalInterest: 10,
@@ -57,7 +55,7 @@ const poolDetails: PoolDetails = {
 }
 
 const AdminPoolDetailsPage: React.FunctionComponent<Props> = (props: Props) => {
-  return <PoolDetails {...poolDetails} />
+  return <AdminPoolDetails {...poolDetails} />
 };
 
 const mapStateToProps = (state) => selectAdminPoolDetailsPage(state);

@@ -5,24 +5,22 @@
  */
 
 import React from 'react';
-import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, Chip, TableHead, TableRow, TableCell, Table, TableBody } from '@material-ui/core';
-import { PoolDetails } from 'containers/AdminPoolDetailsPage';
+import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, Chip, Table, TableHead, TableRow, TableCell, TableBody, Button } from '@material-ui/core';
 import dayjs from 'dayjs';
+import { UserPoolDetails } from 'containers/PoolDetailsPage';
 
-const styles = (theme: Theme) =>
+const styles = ({ palette }: Theme) =>
   createStyles({
     poolDetailsRow: {
       justifyContent: 'space-around'
     },
     tableHeader: {
       backgroundColor: 'lightgrey',
-      borderTop: '#fd9920 2px solid',
+      borderTop: `${palette.primary.main} 2px solid`,
     },
   });
 
-interface OwnProps extends WithStyles<typeof styles>, PoolDetails {
-
-}
+interface OwnProps extends WithStyles<typeof styles>, UserPoolDetails { }
 
 const PoolDetails: React.FunctionComponent<OwnProps> = ({
   classes,
@@ -30,19 +28,16 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
   period,
   type,
   interestRate,
-  totalStaked,
+  balance: totalStaked,
   participants,
-  totalInterest,
-  feeRate,
-  pentalyRate,
-  participantDetails,
+  transactions
 }: OwnProps) => (
     <Container maxWidth='lg'>
       <Grid container direction='row' className={classes.poolDetailsRow}>
         <Grid item><Typography variant='h3'>{name}</Typography></Grid>
-        <Grid item><Chip label={`${period} months`} /></Grid>
+        <Grid item><Chip label={`${period} month(s)`} /></Grid>
         <Grid item direction='row'>
-          <Typography>Current Interest: <strong>{`${(pentalyRate * 100).toFixed(2)} %`}</strong></Typography>
+          <Typography>Current Interest: <strong>{`${(interestRate * 100).toFixed(2)} %`}</strong></Typography>
         </Grid>
       </Grid>
       <Grid container direction='row' className={classes.poolDetailsRow}>
@@ -58,38 +53,45 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
           <Typography>Pool Participants</Typography>
           <Typography>{participants}</Typography>
         </Grid>
+      </Grid>
+      <Grid container direction='row' className={classes.poolDetailsRow}>
         <Grid item>
-          <Typography>Total Interest</Typography>
-          <Typography>{totalInterest.toFixed(2)}</Typography>
+          <Typography>Your contribution</Typography>
+          <Typography>{type}</Typography>
         </Grid>
         <Grid item>
-          <Typography>Fee</Typography>
-          <Typography>{`${(feeRate * 100).toFixed(2)} %`}</Typography>
+          <Typography>Your Interest</Typography>
+          <Typography>{totalStaked.toFixed(2)}</Typography>
         </Grid>
         <Grid item>
-          <Typography>Penalty</Typography>
-          <Typography>{`${(pentalyRate * 100).toFixed(2)} %`}</Typography>
+          <Typography>Available Interest</Typography>
+          <Typography>{participants}</Typography>
         </Grid>
       </Grid>
       <Table>
         <TableHead className={classes.tableHeader}>
           <TableRow>
             <TableCell>Participant</TableCell>
-            <TableCell>Date Joined</TableCell>
-            <TableCell>Contributed</TableCell>
-            <TableCell>Interest</TableCell>
+            <TableCell>Time</TableCell>
+            <TableCell>Type</TableCell>
+            <TableCell>Amount</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {participantDetails.map(p => 
+          {transactions.map(t =>
             <TableRow>
-              <TableCell>{p.address}</TableCell>
-              <TableCell>{dayjs(p.joined).format('YYYY-MM-DD')}</TableCell>
-              <TableCell>{p.contributed.toFixed(2)}</TableCell>
-              <TableCell>{p.interest.toFixed(2)}</TableCell>
+              <TableCell>{t.address}</TableCell>
+              <TableCell>{dayjs(t.time).format('YYYY-MM-DD HH:mm')}</TableCell>
+              <TableCell>{t.type}</TableCell>
+              <TableCell>{t.amount.toFixed(2)}</TableCell>
             </TableRow>)}
         </TableBody>
       </Table>
+      <Grid container direction='row' justify='space-around'>
+        <Button color='primary' onClick={() => {}}>INVEST</Button>
+        <Button color='primary' onClick={() => {}}>WITHDRAW INTEREST</Button>
+        <Button color='primary' onClick={() => {}}>WITHDRAW & CLOSE</Button>
+      </Grid>
     </Container>
   );
 

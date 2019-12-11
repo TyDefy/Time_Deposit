@@ -1,6 +1,7 @@
 require('dotenv').config();
 
-const simpleStorageABI = require('../build/simpleStorage.json');
+const poolRegistryABI = require('../build/BasicRegistry.json');
+const PseudoDaiABI = require('../build/PseudoDaiToken.json');
 
 let DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
@@ -20,17 +21,31 @@ const deploy = async (network, secret) => {
     network = 'local';
   }
 
+  const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS;
+
   if (network === 'local') {
     const deployer = new etherlime.JSONRPCPrivateKeyDeployer(secret, 'http://localhost:8545/', defaultConfigs);
 
     const deploy = (...args) => deployer.deploy(...args);
-    const simpleStorageInstance = await deploy(
-      simpleStorageABI,
-      false
+
+    const pseudoDaiInstance = await deploy(
+			PseudoDaiABI,
+			false,
+			"PseudoDai",
+			"pDAI",
+			18
+    );
+    
+    const poolRegistryInstance = await deploy(
+      poolRegistryABI,
+      false,
+      ADMIN_ADDRESS
     )
+
     const CONTRACT_ADDRESSES = `
-    SIMPLE_STORAGE_ADDRESS=${simpleStorageInstance.contract.address}
-      `;
+    DAI_ADDRESS=${pseudoDaiInstance.contract.address}
+    POOL_REGISTRY_ADDRESS=${poolRegistryInstance.contract.address}
+    `;
     console.log(CONTRACT_ADDRESSES);
   }
 };

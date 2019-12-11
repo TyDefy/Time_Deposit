@@ -33,6 +33,7 @@ import AdminPoolsOverviewPage from 'containers/AdminPoolsOverviewPage';
 import TransactionModal from 'containers/TransactionModal';
 import AdminPoolDetailsPage from 'containers/AdminPoolDetailsPage';
 import CreatePool from 'containers/CreatePool';
+import PoolDetailsPage from 'containers/PoolDetailsPage';
 
 interface OwnProps {
   isMetamaskInstalled: boolean,
@@ -52,7 +53,7 @@ export interface Pool {
   name: string;
   type: string;
   period: number;
-  cap: number;
+  balance: number;
   participants: number;
   interestRate: number;
 }
@@ -91,6 +92,7 @@ const App: React.FunctionComponent<Props> = (props: Props) => {
           <Route exact path='/admin/pools' component={AdminPoolsOverviewPage} />
           <Route exact path='/admin/pool/create' component={CreatePool} />
           <Route exact path='/admin/pool/:id' component={AdminPoolDetailsPage} />
+          <Route exact path='/pool/:id' component={PoolDetailsPage} />
           <Route exact path='/' component={HomePage} />
           <Route exact path='/404'>Not Found</Route>
           <Route component={NotFoundRedirect} />

@@ -1,50 +1,43 @@
-import { getContext, put, call, take, fork, spawn, takeEvery } from "redux-saga/effects";
+import { getContext, put, call, take, fork, spawn } from "redux-saga/effects";
 import { BlockchainContext } from "blockchainContext";
-import { connectMetamask, setWeb3, saveStorageValue, setNewStorageValue } from "./actions";
+import { connectMetamask, setWeb3, setDaiBalance, setIsAdmin } from "./actions";
 import { getType } from "typesafe-actions";
-import { BigNumber, bigNumberify } from "ethers/utils";
 import { eventChannel } from "redux-saga";
-import { Contract } from "ethers";
+import { BigNumber, formatEther } from "ethers/utils";
 
-function* setStorageSaga(action) {
-  const { simpleStorageContract }: BlockchainContext = yield getContext('blockchain');
-  try {
-    debugger;
-    const txReceipt = yield call(simpleStorageContract.set(bigNumberify(action.payload)));
-    console.log(txReceipt);
-  } catch (error) {
-    yield put(setNewStorageValue.failure(error));
-  }
-}
+export function* daiBalanceListener() {
+  const { daiContract, ethAddress }: BlockchainContext = yield getContext('blockchain');
 
-function storageChangedEventChannel(contract: Contract) {
-  return eventChannel(emit => {
-    const storageChangedHandler = (newValue: BigNumber) => {
-      emit(newValue.toNumber())
-    };
-    contract.on(contract.filters.StorageUpdated(), storageChangedHandler)
-    
+  const filterTo = daiContract.filters.Transfer(null, ethAddress, null);
+  const filterFrom = daiContract.filters.Transfer(ethAddress, null, null);
+
+  const transferEventChannel = eventChannel(emit => {
+    const daiBalanceChangedHandler = (value) => emit(value)
+    try {
+      daiContract.on(filterTo, daiBalanceChangedHandler);
+      daiContract.on(filterFrom, daiBalanceChangedHandler);
+    }
+    catch (e) {
+      console.log(e);
+    }
     return () => {
-      contract.off(contract.filters.StorageUpdated(), storageChangedHandler);
+      daiContract.off(filterTo, daiBalanceChangedHandler);
+      daiContract.off(filterFrom, daiBalanceChangedHandler);
     };
-  })
-}
+  });
 
-function* simpleStorageContractSaga() {
-  const { simpleStorageContract }: BlockchainContext = yield getContext('blockchain');
-  const storageChangedChannel = yield call(storageChangedEventChannel, simpleStorageContract);
-  try {
-    const value: BigNumber = yield call(simpleStorageContract.get);
-    yield put(saveStorageValue(value.toNumber()));
-    yield takeEvery(getType(setNewStorageValue.request), setStorageSaga);
-    yield takeEvery(storageChangedChannel, (newValue: number) => saveStorageValue(newValue));
-  } catch (error) {
-    console.log('something went wrong', error);
+  while (true) {
+    const daiBalance: BigNumber = yield call(daiContract.balanceOf, ethAddress);
+    yield put(setDaiBalance(parseFloat(formatEther(daiBalance))));
+    yield take(transferEventChannel);
   }
 }
 
-function accountChangedEventChannel() {
-  return eventChannel(emit => {
+
+function* addressChangeListener() {
+  const blockchainContext: BlockchainContext = yield getContext('blockchain');
+
+  const accountChangedChannel = eventChannel(emit => {
     const { ethereum } = window as any;
     const accountChangedHandler = (accounts) => emit(accounts);
     ethereum.on('accountsChanged', accountChangedHandler);
@@ -53,15 +46,8 @@ function accountChangedEventChannel() {
     return () => {
       ethereum.off('accountsChanged', accountChangedHandler);
       ethereum.off('networkChanged', chainChangedHandler);
-
     };
   });
-}
-
-function* addressChangeListener() {
-  const blockchainContext: BlockchainContext = yield getContext('blockchain');
-
-  const accountChangedChannel = yield call(accountChangedEventChannel)
 
   while (true) {
     yield take(accountChangedChannel);
@@ -96,19 +82,32 @@ function* connectMetamaskSaga() {
   }
 }
 
+function* getUserType() {
+  const { poolRegistryContract, ethAddress }: BlockchainContext = yield getContext('blockchain');
+  try {
+    const isAdmin = yield call(poolRegistryContract.isWhitelistAdmin, ethAddress);
+    console.log(isAdmin);
+    yield put(setIsAdmin(isAdmin));
+  } catch (error) {
+    debugger;
+    console.log('error');
+    yield put(setIsAdmin(false));
+  }
+}
+
 function* blockchain() {
-  const blockchainContext: BlockchainContext = yield getContext('blockchain');
+  const { approvedChainId, approvedNetworkName, isMetamaskInstalled }: BlockchainContext = yield getContext('blockchain');
   yield put(setWeb3({
-    approvedChainId: blockchainContext.approvedChainId,
-    approvedNetworkName: blockchainContext.approvedNetworkName,
-    isMetamaskInstalled: blockchainContext.isMetamaskInstalled,
+    approvedChainId: approvedChainId,
+    approvedNetworkName: approvedNetworkName,
+    isMetamaskInstalled: isMetamaskInstalled,
   }));
 
-  yield spawn(simpleStorageContractSaga);
-
-  while (blockchainContext.isMetamaskInstalled) {
+  while (isMetamaskInstalled) {
     yield call(connectMetamaskSaga);
+    yield fork(getUserType);
     yield spawn(addressChangeListener);
+    yield spawn(daiBalanceListener);
   }
 }
 

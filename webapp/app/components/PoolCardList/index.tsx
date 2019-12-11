@@ -17,7 +17,7 @@ import {
 import { Pool } from 'containers/App';
 import PoolCard from 'components/PoolCard';
 
-const styles = ({ palette }: Theme) =>
+const styles = ({ palette, spacing }: Theme) =>
   createStyles({
     poolHeader: {
       paddingTop: '32px',
@@ -28,7 +28,10 @@ const styles = ({ palette }: Theme) =>
       borderTop: '#fd9920 2px solid',
       paddingBottom: '16px',
     },
-   
+    poolGrid: {
+      paddingLeft: spacing(1),
+      paddingRight: spacing(1),
+    }
   });
 
 interface OwnProps extends WithStyles<typeof styles> {
@@ -39,19 +42,16 @@ const PoolCardList: React.FunctionComponent<OwnProps> = ({
   pools,
   classes,
 }: OwnProps) => (
-  <>
-    <Paper elevation={5} className={classes.poolPaper}>
-      <Typography variant="h5" className={classes.poolHeader}>
-        Available Pools
-      </Typography>
-      <Grid container spacing={1} direction="row">
-      <PoolCard></PoolCard>
-      <PoolCard></PoolCard>
-      <PoolCard></PoolCard>
-      </Grid>
-  
-    </Paper>
-  </>
-);
+    <>
+      <Paper elevation={5} className={classes.poolPaper}>
+        <Typography variant="h5" className={classes.poolHeader}>
+          Available Pools
+        </Typography>
+        <Grid container spacing={1} direction="row" justify='space-around' className={classes.poolGrid}>
+          {pools.map(p => <PoolCard key={p.address} pool={p} />)}
+        </Grid>
+      </Paper>
+    </>
+  );
 
 export default withStyles(styles, { withTheme: true })(PoolCardList);

@@ -18,7 +18,7 @@ interface OwnProps extends WithStyles<typeof styles> { }
 interface OwnProps { }
 {{/if}}
 
-const {{ properCase name }}: React.FunctionComponent<OwnProps> = (props: OwnProps) => (
+const {{ properCase name }}: React.FC<OwnProps> = (props: OwnProps) => (
   <>
     {{#if wantMessages}}
     <FormattedMessage {...messages.header} />

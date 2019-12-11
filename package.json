@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "yarn wsrun --stages -c build",
-    "build:blockchain": "yarn wsrun -p project-wild-blockchain -c build",
-    "build:webapp": "yarn wsrun -p project-wild-webapp -c build",
+    "build:blockchain": "yarn wsrun -p nobuntu-blockchain -c build",
+    "build:webapp": "yarn wsrun -p nobuntu-webapp -c build",
     "start:dev": "yarn wsrun --parallel --exclude-missing start:dev",
     "clean": "rm -rf ./node_modules && rm -rf ./*/node_modules"
   },

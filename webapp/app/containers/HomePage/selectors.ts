@@ -15,7 +15,8 @@ const selectHomePage = createStructuredSelector<RootState, StateProps>({
   approvedNetworkName: createSelector((state:ApplicationRootState) => state.app.approvedNetworkName, substate => substate),
   chainId: createSelector((state:ApplicationRootState) => state.app.chainId, substate => substate),
   networkName: createSelector((state:ApplicationRootState) => state.app.networkName, substate => substate),
-  storageValue: createSelector((state:ApplicationRootState) => state.app.storageValue, substate => substate),
+  isAdmin: createSelector((state: ApplicationRootState) => state.app.isAdmin, substate => substate),
+  daiBalance: createSelector((state: ApplicationRootState) => state.app.daiBalance, substate => substate),
 });
 
 
