@@ -14,13 +14,11 @@ describe("Basic Pool Tests", async () => {
     let deployerInsecure = accounts[1];
     let admin = accounts[2];
     let user1 = accounts[3];
-    let deployer;
+    let deployer = new etherlime.EtherlimeGanacheDeployer(deployerInsecure.secretKey);;
     
     let basicPoolInstance, cyclicWithdrawInstance, penaltyInstance, pDaiInstance, cDaiInstance;
 
     beforeEach('', async () => {
-        deployer = new etherlime.EtherlimeGanacheDeployer(deployerInsecure.secretKey);
-
         pDaiInstance = await deployer.deploy(
             pDaiAbi,
             false,
@@ -255,15 +253,70 @@ describe("Basic Pool Tests", async () => {
                 test_settings.basicPool.deposit
             );
             let balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
-            console.log(balanceBefore)
-            // await utils.timeTravel(deployer.provider, test_settings.cyclicWithdraw.cycleLength);
+            console.log("collateral invested and cdai balance:\n" + balanceBefore[0].toString())
+            console.log(balanceBefore[1].toString())
 
-            await basicPoolInstance.from(user1).withdraw(
+            let balanceInPcToken = await cDaiInstance.balanceOf(user1.signer.address);
+            console.log("actual cdai balance:\n" + balanceInPcToken.toString())
+
+            let withdrawInfo = await basicPoolInstance.canWithdraw(
+                user1.signer.address,
                 test_settings.basicPool.withdraw
             );
 
+            assert.equal(
+                withdrawInfo[0],
+                true,
+                "User is blocked from withdrawing with penalty"
+            );
+            assert.equal(
+                withdrawInfo[1].toString(),
+                test_settings.basicPool.withdrawAmount,
+                "Withdraw amount is not correct"
+            );
+            assert.equal(
+                withdrawInfo[2].toString(),
+                test_settings.basicPool.withdrawPenalty,
+                "Penalty amount is not correct"
+            );
+
+            await utils.timeTravel(deployer.provider, test_settings.cyclicWithdraw.cycleLength);
+            let withdrawInfoAfter = await basicPoolInstance.canWithdraw(
+                user1.signer.address,
+                test_settings.basicPool.withdraw
+            );
+
+            assert.equal(
+                withdrawInfoAfter[0],
+                true,
+                "User is blocked from withdrawing with penalty"
+            );
+            assert.equal(
+                withdrawInfoAfter[1].toString(),
+                test_settings.basicPool.withdraw,
+                "Withdraw amount is not correct"
+            );
+            assert.equal(
+                withdrawInfoAfter[2].toString(),
+                0,
+                "Penalty amount is not correct"
+            );
+
+            console.log("before withdraw")
+
+            let tx = await basicPoolInstance.from(user1).withdraw(
+                test_settings.basicPool.withdraw
+            );
+            utils.parseLogs(tx, basicPoolInstance, "log")
+
+            balanceInPcToken = await cDaiInstance.balanceOf(user1.signer.address);
+            console.log("cDai balance after:\n" + balanceInPcToken.toString())
+
             balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
-            console.log(balanceBefore)
+            console.log("collateral and cdai invested:\n" + balanceBefore[0].toString())
+            console.log(balanceBefore[1].toString())
+            console.log("Time stamp of last deposit and withdraw:\n" + balanceBefore[2].toString())
+            console.log(balanceBefore[3].toString())
 
             // await basicPoolInstance.from(user1).withdraw(
             //     test_settings.basicPool.withdraw
@@ -393,18 +446,48 @@ describe("Basic Pool Tests", async () => {
             await basicPoolInstance.from(user1).deposit(
                 test_settings.basicPool.deposit
             );
-            let balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
-            // console.log(balanceBefore);
-            // await utils.timeTravel(deployer.provider, test_settings.cyclicWithdraw.cycleLength);
-
-            let thing = await basicPoolInstance.from(user1).canWithdraw(
+            let withdrawInfo = await basicPoolInstance.canWithdraw(
+                user1.signer.address,
                 test_settings.basicPool.withdraw
             );
-            console.log(thing);
-        });
 
-        it("User info", async () => {
+            assert.equal(
+                withdrawInfo[0],
+                true,
+                "User is blocked from withdrawing with penalty"
+            );
+            assert.equal(
+                withdrawInfo[1].toString(),
+                test_settings.basicPool.withdrawAmount,
+                "Withdraw amount is not correct"
+            );
+            assert.equal(
+                withdrawInfo[2].toString(),
+                test_settings.basicPool.withdrawPenalty,
+                "Penalty amount is not correct"
+            );
 
+            await utils.timeTravel(deployer.provider, test_settings.cyclicWithdraw.cycleLength);
+            let withdrawInfoAfter = await basicPoolInstance.canWithdraw(
+                user1.signer.address,
+                test_settings.basicPool.withdraw
+            );
+
+            assert.equal(
+                withdrawInfoAfter[0],
+                true,
+                "User is blocked from withdrawing with penalty"
+            );
+            assert.equal(
+                withdrawInfoAfter[1].toString(),
+                test_settings.basicPool.withdraw,
+                "Withdraw amount is not correct"
+            );
+            assert.equal(
+                withdrawInfoAfter[2].toString(),
+                0,
+                "Penalty amount is not correct"
+            );
         });
 
         it("", async () => {

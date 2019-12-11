@@ -5,6 +5,8 @@ interface ICToken {
 
     function exchangeRateCurrent() external returns(uint);
 
+    function redeem(uint redeemTokens) external returns(uint);
+
     // Standard ERC20 functionality 
 
     /**

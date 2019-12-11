@@ -33,11 +33,11 @@ contract CyclicWithdraw is IWithdraw {
         view
         returns(bool, uint256, uint256) 
     {
-        if(_lastWithdraw + cycleLength_ < now) {
+        if(_lastWithdraw + cycleLength_ > now) {
             if(violationWithdraw_) {
                 uint256 penalty = 0;
                 uint256 withdraw = _amount;
-                // (withdraw, penalty) = penaltyInstance_.penalize(_amount);
+                (withdraw, penalty) = penaltyInstance_.penalize(_amount);
                 return (true, withdraw, penalty);
             } else {
                 return (false, 0, 0);

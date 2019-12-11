@@ -14,6 +14,8 @@ contract BasicPool {
     ICToken internal cTokenInstance_;
     // Mutex variable
     bool internal lock_;
+    // The total amount of collateral in this pool
+    uint256 internal totalCollateral_;
 
     // struct of all user withdraw information
     struct UserInfo {
@@ -92,6 +94,8 @@ contract BasicPool {
         assert(
             cTokenInstance_.mint(_amount) == 0
         );
+
+        totalCollateral_ += _amount;
         
         uint256 exchange = cTokenInstance_.exchangeRateCurrent();
         uint256 mintedTokens = _amount/exchange;
@@ -106,19 +110,75 @@ contract BasicPool {
         //TODO emit
     }
 
+    event log(string _msg, uint256 _number);
+
     function withdraw(uint256 _amount) public {
         require(
             users_[msg.sender].collateralInvested >= _amount,
             "Insufficent balance"
         );
 
-        uint256 withdrawAllowed;
-        uint256 penalty;
+        bool withdrawAllowed;
+        uint256 withdrawAmount;
+        uint256 penaltyAmount;
 
-        (withdrawAllowed, penalty) = withdrawInstance_.calculateWithdraw(
-            _amount,
-            users_[msg.sender].lastWtihdraw
+        (withdrawAllowed, withdrawAmount, penaltyAmount) = canWithdraw(
+            msg.sender,
+            _amount
         );
+                 
+        emit log("Allowed withdraw amount", withdrawAmount);
+
+        require(
+            withdrawAllowed && withdrawAmount != 0,
+            "Withdraw is not allowed"
+        );
+
+        uint256 totalBalance = cTokenInstance_.balanceOf(address(this));
+        // totalCollateral_
+
+        emit log("total cdai balance of pool", totalBalance);
+
+        uint256 valuePerToken = totalBalance/totalCollateral_;
+        
+        emit log("value per token", valuePerToken);
+
+        uint256 amountValue = valuePerToken*withdrawAmount;
+
+        emit log("The vaule amount of the withdraw", amountValue);
+
+        uint256 balanceBefore = cTokenInstance_.balanceOf(address(this));
+        uint256 collateralBalanceBefore = collateralInstance_.balanceOf(address(this));
+
+        emit log("Balance (cDai) pool", balanceBefore); 
+        emit log("Balance (dai) pool", collateralBalanceBefore); 
+
+        require(
+            cTokenInstance_.redeem(amountValue) != 0,
+            "Interest collateral transfer failed"
+        );
+
+        uint256 balanceAfter = cTokenInstance_.balanceOf(address(this));
+        uint256 collateralBalanceAfter = collateralInstance_.balanceOf(address(this));
+
+        emit log("Balance after redeem (cDai) pool", balanceAfter); 
+        emit log("Balance after redeem (dai) pool", collateralBalanceAfter); 
+
+        assert(
+            balanceBefore - amountValue == balanceAfter
+        );
+
+        uint256 collateral = collateralBalanceAfter - collateralBalanceBefore;
+
+        emit log("Collateral difference", collateral);
+
+        // require(
+        //     collateralInstance_.transfer(
+        //         msg.sender,
+        //         collateral
+        //     ),
+        //     "Collateral transfer failed"
+        // );
 
         // require(
         //     withdrawAllowed > 0,
@@ -134,24 +194,36 @@ contract BasicPool {
         // send dai to user
 
         //  */
-
-        // users_[msg.sender].collateralInvested -= _amount;
+        totalCollateral_ -= _amount;
+        users_[msg.sender].collateralInvested -= _amount;
+        users_[msg.sender].balance -= amountValue;
+        users_[msg.sender].lastWtihdraw = now;
     }
 
     function canWithdraw(
+        address _user,
         uint256 _amount
     )
         public
-        returns(bool, uint256, uint256) 
+        view
+        returns(
+            bool, 
+            uint256, 
+            uint256
+        ) 
     {
         bool withdrawAllowed = true;
         uint256 withdrawAmount = _amount;
         uint256 penaltyAmount = 0;
         (withdrawAllowed, withdrawAmount, penaltyAmount) = withdrawInstance_.canWithdraw(
             _amount,
-            users_[msg.sender].lastWtihdraw
+            users_[_user].lastWtihdraw
         );
-        return (withdrawAllowed, withdrawAmount, penaltyAmount);
+        return (
+            withdrawAllowed, 
+            withdrawAmount, 
+            penaltyAmount
+        );
     }
 
     function balanceOf(address _user) public view returns(uint256) {

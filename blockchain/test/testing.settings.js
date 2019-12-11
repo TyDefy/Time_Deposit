@@ -11,7 +11,7 @@ let basicRegistryAbi = require('../build/BasicRegistry.json');
 
 const test_settings = {
     cyclicWithdraw: {
-        cycleLength: "10",
+        cycleLength: "1",
         withdrawViolation: true
     },
     penalty: {
@@ -20,7 +20,9 @@ const test_settings = {
     basicPool: {
         deposit: ethers.utils.parseUnits("100", 18),
         withdraw: ethers.utils.parseUnits("50", 18),
-        mintAmount: ethers.utils.parseUnits("10", 18)
+        mintAmount: ethers.utils.parseUnits("10", 18),
+        withdrawAmount: ethers.utils.parseUnits("425", 17),
+        withdrawPenalty: ethers.utils.parseUnits("75", 17)
     },
     pDaiSettings: {
         name: "pDai",

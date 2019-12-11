@@ -65,6 +65,28 @@ contract pcToken is ICToken, ERC20 {
         return 10;
     }
 
+    function redeem(uint redeemTokens) public returns (uint) {
+        require(
+            balances[msg.sender] >= redeemTokens,
+            "User has insuficient balance"
+        );
+
+        require(
+            collateralInstance_.transferFrom(
+                address(this),
+                msg.sender,
+                redeemTokens*exchangeRateCurrent()
+            ),
+            "Transerfer failed"
+        );
+    }
+
+    // function exchangeRateCurrent() returns (uint) {
+    //     uint getCash = collateralInstance_.balanceOf(address(this));
+
+    //     return((getCash / totalSupply());
+    // }
+
     /**
       * @dev Transfer token to a specified address
       * @param _to    : The address to transfer to.
