@@ -14,6 +14,8 @@ import PoolDetails from 'components/PoolDetails';
 import { Pool } from 'containers/App';
 import { Dialog } from '@material-ui/core';
 import InvestModal from 'components/InvestModal';
+import WithdrawInterestModal from 'components/WithdrawInterestModal';
+import WithdrawAllModal from 'components/WithdrawAllModal';
 
 interface OwnProps { }
 
@@ -61,12 +63,13 @@ const pool: UserPoolDetails = {
 const daiBalance = 100;
 
 type Props = StateProps & DispatchProps & OwnProps;
+type ModalType = 'invest' | 'withdrawInterest' | 'withdrawAll';
 
 const PoolDetailsPage: React.FunctionComponent<Props> = (props: Props) => {
   const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<'invest' | 'withdraw' | 'withdrawAll'>('invest');
+  const [modalType, setModalType] = useState<ModalType>('invest');
 
-  const displayModal = (modalToShow: 'invest' | 'withdraw' | 'withdrawAll') => {
+  const displayModal = (modalToShow: ModalType) => {
     setShowModal(true);
     setModalType(modalToShow);
   }
@@ -85,10 +88,20 @@ const PoolDetailsPage: React.FunctionComponent<Props> = (props: Props) => {
               type={pool.type}
               onClose={() => setShowModal(false)}
               onSubmit={(value) => console.log(value)} />;
-          case 'withdraw':
-            return <div>withdraw coming soon</div>;
+          case 'withdrawInterest':
+            return <WithdrawInterestModal 
+              name={pool.name}
+              type={pool.type}
+              availableInterest={pool.availableInterest}
+              onSubmit={(value) => console.log(value)}
+              onClose={() => setShowModal(false)} />;
           case 'withdrawAll':
-            return <div>withdrawAll coming soon</div>;
+            return <WithdrawAllModal 
+            name={pool.name}
+            type={pool.type}
+            availableFunds={pool.availableInterest}
+            onSubmit={(value) => console.log(value)}
+            onClose={() => setShowModal(false)} />;
           default:
             return null;
         }
