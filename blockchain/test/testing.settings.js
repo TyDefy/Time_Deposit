@@ -2,16 +2,16 @@ const etherlime = require('etherlime-lib');
 const ethers = require('ethers');
 const BigNumber = require('bignumber.js');
 
-// let basicPoolAbi = require('../build/BasicPool.json');
-// let cyclicWithdrawAbi = require('../build/CyclicWithdraw.json');
-// let penaltyAbi = require('../build/BasicPenalty.json');
-// let pDaiAbi = require('../build/pDai.json');
-// let cDaiAbi = require('../build/pcToken.json');
+let basicPoolAbi = require('../build/BasicPool.json');
+let cyclicWithdrawAbi = require('../build/CyclicWithdraw.json');
+let penaltyAbi = require('../build/BasicPenalty.json');
+let pDaiAbi = require('../build/pDai.json');
+let cDaiAbi = require('../build/pcToken.json');
 let basicRegistryAbi = require('../build/BasicRegistry.json');
 
 const test_settings = {
     cyclicWithdraw: {
-        cycleLength: "10",
+        cycleLength: "1",
         withdrawViolation: true
     },
     penalty: {
@@ -20,7 +20,9 @@ const test_settings = {
     basicPool: {
         deposit: ethers.utils.parseUnits("100", 18),
         withdraw: ethers.utils.parseUnits("50", 18),
-        mintAmount: ethers.utils.parseUnits("10", 18)
+        mintAmount: ethers.utils.parseUnits("10", 18),
+        withdrawAmount: ethers.utils.parseUnits("425", 17),
+        withdrawPenalty: ethers.utils.parseUnits("75", 17)
     },
     pDaiSettings: {
         name: "pDai",
