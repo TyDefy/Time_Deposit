@@ -6,11 +6,13 @@ import { CyclicWithdraw } from "./CyclicWithdraw.sol";
 import { BasicPenalty } from "./BasicPenalty.sol";
 import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
 
-
 contract BasicFactory is WhitelistAdminRole {
     address internal collateral_;
     address internal interestCollateral_;
     BasicRegistry internal registryInstance_;
+
+    event DeployedUtilities(address indexed withdraw, address indexed penalty);
+    event DeployedPool(address indexed pool, address indexed withdraw);
 
     constructor(
         address _admin, 
@@ -33,6 +35,7 @@ contract BasicFactory is WhitelistAdminRole {
     )
         public 
         onlyWhitelistAdmin()
+        returns(address)
     {
         BasicPool newPool = new BasicPool(
             msg.sender,
@@ -51,6 +54,10 @@ contract BasicFactory is WhitelistAdminRole {
             ),
             "Pool registration falied"
         );
+
+        emit DeployedPool(address(newPool), _withdraw);
+
+        return(address(newPool));
     }
 
     function deployUtility(
@@ -63,6 +70,7 @@ contract BasicFactory is WhitelistAdminRole {
     )
         public
         onlyWhitelistAdmin()
+        returns(address, address)
     {
         BasicPenalty newPenalty = new BasicPenalty(
             _penaltyPercentage
@@ -93,6 +101,13 @@ contract BasicFactory is WhitelistAdminRole {
                 1
             ),
             "Penalty registration failed"
+        );
+
+        emit DeployedUtilities(address(newWithdraw), address(newPenalty));
+
+        return(
+            address(newWithdraw),
+            address(newPenalty)
         );
     }
 }
