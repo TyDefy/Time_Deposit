@@ -18,21 +18,44 @@ import { compose, Dispatch } from 'redux';
 import { Redirect, Route } from 'react-router-dom';
 
 import injectSaga from 'utils/injectSaga';
+import injectReducer from 'utils/injectReducer';
 import { DAEMON } from 'utils/constants';
 import saga from './saga';
+import reducer from './reducer';
+
 import selectApp from './selectors';
 
 import AppWrapper from '../../components/AppWrapper/index';
-import Notifier from '../Notification/notifier';
+import Notification from '../Notification'
+import HomePage from 'containers/HomePage';
+import { connectMetamask } from './actions';
+import AdminPoolsOverviewPage from 'containers/AdminPoolsOverviewPage';
+import TransactionModal from 'containers/TransactionModal';
+import AdminPoolDetailsPage from 'containers/AdminPoolDetailsPage';
+import CreatePool from 'containers/CreatePool';
+import PoolDetailsPage from 'containers/PoolDetailsPage';
 
-interface OwnProps { }
+interface OwnProps {
+  isMetamaskInstalled: boolean,
+  ethAddress?: string,
+}
 
 export interface StateProps {
 
 }
 
 export interface DispatchProps {
+  connect(): void;
+}
 
+export interface Pool {
+  address: string;
+  name: string;
+  type: string;
+  period: number;
+  balance: number;
+  participants: number;
+  interestRate: number;
 }
 
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;
@@ -57,13 +80,21 @@ const NotFoundRedirect = () => <Redirect to='/404' />
 //   />
 // );
 
+// Keep most specific routes
+
 const App: React.FunctionComponent<Props> = (props: Props) => {
   return (
     <>
-      <Notifier />
+      <Notification />
+      <TransactionModal />
       <AppWrapper {...props}>
         <Switch>
-          <Route path='/'>Hi there</Route>
+          <Route exact path='/admin/pools' component={AdminPoolsOverviewPage} />
+          <Route exact path='/admin/pool/create' component={CreatePool} />
+          <Route exact path='/admin/pool/:id' component={AdminPoolDetailsPage} />
+          <Route exact path='/pool/:id' component={PoolDetailsPage} />
+          <Route exact path='/' component={HomePage} />
+          <Route exact path='/404'>Not Found</Route>
           <Route component={NotFoundRedirect} />
         </Switch>
       </AppWrapper>
@@ -74,7 +105,7 @@ const App: React.FunctionComponent<Props> = (props: Props) => {
 const mapStateToProps = state => selectApp(state);
 
 const mapDispatchToProps = (dispatch: Dispatch): DispatchProps => ({
-
+  connect: () => dispatch(connectMetamask.request()),
 });
 
 const withConnect = connect(
@@ -82,10 +113,13 @@ const withConnect = connect(
   mapDispatchToProps,
 );
 
+const withReducer = injectReducer<OwnProps>({ key: 'app', reducer: reducer });
 const withSaga = injectSaga<OwnProps>({ key: 'app', saga: saga, mode: DAEMON });
+
 
 export default compose(
   withRouter,
+  withReducer,
   withSaga,
   withConnect,
 )(App);

@@ -1,4 +1,6 @@
 import { Reducer, Store } from 'redux';
+import { ContainerState as AppState } from '../containers/App/types';
+import { ContainerState as TransactionModalState } from '../containers/TransactionModal/types';
 
 export interface LifeStore extends Store<ApplicationRootState> {
   injectedReducers: any;
@@ -20,5 +22,7 @@ export interface InjectSagaParams {
 
 // Your root reducer type, which is your redux state types also
 export interface ApplicationRootState {
-  readonly app: never;
+  readonly app: AppState;
+  readonly transactionModal: TransactionModalState;
+  readonly createPool: never;
 }

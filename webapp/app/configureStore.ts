@@ -6,8 +6,13 @@ import createReducer from 'reducers';
 import { applyMiddleware, compose, createStore } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import { LifeStore } from 'types';
+import { blockchainContext } from 'blockchainContext';
 
-const sagaMiddleware = createSagaMiddleware();
+const sagaMiddleware = createSagaMiddleware({
+  context: {
+    blockchain: new blockchainContext(),
+  }
+});
 
 declare interface IWindow extends Window {
   __REDUX_DEVTOOLS_EXTENSION_COMPOSE__: any; // redux-dev-tools definitions not needed
@@ -25,14 +30,14 @@ export default function configureStore(initialState) {
     // Uncomment to disable devtools in production
     // process.env.NODE_ENV !== 'production' &&
     typeof window === 'object' &&
-    window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+      window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-          // TODO Try to remove when `react-router-redux` is out of beta, LOCATION_CHANGE should not be fired more than once after hot reloading
-          // Prevent recomputing reducers for `replaceReducer`
-          shouldHotReload: false,
-          trace: true,
-          traceLimit: 25
-        })
+        // TODO Try to remove when `react-router-redux` is out of beta, LOCATION_CHANGE should not be fired more than once after hot reloading
+        // Prevent recomputing reducers for `replaceReducer`
+        shouldHotReload: false,
+        trace: true,
+        traceLimit: 25
+      })
       : compose;
   /* eslint-enable */
 
