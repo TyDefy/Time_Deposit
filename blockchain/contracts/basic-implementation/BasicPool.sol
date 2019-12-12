@@ -114,8 +114,6 @@ contract BasicPool {
         //TODO emit
     }
 
-    event log(string _msg, uint256 _number);
-
     function withdraw(uint256 _amount) public {
         require(
             users_[msg.sender].collateralInvested >= _amount,
@@ -133,105 +131,25 @@ contract BasicPool {
 
         uint256 payoutAmount  = withdrawAmount + (
                 (users_[msg.sender].balance*10**18)/totalCCollateral_
-            )/10**18*penaltyPot_;
+            )/10**18*penaltyPot_;   
 
         penaltyPot_ += penaltyAmount;
-                 
-        emit log("Payout amount", payoutAmount);
 
-        // require(
-        //     withdrawAllowed && withdrawAmount != 0,
-        //     "Withdraw is not allowed"
-        // );
-
-        /**
-        1 000 000 000 000 000 000 000
-          950 000 000 000 000 000 000
-          15
-         */
-
-        // uint256 totalBalance = cTokenInstance_.balanceOf(address(this));
-        // // totalCollateral_
-
-        // emit log("total cdai balance of pool", totalBalance);
-
-        // uint256 valuePerToken = totalBalance/totalCollateral_;
-        
-        // emit log("value per token", valuePerToken);
-
-        // uint256 amountValue = valuePerToken*withdrawAmount;
-
-        // emit log("The vaule amount of the withdraw", amountValue);
-
-        // uint256 balanceBefore = cTokenInstance_.balanceOf(address(this));
-        // uint256 collateralBalanceBefore = collateralInstance_.balanceOf(address(this));
-        // uint256 balanceofctoken = collateralInstance_.balanceOf(address(cTokenInstance_));
-
-        // emit log("Balance (cDai) pool", balanceBefore); 
-        // emit log("Balance (dai) pool", collateralBalanceBefore); 
-        // emit log("Balance of cToken in dai", balanceofctoken); 
-
-        /**
-        1000000000000000000000
-        1000000000000000000000
-        500000000000000000000
-         */
-
-        // require(
-        //     cTokenInstance_.approve(
-        //         address(cTokenInstance_),
-        //         amountValue
-        //     ),
-        //     "Approve failed"
-        // );
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
         // require(
-            cTokenInstance_.redeem(payoutAmount); //!= 0,
+            cTokenInstance_.redeem(payoutAmount);// != 0,
             // "Interest collateral transfer failed"
         // );
         uint256 balanceAfter = collateralInstance_.balanceOf(address(this));
 
-        collateralInstance_.transfer(
+        // require(
+            collateralInstance_.transfer(
                 msg.sender,
                 balanceAfter - balanceBefore
             );
-
-        // uint256 balanceAfter = cTokenInstance_.balanceOf(address(this));
-        // uint256 collateralBalanceAfter = collateralInstance_.balanceOf(address(this));
-
-        // emit log("Balance after redeem (cDai) pool", balanceAfter); 
-        // emit log("Balance after redeem (dai) pool", collateralBalanceAfter); 
-
-        // assert(
-        //     balanceBefore - amountValue == balanceAfter
-        // );
-
-        // uint256 collateral = collateralBalanceAfter - collateralBalanceBefore;
-
-        // emit log("Collateral difference", collateral);
-
-        // require(
-        //     collateralInstance_.transfer(
-        //         msg.sender,
-        //         collateral
-        //     ),
         //     "Collateral transfer failed"
         // );
 
-        // require(
-        //     withdrawAllowed > 0,
-        //     "Withdraw not allowed"
-        // );
-
-
-
-        // /**
-        // TODO 
-        // Exchange cDai to dai 
-
-        // send dai to user
-
-        //  */
         totalCCollateral_ -= _amount;
         users_[msg.sender].collateralInvested -= _amount;
         users_[msg.sender].balance -= payoutAmount + penaltyAmount;

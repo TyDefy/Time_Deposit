@@ -318,31 +318,7 @@ describe("Basic Pool Tests", async () => {
             console.log(balanceBefore[1].toString())
             console.log("Time stamp of last deposit and withdraw:\n" + balanceBefore[2].toString())
             console.log(balanceBefore[3].toString() + "\n")
-
-            console.log("\n\n<<<<<<<<<<<<<<\nLogs\n>>>>>>>>>>>>>>>>>>>>>")
-            console.log(tx.events[0].args._msg)
-            console.log(tx.events[0].args._number.toString())
-
-            // console.log(tx.events[1].args._msg)
-            // console.log(tx.events[1].args._number.toString())
-
-            // console.log(tx.events[2].args._msg)
-            // console.log(tx.events[2].args._number.toString())
-
-            // console.log(tx.events[3].args._msg)
-            // console.log(tx.events[3].args._number.toString())
-
-            // console.log(tx.events[4].args._msg)
-            // console.log(tx.events[4].args._number.toString())
-
-            // console.log(tx.events[5].args._msg)
-            // console.log(tx.events[5].args._number.toString())
-
-            // console.log(tx.events[6].args._msg)
-            // console.log(tx.events[6].args._number.toString())
-
-            // console.log(tx.events[7].args._msg)
-            // console.log(tx.events[7].args._number.toString())
+            
             // await basicPoolInstance.from(user1).withdraw(
             //     test_settings.basicPool.withdraw
             // );
