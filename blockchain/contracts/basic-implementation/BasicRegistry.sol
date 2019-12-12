@@ -1,6 +1,7 @@
 pragma solidity 0.5.10;
 
 import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
+import { IWithdraw } from "../interfaces/IWithdraw.sol";
 
 contract BasicRegistry is WhitelistAdminRole {
     // Enums for the types of contracts
@@ -27,6 +28,21 @@ contract BasicRegistry is WhitelistAdminRole {
     mapping(address => Pool) internal pools_;
     // Deployers
     mapping(address => bool) internal deployers_;
+
+    event PoolRegistration(
+        address indexed admin, 
+        address indexed pool, 
+        address indexed withdraw, 
+        string name, 
+        string description
+    );
+    event UtilityRegistration(
+        address indexed admin, 
+        address indexed utility, 
+        string name, 
+        string description, 
+        uint8 typeOfUtil
+    );
 
     constructor(
         address _admin
@@ -61,19 +77,12 @@ contract BasicRegistry is WhitelistAdminRole {
         deployers_[_deployer] = _deployerStatus;
     }
 
-    /**
-      * @notice Allows a deployer to register a pool.
-      * @param  _pool The address of the pool
-      * @param  _withdraw The address of the withdraw util
-      * @param  _penalty The address of the penalty util
-      * @param  _poolName A descriptor for the pool
-      * @return bool The compleation status of the pool registration
-      */
     function registerPool(
+        address _admin,
         address _pool,
         address _withdraw,
-        address _penalty,
-        string memory _poolName
+        string memory _poolName,
+        string memory _poolDescription
     )
         public
         onlyDeployer()
@@ -88,37 +97,31 @@ contract BasicRegistry is WhitelistAdminRole {
         pools_[_pool].poolName = _poolName;
         pools_[_pool].active = true;
 
-        if(_withdraw != address(0)) {
-            require(
-                contractLibraries_[_withdraw].contractType == ContractType.WITHDRAW,
-                "Please register withdraw utility"
-            );            
-        }
-        pools_[_pool].withdraw = _withdraw;
+        require(
+            contractLibraries_[_withdraw].contractType == ContractType.WITHDRAW,
+            "Please register withdraw utility"
+        );  
 
-        if(_penalty != address(0)) {
-            require(
-                contractLibraries_[_penalty].contractType == ContractType.PENALTY,
-                "Please register penalty utility"
-            );            
-        }
-        pools_[_pool].penalty = _penalty;
+        pools_[_pool].withdraw = _withdraw;
+        pools_[_pool].penalty = IWithdraw(_withdraw).getPenalty();
+
+        emit PoolRegistration(
+            _admin, 
+            _pool, 
+            _withdraw, 
+            _poolName, 
+            _poolDescription
+        );
 
         return true;
     }
 
-    /**
-      * @notice Allows a deployer to register a utility
-      * @param  _contract The address of the util
-      * @param  _name The name for the util
-      * @param  _implementationType A description of the util functionality
-      * @param  _type An enum of the type of utility
-      * @return bool The success or failure of the registration
-      */
+
     function registerUtility(
+        address _admin,
         address _contract,
         string memory _name,
-        string memory _implementationType,
+        string memory _description,
         uint8 _type
     )
         public
@@ -132,13 +135,18 @@ contract BasicRegistry is WhitelistAdminRole {
         contractLibraries_[_contract]
             .name = _name;
         contractLibraries_[_contract]
-            .implementationType = _implementationType;
+            .implementationType = _description;
         contractLibraries_[_contract]
             .active = true;
 
-            //TODO add check that the address conforms
-            //      to the interface of its type
-        
+        emit UtilityRegistration(
+            _admin, 
+            _contract, 
+            _name, 
+            _description, 
+            _type
+        );
+
         return true;
     }
 
