@@ -48,7 +48,7 @@ describe("Basic Registry Tests", async () => {
             penaltyAbi,
             false,
             test_settings.penalty.percentage
-        )
+        );
 
         cyclicWithdrawInstance = await deployer.deploy(
             cyclicWithdrawAbi, 
@@ -77,6 +77,13 @@ describe("Basic Registry Tests", async () => {
             registeredDeployer.signer.address,
             true
         );
+
+        await pDaiInstance.from(admin).mint();
+        await pDaiInstance.from(admin).transfer(
+            cDaiInstance.contract.address,
+            10000
+        );
+        await pDaiInstance.from(user1).mint();
     });
 
     describe("Core Functionality", async () => {

@@ -129,6 +129,8 @@ contract BasicPool {
             _amount
         );
 
+        // uint256 withdrawAmountInCtoken = (((withdrawAmount*100)/users_[msg.sender].collateralInvested)*users_[msg.sender].balance)/100;
+        // WithdrawAmount needs to be in cDai
         uint256 payoutAmount  = withdrawAmount + (
                 (users_[msg.sender].balance*10**18)/totalCCollateral_
             )/10**18*penaltyPot_;   

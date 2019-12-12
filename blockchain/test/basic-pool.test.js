@@ -16,7 +16,11 @@ describe("Basic Pool Tests", async () => {
     let user1 = accounts[3];
     let deployer = new etherlime.EtherlimeGanacheDeployer(deployerInsecure.secretKey);;
     
-    let basicPoolInstance, cyclicWithdrawInstance, penaltyInstance, pDaiInstance, cDaiInstance;
+    let basicPoolInstance, 
+        cyclicWithdrawInstance, 
+        penaltyInstance, 
+        pDaiInstance, 
+        cDaiInstance;
 
     beforeEach('', async () => {
         pDaiInstance = await deployer.deploy(
@@ -40,7 +44,7 @@ describe("Basic Pool Tests", async () => {
             penaltyAbi,
             false,
             test_settings.penalty.percentage
-        )
+        );
 
         cyclicWithdrawInstance = await deployer.deploy(
             cyclicWithdrawAbi, 
@@ -60,7 +64,38 @@ describe("Basic Pool Tests", async () => {
         );
 
         await pDaiInstance.from(admin).mint();
+        await pDaiInstance.from(admin).transfer(
+            cDaiInstance.contract.address,
+            test_settings.basicPool.deposit
+        );
         await pDaiInstance.from(user1).mint();
+        await pDaiInstance.from(user1).approve(
+            cDaiInstance.contract.address,
+            test_settings.basicPool.deposit
+        );
+        await cDaiInstance.from(user1).approve(
+            pDaiInstance.contract.address,
+            10000
+        );
+    });
+
+    describe("pcToken mock test", async () => {
+        it("Redeem underlying collateral", async () => {
+            let userBalanceBefore = await cDaiInstance.balanceOf(user1.signer.address);
+            console.log("User balance before mint:\n" + userBalanceBefore.toString())
+            await cDaiInstance.from(user1).mint(
+                test_settings.basicPool.deposit
+            );
+
+            let userBalanceAfterMint = await cDaiInstance.balanceOf(user1.signer.address);
+            console.log("User balance after mint:\n" + userBalanceAfterMint.toString());
+            let print = await(await cDaiInstance.from(user1).redeemUnderlying(
+                test_settings.basicPool.deposit)
+            ).wait();
+            console.log(print);
+            let userBalanceAfterRedeemUnderlying = await cDaiInstance.balanceOf(user1.signer.address);
+            console.log("User balance after redeem underlying:\n" + userBalanceAfterRedeemUnderlying.toString());
+        });
     });
 
     describe("Core Functionality", async () => {
@@ -244,7 +279,14 @@ describe("Basic Pool Tests", async () => {
             ));
         });
 
-        it("💵 Can withdraw (no penalty)", async () => {      
+        it("💵 Can withdraw (no penalty)", async () => {    
+            let poolDaiBalance = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            let poolCdaiBalance = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            console.log("Pool Balances:")
+            console.log("Dai balance:\t" + poolDaiBalance.toString());
+            console.log("cDai balance:\t" + poolCdaiBalance.toString());
+
             await pDaiInstance.from(user1).approve(
                 basicPoolInstance.contract.address,
                 test_settings.basicPool.deposit
@@ -253,11 +295,20 @@ describe("Basic Pool Tests", async () => {
                 test_settings.basicPool.deposit
             );
             let balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
-            console.log("collateral invested and cdai balance:\n" + balanceBefore[0].toString())
-            console.log(balanceBefore[1].toString())
-
             let balanceInPcToken = await cDaiInstance.balanceOf(user1.signer.address);
-            console.log("actual cdai balance:\n" + balanceInPcToken.toString())
+            let balanceInDai = await pDaiInstance.balanceOf(user1.signer.address);
+
+            poolDaiBalance = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            poolCdaiBalance = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            console.log("\nUser balances:");
+            console.log("Dai in pool:\t\t" + balanceBefore[0].toString())
+            console.log("cDai in pool:\t\t" + balanceBefore[1].toString())
+            console.log("dai balance in Dai:\t" + balanceInDai.toString())
+            console.log("cDai balance in cDai:\t" + balanceInPcToken.toString())
+            console.log("\nPool Balances:")
+            console.log("Dai balance:\t" + poolDaiBalance.toString());
+            console.log("cDai balance:\t" + poolCdaiBalance.toString());
 
             let withdrawInfo = await basicPoolInstance.canWithdraw(
                 user1.signer.address,
@@ -302,20 +353,27 @@ describe("Basic Pool Tests", async () => {
                 "Penalty amount is not correct"
             );
 
-            console.log("before withdraw")
+            console.log("\n<<<\nAfter withdraw\n>>>\n")
 
             let tx = await(await basicPoolInstance.from(user1).withdraw(
-                test_settings.basicPool.withdraw
+                test_settings.basicPool.deposit
             )).wait();
 
             let balanceInPcTokenAfter = await cDaiInstance.balanceOf(user1.signer.address);
-            console.log("cDai balance after:\n" + balanceInPcTokenAfter.toString())
             let balanceDaiAFter = await pDaiInstance.balanceOf(user1.signer.address);
-            console.log("cDai balance after:\n" + balanceDaiAFter.toString())
-
             balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
-            console.log("collateral and cdai invested:\n" + balanceBefore[0].toString())
-            console.log(balanceBefore[1].toString())
+            let poolDaiBalanceAfter = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            let poolCdaiBalanceAfter = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            console.log("User balances:");
+            console.log("Dai in pool:\t\t" + balanceBefore[0].toString())
+            console.log("cDai in pool:\t\t" + balanceBefore[1].toString())
+            console.log("dai balance in Dai:\t" + balanceDaiAFter.toString())
+            console.log("cDai balance in cDai:\t" + balanceInPcTokenAfter.toString())
+            console.log("Pool Balances:")
+            console.log("Dai balance:\t" + poolDaiBalanceAfter.toString());
+            console.log("cDai balance:\t" + poolCdaiBalanceAfter.toString());
+
             console.log("Time stamp of last deposit and withdraw:\n" + balanceBefore[2].toString())
             console.log(balanceBefore[3].toString() + "\n")
             

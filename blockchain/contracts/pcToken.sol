@@ -17,6 +17,8 @@ contract pcToken is ICToken, ERC20 {
     string public symbol;
     uint8 public decimals;
     uint256 internal totalSupply_;
+    uint256 internal totalReserves_;
+    uint256 internal totalBorrows_;
     IERC20 internal collateralInstance_;
 
     mapping (address => mapping (address => uint256)) internal allowed;
@@ -46,30 +48,24 @@ contract pcToken is ICToken, ERC20 {
         symbol = _symbol;
         decimals = _decimals;
         collateralInstance_ = IERC20(_colalteral);
+        totalSupply_ = 57733536549738757;
+        totalReserves_ = 125573360914251726089975;
+        totalBorrows_ = 2867271208090219596939682;
     }
 
-    /// @notice Mints 100 000 000 free tokens to a user.
     function mint(uint mintAmount) public returns(uint) {
-        uint cTokenAmount = mintAmount*exchangeRateCurrent();
-
+        uint newCdai = (mintAmount*10**28)/exchangeRateCurrent();
+        _mint(msg.sender, newCdai);
         require(
             collateralInstance_.transferFrom(
-                msg.sender,
-                address(this),
+                msg.sender, 
+                address(this), 
                 mintAmount
             ),
-            "Transerfer failed"
+            "Transfer failed"
         );
 
-        totalSupply_.add(cTokenAmount);
-        balances[msg.sender] = balances[msg.sender].add(cTokenAmount);
-        emit Transfer(address(0), msg.sender, cTokenAmount);
-        // Success 
         return 0;
-    }
-
-    function exchangeRateCurrent() public returns(uint) {
-        return 10;
     }
 
     function redeem(uint redeemTokens) public returns (uint) {
@@ -80,6 +76,8 @@ contract pcToken is ICToken, ERC20 {
 
         uint tokenAmount = redeemTokens/exchangeRateCurrent();
 
+        balances[msg.sender] = balances[msg.sender].sub(tokenAmount);
+
         require(
             collateralInstance_.transfer(
                 msg.sender,
@@ -88,122 +86,33 @@ contract pcToken is ICToken, ERC20 {
             "Transerfer failed"
         );
 
-        // totalSupply_.sub(redeemTokens);
-        // balances[msg.sender] = balances[msg.sender].sub(redeemTokens);
-        // emit Transfer(address(this), msg.sender, redeemTokens);
+        // totalSupply_.sub(tokenAmount);
+        
+        emit Transfer(address(this), msg.sender, tokenAmount);
 
-        // return tokenAmount;
+        return tokenAmount;
     }
 
-    // function exchangeRateCurrent() returns (uint) {
-    //     uint getCash = collateralInstance_.balanceOf(address(this));
-
-    //     return((getCash / totalSupply());
-    // }
-
-    /**
-      * @dev Transfer token to a specified address
-      * @param _to    : The address to transfer to.
-      * @param _value : The amount to be transferred.
-      */
-    function transfer(
-        address _to,
-        uint256 _value
-    )
-        public
-        returns (bool)
-    {
-        require(_value <= balances[msg.sender], '');
-        require(_to != address(0), '');
-
-        balances[msg.sender] = balances[msg.sender].sub(_value);
-        balances[_to] = balances[_to].add(_value);
-        emit Transfer(msg.sender, _to, _value);
-        return true;
+    function redeemUnderlying(uint redeemAmount) public returns(uint) {
+        uint256 cRedeemAmount = (redeemAmount*10**28)*exchangeRateCurrent();
+        // _burn(msg.sender, cRedeemAmount);
+        // require(
+        //     collateralInstance_.transfer(
+        //         msg.sender,
+        //         redeemAmount
+        //     ),
+        //     "Transerfer failed"
+        // );
+        
+        return cRedeemAmount;
     }
 
-    /**
-      * @dev Transfer tokens from one address to another
-      * @param _from     : address The address which you want to send tokens from
-      * @param _to       : address The address which you want to transfer to
-      * @param _value    : uint256 the amount of tokens to be transferred
-      */
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _value
-    )
-        public
-        returns (bool)
-    {
-        require(_value <= balances[_from], '');
-        require(_value <= allowed[_from][msg.sender], '');
-        require(_to != address(0), '');
-
-        balances[_from] = balances[_from].sub(_value);
-        balances[_to] = balances[_to].add(_value);
-        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
-        emit Transfer(_from, _to, _value);
-        return true;
+    function getCash() public view returns(uint) {
+        return 9445753245515894173386887;
     }
 
-    /**
-      * @dev Approve the passed address to spend the specified amount of tokens on behalf of msg.sender.
-      *     Beware that changing an allowance with this method brings the risk that someone may use both the old
-      *     and the new allowance by unfortunate transaction ordering. One possible solution to mitigate this
-      *     race condition is to first reduce the spender's allowance to 0 and set the desired value afterwards:
-      *     https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
-      * @param _spender  : The address which will spend the funds.
-      * @param _value    : The amount of tokens to be spent.
-      */
-    function approve(
-        address _spender,
-        uint256 _value
-    )
-        public
-        returns (bool success)
-    {
-        allowed[msg.sender][_spender] = _value;
-        emit Approval(msg.sender, _spender, _value);
-        success = true;
-    }
-
-    /**
-    ----------------------------------------------------
-    view functions
-    ----------------------------------------------------
-    */
-
-    /**
-      * @dev Function to check the amount of tokens that an owner allowed to a spender.
-      * @param _owner    : address The address which owns the funds.
-      * @param _spender  : address The address which will spend the funds.
-      * @return A uint256 specifying the amount of tokens still available for the spender.
-      */
-    function allowance(
-        address _owner,
-        address _spender
-     )
-        public
-        view
-        returns (uint256 remaining)
-    {
-        remaining = allowed[_owner][_spender];
-    }
-
-    /**
-      * @return the total supply of tokens.
-      */
-    function totalSupply() public view returns (uint256) {
-        return totalSupply_;
-    }
-
-    /**
-      * @dev Gets the balance of the specified address.
-      * @param _owner The address to query the the balance of.
-      * @return An uint256 representing the amount owned by the passed address.
-      */
-    function balanceOf(address _owner) public view returns (uint256) {
-        return balances[_owner];
+    function exchangeRateCurrent() public returns(uint) {
+        return 211098294354306448527248519;
+        // return (getCash() + totalBorrows() - totalReserves_) / totalSupply();
     }
 }
