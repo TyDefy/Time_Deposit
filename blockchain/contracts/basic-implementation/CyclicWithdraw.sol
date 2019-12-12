@@ -8,7 +8,7 @@ contract CyclicWithdraw is IWithdraw {
     uint256 internal cycleLength_;
     // Withdraw control for pool
     bool internal violationWithdraw_;
-    //
+    // Instance of penalty contract
     IPenalty internal penaltyInstance_;
 
     constructor(
@@ -80,4 +80,8 @@ contract CyclicWithdraw is IWithdraw {
     function getCycle() public view returns(uint256) {
         return cycleLength_;
     } 
+
+    function getPenalty() public view returns(address) {
+        return address(penaltyInstance_);
+    }
 }

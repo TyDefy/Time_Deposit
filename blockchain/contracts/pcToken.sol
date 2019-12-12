@@ -34,7 +34,14 @@ contract pcToken is ICToken, ERC20 {
         uint256 value
     );
 
-    constructor(string memory _name, string memory _symbol, uint8 _decimals, address _colalteral) public {
+    constructor(
+        string memory _name, 
+        string memory _symbol, 
+        uint8 _decimals, 
+        address _colalteral
+    ) 
+        public 
+    {
         name = _name;
         symbol = _symbol;
         decimals = _decimals;
