@@ -286,6 +286,7 @@ describe("Basic Pool Tests", async () => {
         it("💵 Can withdraw (no penalty)", async () => {    
             let poolDaiBalanceBefore = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
             let poolCdaiBalanceBefore = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            let userDaiBalanceBefore = await pDaiInstance.balanceOf(user1.signer.address);
 
             assert.equal(
                 poolDaiBalanceBefore.toString(),
@@ -374,53 +375,41 @@ describe("Basic Pool Tests", async () => {
                 "Penalty amount is not correct"
             );
 
-            console.log("\n<<<\n")
-
             let tx = await(await basicPoolInstance.from(user1).withdraw(
                 test_settings.basicPool.deposit
             )).wait();
 
-            console.log("After withdraw\n>>>\n")
-
             let balanceInPcTokenAfter = await cDaiInstance.balanceOf(user1.signer.address);
             let balanceDaiAFter = await pDaiInstance.balanceOf(user1.signer.address);
-            balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
+            let balanceOfUserInPoolAfterWithdraw = await basicPoolInstance.getUserInfo(user1.signer.address);
             let poolDaiBalanceAfter = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
             let poolCdaiBalanceAfter = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
-
-            console.log("User balances:");
-            console.log("Dai in pool:\t\t" + balanceBefore[0].toString())
-            console.log("cDai in pool:\t\t" + balanceBefore[1].toString())
-            console.log("dai balance in Dai:\t" + balanceDaiAFter.toString())
-            console.log("cDai balance in cDai:\t" + balanceInPcTokenAfter.toString())
-            console.log("Pool Balances:")
-            console.log("Dai balance:\t" + poolDaiBalanceAfter.toString());
-            console.log("cDai balance:\t" + poolCdaiBalanceAfter.toString());
-
-            console.log("Time stamp of last deposit and withdraw:\n" + balanceBefore[2].toString())
-            console.log(balanceBefore[3].toString() + "\n")
             
-            // await basicPoolInstance.from(user1).withdraw(
-            //     test_settings.basicPool.withdraw
-            // );
-            // console.log("0");
-            // let balanceAfter = await basicPoolInstance.getUserInfo(user1.signer.address);
-            
-            // console.log(balanceBefore[0].toString());
-            // console.log(balanceBefore[1].toString());
-            // console.log(balanceAfter[0].toString())
-            // console.log(balanceAfter[1].toString())
-
-            // assert.equal(
-            //     balanceBefore.toString(),
-            //     test_settings.basicPool.deposit,
-            //     "user has incorrect balance after"
-            // );
-            // assert.equal(
-            //     balanceAfter.toString(),
-            //     test_settings.basicPool.withdraw,
-            //     "user has incorrect balance after"
-            // );
+            assert.equal(
+                balanceInPcTokenAfter.toString(),
+                0,
+                "User has incorrect cDai balance after withdraw"
+            );
+            assert.equal(
+                balanceDaiAFter.toString(),
+                userDaiBalanceBefore.toString(),
+                "User has not been refunded all dai"
+            );
+            assert.equal(
+                balanceOfUserInPoolAfterWithdraw[0].toString(),
+                0,
+                "User has a balance in pool after withdrawing"
+            );
+            assert.equal(
+                poolDaiBalanceAfter.toString(),
+                0,
+                "Pool has dai after withdraw"
+            );
+            assert.equal(
+                poolCdaiBalanceAfter.toString(),
+                0,
+                "Pool has cDai after withdraw"
+            );
         });
 
         it("💵 Can withdraw (with penalty)", async () => {   
