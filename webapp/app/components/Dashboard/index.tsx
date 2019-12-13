@@ -26,7 +26,7 @@ const Dashboard: React.FunctionComponent<OwnProps> = ({pools, allPoolsBalance}: 
     <br></br>
     <br></br>
     <br></br>
-    <PoolCardList pools={pools} />
+    <PoolCardList pools={pools} listLabel='AvailablePools' />
   </Container>
 );
 

@@ -9,16 +9,16 @@ let DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
 const etherlime = require('etherlime-lib');
 
-Array.prototype.asyncForEach = async function(callback, thisArg) {
-  thisArg = thisArg || this
-  for (let i = 0, l = this.length; i !== l; ++i) {
-    await callback.call(thisArg, this[i], i, this)
-  }
+Array.prototype.asyncForEach = async function (callback, thisArg) {
+	thisArg = thisArg || this
+	for (let i = 0, l = this.length; i !== l; ++i) {
+		await callback.call(thisArg, this[i], i, this)
+	}
 }
 
 const defaultConfigs = {
-  chainId: 4,
-  etherscanApiKey: process.env.ETHERSCAN_API_KEY,
+	chainId: 4,
+	etherscanApiKey: process.env.ETHERSCAN_API_KEY,
 };
 
 const deploy = async (network, secret) => {
@@ -29,14 +29,14 @@ const deploy = async (network, secret) => {
 		network = 'local';
 	}
 
-  const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS;
+	const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS;
 
-  	if (network === 'local') {
+	if (network === 'local') {
 		const deployer = new etherlime.JSONRPCPrivateKeyDeployer(secret, 'http://localhost:8545/', defaultConfigs);
 
 		const deploy = (...args) => deployer.deploy(...args);
 
-    const pDaiInstance = await deploy(
+		const pDaiInstance = await deploy(
 			pDaiABI,
 			false,
 			"PseudoDai",
@@ -52,13 +52,13 @@ const deploy = async (network, secret) => {
 			18,
 			pDaiInstance.contract.address
 		);
-		
+
 		const poolRegistryInstance = await deploy(
 			poolRegistryABI,
 			false,
 			ADMIN_ADDRESS
 		);
-		
+
 		const poolFactoryInstance = await deploy(
 			BasicFactoryABI,
 			false,
@@ -73,7 +73,7 @@ const deploy = async (network, secret) => {
 			true
 		);
 
-		let newUtilities = await(await poolFactoryInstance.deployUtility(
+		let newUtilities = await (await poolFactoryInstance.deployUtility(
 			process.env.PENALTY_PERCENTAGE,
 			process.env.CYCLE_LENGTH,
 			process.env.PENALTY_NAME,
@@ -85,30 +85,25 @@ const deploy = async (network, secret) => {
 		const withdrawAddress = newUtilities.events[2].args.withdraw;
 		const penaltyAddress = newUtilities.events[2].args.penalty;
 
-		let newPool = await(await poolFactoryInstance.deployBasicPool(
+		let newPool = await (await poolFactoryInstance.deployBasicPool(
 			withdrawAddress,
 			process.env.POOL_NAME,
 			process.env.POOL_DESCRIPTION
 		)).wait();
 
-		const poolAddress = newPool.events[1].args.pool;
-
 		const CONTRACT_ADDRESSES = `
 			DAI_ADDRESS=${pDaiInstance.contract.address}
 			POOL_REGISTRY_ADDRESS=${poolRegistryInstance.contract.address}
 			POOL_FACTORY_ADDRESS=${poolFactoryInstance.contract.address}
-			WITHDRAW_ADDRESS=${withdrawAddress}
-			PENALTY_ADDRESS=${penaltyAddress}
-			POOL_ADDRESS=${poolAddress}
 		`;
-    console.log(CONTRACT_ADDRESSES);
-    
-    const addresses = (process.env.ADDESSES_TO_MINT).split(',');
+		console.log(CONTRACT_ADDRESSES);
 
-    for (const address of addresses) {
-      await(await pDaiInstance.mintTo(address));
-      console.log(`successfully minted to ${address}`);
-    }
+		const addresses = (process.env.ADDESSES_TO_MINT).split(',');
+
+		for (const address of addresses) {
+			await (await pDaiInstance.mintTo(address));
+			console.log(`successfully minted to ${address}`);
+		}
 
 	} else if (network === 'rinkeby') {
 
@@ -116,5 +111,5 @@ const deploy = async (network, secret) => {
 };
 
 module.exports = {
-  deploy
+	deploy
 };
