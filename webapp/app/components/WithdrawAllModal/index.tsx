@@ -44,7 +44,7 @@ const WithdrawAllModal: React.FC<OwnProps> = ({
   }, [value]);
 
   const submit = () => onSubmit(value);
-  return <Container maxWidth='xs'>
+  return <Container maxWidth='sm'>
     <Grid container direction='column' alignItems='center'>
       <Typography variant='h6'>Withdraw All</Typography>
       <Typography>Pool</Typography>

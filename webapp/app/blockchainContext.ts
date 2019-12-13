@@ -2,7 +2,7 @@ import { BaseProvider } from "ethers/providers";
 import { getDefaultProvider, Signer, ethers, Contract } from "ethers";
 import { getNetwork } from "ethers/utils";
 import PoolRegistryContractAbi from '../../blockchain/build/abis/BasicRegistry-abi.json';
-import DaiContractAbi from '../../blockchain/build/abis/PseudoDaiToken-abi.json';
+import DaiContractAbi from '../../blockchain/build/abis/pDai-abi.json';
 
 
 export interface BlockchainContext {

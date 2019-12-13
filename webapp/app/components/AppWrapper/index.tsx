@@ -32,6 +32,7 @@ const styles = ({ spacing, zIndex, mixins }: Theme) => createStyles({
     paddingTop: spacing(8),
     paddingLeft: spacing(2),
     paddingRight: spacing(2),
+    paddingBottom: spacing(2),
     position: "relative",
     minHeight: `calc(100vh - ${footerHeight}px)`,
   },
@@ -69,22 +70,6 @@ const styles = ({ spacing, zIndex, mixins }: Theme) => createStyles({
     fontFamily: "Montserrat",
     fontWeight: "bold",
     fontSize: "14px",
-  },
-  background: {
-    display: "block",
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    maxHeight: `calc(100vh - ${footerHeight}px)`,
-    zIndex: -1,
-    "& img": {
-      width: "100%",
-      maxHeight: `calc(100vh - ${footerHeight}px)`,
-    },
-    "& ~ *": {
-      zIndex: 0
-    }
   },
 });
 
