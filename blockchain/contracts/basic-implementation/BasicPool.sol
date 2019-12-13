@@ -191,16 +191,28 @@ contract BasicPool {
             _amount,
             users_[_user].lastWtihdraw
         );
-
-        uint256 payoutAmount = withdrawAmount + (
-                (users_[msg.sender].balance*10**18)/totalCCollateral_
-            )/10**18*penaltyPot_;
             
         return (
             withdrawAllowed, 
-            payoutAmount, 
+            withdrawAmount, 
             penaltyAmount
         );
+    }
+
+    function withdrawInterest() public {
+
+    }
+
+    function getInterestAmount(address _user) public returns(uint256) {
+        uint256 penaltyPotReward = (
+                (users_[_user].balance*10**18)/totalCCollateral_
+            )/10**18*penaltyPot_;
+            
+        uint256 interestEarned = users_[_user].balance - ((
+                users_[_user].collateralInvested*10**18
+            )/cTokenInstance_.exchangeRateCurrent()
+        );
+        return penaltyPotReward + interestEarned;
     }
 
     function balanceOf(address _user) public view returns(uint256) {
