@@ -40,7 +40,7 @@ contract pDai is ERC20 {
     }
 
 
-    /// @notice Mints 100 000 000 free tokens to a user.
+    /// @notice Mints 100 000 000 DAI to a user.
     function mint() public {
         require(
             !mintingRewards[msg.sender],
@@ -51,6 +51,19 @@ contract pDai is ERC20 {
         totalSupply_.add(100000000000000000000000000);
         balances[msg.sender] = balances[msg.sender].add(100000000000000000000000000);
         emit Transfer(address(0), msg.sender, 100000000000000000000000000);
+    }
+
+    /// @notice Mints 100 000 000 DAI to the address specified.
+    function mintTo(address _to) public {
+        require(
+            !mintingRewards[_to],
+            "All free tokens have been used."
+        );
+
+        mintingRewards[_to] = true;
+        totalSupply_.add(100000000000000000000000000);
+        balances[_to] = balances[_to].add(100000000000000000000000000);
+        emit Transfer(address(0), _to, 100000000000000000000000000);
     }
 
     /**
