@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import clsx from 'clsx';
 import {
   Theme,
   createStyles,
@@ -18,14 +19,17 @@ import {
   Chip,
   Grid,
   Divider,
+  Collapse,
+  IconButton
 } from '@material-ui/core';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { Pool } from 'containers/App';
 import { forwardTo } from 'utils/history';
 
-const styles = ({ palette }: Theme) =>
+const styles = ( theme: Theme) =>
   createStyles({
     card: {
-      height: '460px',
+      height: '470px',
     },
     cardHeader: {
       backgroundColor: '#E5E5E5',
@@ -71,6 +75,20 @@ const styles = ({ palette }: Theme) =>
       padding: 8,
       textTransform: "uppercase",
       fontWeight: "bold"
+    },
+    expand: {
+      transform: 'rotate(0deg)',
+      marginLeft: 'auto',
+      transition: theme.transitions.create('transform', {
+        duration: theme.transitions.duration.shortest,
+      }),
+    },
+    expandOpen: {
+      transform: 'rotate(180deg)',
+    },
+    description: {
+      backgroundColor: '#E5E5E5',
+      padding: 8
     }
   });
 
@@ -81,17 +99,41 @@ interface OwnProps extends WithStyles<typeof styles> {
 const PoolCard: React.FunctionComponent<OwnProps> = ({
   classes,
   pool,
-}: OwnProps) => (
+}: OwnProps) => {
+  
+  const [expanded, setExpanded] = React.useState(false);
+
+  const handleExpandClick = () => {
+    setExpanded(!expanded);
+  };
+
+  return(
     <Grid item xs={12} sm={6} md={4}>
-      <Card elevation={3} className={classes.card} onClick={() => forwardTo(`/pool/${pool.address}`)}>
+      <Card elevation={3} className={classes.card} >
+     
         <CardHeader
           className={classes.cardHeader}
           title={pool.name}
           action={
+            <>
             <Chip color="primary" className={classes.chip} label={pool.period} />
+            <IconButton
+            className={clsx(classes.expand, {
+              [classes.expandOpen]: expanded,
+            })}
+            onClick={handleExpandClick}
+            aria-expanded={expanded}
+            aria-label="show more"
+          >
+            <ExpandMoreIcon />
+          </IconButton>
+          </>
           }
         />
-        <CardContent>
+         <Collapse in={expanded} timeout="auto" unmountOnExit>
+           <Typography className={classes.description}> {pool.description} </Typography>
+        </Collapse>
+        <CardContent onClick={() => forwardTo(`/pool/${pool.address}`)}>
           <Grid container spacing={2} direction="column">
             <Grid item xs={12}>
               <Paper elevation={4} className={classes.cardMetric}>
@@ -159,7 +201,6 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
           </Grid>
         </CardContent>
       </Card>
-    </Grid>
-  );
+    </Grid>)};
 
 export default withStyles(styles, { withTheme: true })(PoolCard);

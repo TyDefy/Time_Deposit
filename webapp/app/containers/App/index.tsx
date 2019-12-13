@@ -56,6 +56,7 @@ export interface Pool {
   balance: number;
   participants: number;
   interestRate: number;
+  description: string;
 }
 
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;
