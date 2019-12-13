@@ -7,6 +7,8 @@ interface ICToken {
 
     function redeem(uint redeemTokens) external returns(uint);
 
+    function redeemUnderlying(uint redeemAmount) external returns(uint);
+
     // Standard ERC20 functionality 
 
     /**

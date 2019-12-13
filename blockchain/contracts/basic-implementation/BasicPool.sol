@@ -129,32 +129,46 @@ contract BasicPool {
             _amount
         );
 
-        // uint256 withdrawAmountInCtoken = (((withdrawAmount*100)/users_[msg.sender].collateralInvested)*users_[msg.sender].balance)/100;
-        // WithdrawAmount needs to be in cDai
-        uint256 payoutAmount  = withdrawAmount + (
-                (users_[msg.sender].balance*10**18)/totalCCollateral_
-            )/10**18*penaltyPot_;   
+        // uint256 penaltyRewardInCdai  = ((users_[msg.sender].balance*10**18)/totalCCollateral_
+        //     )/10**18*penaltyPot_;   
 
-        penaltyPot_ += penaltyAmount;
+        // if(penaltyAmount != 0) {
+        //     uint256 penaltyAmountInCdai = (penaltyAmount*10**18)/cTokenInstance_.exchangeRateCurrent();
+        //     if(penaltyAmountInCdai >= penaltyRewardInCdai) {
+        //         penaltyPot_ += (penaltyAmountInCdai - penaltyRewardInCdai);
+        //         users_[msg.sender].balance -= (penaltyAmountInCdai - penaltyRewardInCdai);
+        //     } else {
+        //         users_[msg.sender].balance += (penaltyRewardInCdai - penaltyAmountInCdai);
+        //     }
+        // } else {
+        //     users_[msg.sender].balance += penaltyRewardInCdai;
+        // }
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
-        // require(
-            cTokenInstance_.redeem(payoutAmount);// != 0,
-            // "Interest collateral transfer failed"
-        // );
-        uint256 balanceAfter = collateralInstance_.balanceOf(address(this));
+        uint256 balanceBeforeInCdai = cTokenInstance_.balanceOf(address(this));
 
-        // require(
+        require(
+            cTokenInstance_.redeemUnderlying(withdrawAmount) == 0,
+            "Interest collateral transfer failed"
+        );
+
+        uint256 balanceAfter = collateralInstance_.balanceOf(address(this));
+        uint256 balanceAfterInCdai = cTokenInstance_.balanceOf(address(this));
+
+        uint256 cDaiBurnt = balanceBeforeInCdai - balanceAfterInCdai;
+        uint256 daiRecived = balanceAfter - balanceBefore;
+
+        require(
             collateralInstance_.transfer(
                 msg.sender,
-                balanceAfter - balanceBefore
-            );
-        //     "Collateral transfer failed"
-        // );
+                daiRecived
+            ),
+            "Collateral transfer failed"
+        );
 
-        totalCCollateral_ -= _amount;
+        totalCCollateral_ -= cDaiBurnt;
         users_[msg.sender].collateralInvested -= _amount;
-        users_[msg.sender].balance -= payoutAmount + penaltyAmount;
+        users_[msg.sender].balance -= cDaiBurnt;
         users_[msg.sender].lastWtihdraw = now;
     }
 

@@ -94,17 +94,17 @@ contract pcToken is ICToken, ERC20 {
     }
 
     function redeemUnderlying(uint redeemAmount) public returns(uint) {
-        uint256 cRedeemAmount = (redeemAmount*10**28)*exchangeRateCurrent();
-        // _burn(msg.sender, cRedeemAmount);
-        // require(
-        //     collateralInstance_.transfer(
-        //         msg.sender,
-        //         redeemAmount
-        //     ),
-        //     "Transerfer failed"
-        // );
+        uint256 cRedeemAmount = (redeemAmount*10**28)/exchangeRateCurrent();
+        _burn(msg.sender, cRedeemAmount);
+        require(
+            collateralInstance_.transfer(
+                msg.sender,
+                redeemAmount
+            ),
+            "Transerfer failed"
+        );
         
-        return cRedeemAmount;
+        return 0;
     }
 
     function getCash() public view returns(uint) {

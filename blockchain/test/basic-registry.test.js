@@ -15,6 +15,7 @@ describe("Basic Registry Tests", async () => {
     let deployerInsecure = accounts[1];
     let admin = accounts[2];
     let registeredDeployer = accounts[3];
+    let user1 = accounts[4];
     let deployer;
     
     let basicPoolInstance, 
