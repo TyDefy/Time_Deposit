@@ -1,8 +1,9 @@
 import { BlockchainContext } from "blockchainContext";
 import { getContext, call, put, spawn, take } from "redux-saga/effects";
 import { Log } from "ethers/providers";
-import { poolDeployed } from "./actions";
+import { poolDeployed, createPool } from "./actions";
 import { eventChannel } from "redux-saga";
+import { getType } from "typesafe-actions";
 
 function* deployedPoolWatcher() {
   const {poolFactoryContract}: BlockchainContext = yield getContext('blockchain');
@@ -21,11 +22,16 @@ function* deployedPoolWatcher() {
   }
 }
 
+function* createPoolSaga(action) {
+  const {poolFactoryContract}: BlockchainContext = yield getContext('blockchain');
+  yield call([poolFactoryContract, poolFactoryContract.deployBasicPool()], action.payload)
+}
+
 export default function* poolFactorySaga() {
   const { poolFactoryContract, provider }: BlockchainContext = yield getContext('blockchain')
 
   const deployedPoolEventFilter = {
-    ...poolFactoryContract.filters.DeployedPool(),
+    ...poolFactoryContract.filters.DeployedPool(null, null),
     fromBlock: 0,
     toBlock: 'latest',
   }
@@ -40,5 +46,6 @@ export default function* poolFactorySaga() {
     console.log('error');
   }
 
-  yield spawn(deployedPoolWatcher)
+  yield spawn(deployedPoolWatcher);
+  yield takeEvery(getType(createPool.request), createPoolSaga)
 }

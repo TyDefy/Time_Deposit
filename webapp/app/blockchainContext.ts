@@ -4,6 +4,7 @@ import { getNetwork } from "ethers/utils";
 import DaiContractAbi from '../../blockchain/build/abis/pDai-abi.json';
 import PoolRegistryContractAbi from '../../blockchain/build/abis/BasicRegistry-abi.json';
 import PoolFactoryContractAbi from '../../blockchain/build/abis/BasicFactory-abi.json';
+import { BasicFactory as PoolFactory } from '../../blockchain/contractInterfaces/BasicFactory';
 
 export interface BlockchainContext {
   isMetamaskInstalled: boolean
@@ -18,7 +19,7 @@ export interface BlockchainContext {
   signerAddress?: string;
   daiContract: Contract;
   poolRegistryContract: Contract;
-  poolFactoryContract: Contract;
+  poolFactoryContract: PoolFactory;
   ethAddress?: string;
   enableEthereum();
 }
@@ -36,7 +37,7 @@ export class blockchainContext implements BlockchainContext {
   ethAddress?: string;
   daiContract: Contract;
   poolRegistryContract: Contract;
-  poolFactoryContract: Contract;
+  poolFactoryContract: PoolFactory;
 
   constructor() {
     const network = getNetwork(parseInt(`${process.env.CHAIN_ID}`));
