@@ -27,3 +27,4 @@ export const setNewStorageValue = createAsyncAction(
 
 export const setDaiBalance = createStandardAction('SET_DAI_BALANCE')<number>();
 export const setIsAdmin = createStandardAction('SET_IS_ADMIN')<boolean>();
+export const poolDeployed = createStandardAction('POOL_DEPLOYED')<{pool: string, withdraw: string}>();

@@ -100,8 +100,8 @@ export class blockchainContext implements BlockchainContext {
       const writeablePoolRegistryContract = this.poolRegistryContract.connect(this.signer);
       this.poolRegistryContract = writeablePoolRegistryContract;
 
-      const writeablePoolFactoryContract = this.poolFactoryContract.connect(this.signer);
-      this.poolFactoryContract = writeablePoolFactoryContract;
+      // const writeablePoolFactoryContract = this.poolFactoryContract.connect(this.signer);
+      // this.poolFactoryContract = writeablePoolFactoryContract;
     }
 
     return this;

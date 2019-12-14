@@ -12,7 +12,8 @@
     "test": "etherlime test --output=none --timeout 100000 --gas-report=true --runs=999",
     "test-one": "etherlime test test/anglo-rppVault/anglo-rppVault.test.js --output=none --timeout 100000 --gas-report=true --runs=999",
     "test-cov": "etherlime coverage --timeout 100000 --runs=999",
-    "flat": "etherlime flatten ./basic-implementation/CyclicWithdraw.sol"
+    "flat": "etherlime flatten ./basic-implementation/CyclicWithdraw.sol",
+    "remixd": "remixd -s . --remix-ide https://remix.ethereum.org"
   },
   "author": "Linum Labs",
   "license": "MIT",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5",
-    "typescript": "3.7.2"
+    "typescript": "3.7.2",
+    "remixd": "0.1.8-alpha.14"
   }
 }
