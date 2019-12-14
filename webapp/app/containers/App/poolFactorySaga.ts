@@ -24,7 +24,7 @@ function* deployedPoolWatcher() {
 
 function* createPoolSaga(action) {
   const {poolFactoryContract}: BlockchainContext = yield getContext('blockchain');
-  yield call([poolFactoryContract, poolFactoryContract.deployBasicPool()], action.payload)
+  yield call([poolFactoryContract, poolFactoryContract.deployBasicPool], '0x', 'test', 'test')
 }
 
 export default function* poolFactorySaga() {
