@@ -16,6 +16,7 @@ import notificationReducer from 'containers/Notification/reducer';
 export default function createReducer(injectedReducers: Redux.ReducersMapObject = {}): Redux.Reducer<any> {
   return combineReducers({
     notification: notificationReducer,
+    // pools: poolsReducer,
     ...injectedReducers,
   });
 }

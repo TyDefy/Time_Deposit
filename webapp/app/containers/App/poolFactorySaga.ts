@@ -1,5 +1,5 @@
 import { BlockchainContext } from "blockchainContext";
-import { getContext, call, put, spawn, take } from "redux-saga/effects";
+import { getContext, call, put, spawn, take, takeEvery } from "redux-saga/effects";
 import { Log } from "ethers/providers";
 import { poolDeployed, createPool } from "./actions";
 import { eventChannel } from "redux-saga";
@@ -10,7 +10,7 @@ function* deployedPoolWatcher() {
 
   const poolDeployedChannel = eventChannel(emit => {
     const poolDeployedHandler = (pool, withdraw) => emit({pool: pool, withdraw: withdraw} );
-    poolFactoryContract.on(poolFactoryContract.filters.DeployedPool(), poolDeployedHandler);
+    poolFactoryContract.on(poolFactoryContract.filters.DeployedPool(null, null), poolDeployedHandler);
     return () => {
       poolFactoryContract.off('accountsChanged', poolDeployedHandler);
     };
@@ -24,7 +24,13 @@ function* deployedPoolWatcher() {
 
 function* createPoolSaga(action) {
   const {poolFactoryContract}: BlockchainContext = yield getContext('blockchain');
-  yield call([poolFactoryContract, poolFactoryContract.deployBasicPool], '0x', 'test', 'test')
+  try {
+    // TODO Figure out where to populate the withdraw address
+    yield call([poolFactoryContract, poolFactoryContract.deployBasicPool], '0xed266174978Cc3ec95Ae6C28F4e5Dd378B9036b9', 'test', 'test')
+    yield put(createPool.success());
+  } catch (error) {
+    yield put(createPool.failure(error.message));
+  }
 }
 
 export default function* poolFactorySaga() {
@@ -40,7 +46,7 @@ export default function* poolFactorySaga() {
     const deployedPoolLogs: Log[] = yield call([provider, provider.getLogs],deployedPoolEventFilter);
     const parsedLogs = deployedPoolLogs.map(log => poolFactoryContract.interface.parseLog(log).values as {pool: string, withdraw: string});
     for (const log of parsedLogs) {
-      yield put(poolDeployed(log));
+      yield put(poolDeployed({pool: log.pool, withdraw: log.withdraw}));
     };
   } catch (error) {
     console.log('error');
