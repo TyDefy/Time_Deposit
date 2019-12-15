@@ -4,7 +4,9 @@ import { getNetwork } from "ethers/utils";
 import DaiContractAbi from '../../blockchain/build/abis/pDai-abi.json';
 import PoolRegistryContractAbi from '../../blockchain/build/abis/BasicRegistry-abi.json';
 import PoolFactoryContractAbi from '../../blockchain/build/abis/BasicFactory-abi.json';
+import { pDai } from '../../blockchain/contractInterfaces/pDai';
 import { BasicFactory as PoolFactory } from '../../blockchain/contractInterfaces/BasicFactory';
+import { BasicRegistry as PoolRegistry } from '../../blockchain/contractInterfaces/BasicRegistry';
 
 export interface BlockchainContext {
   isMetamaskInstalled: boolean
@@ -17,8 +19,8 @@ export interface BlockchainContext {
   provider: BaseProvider;
   signer?: Signer;
   signerAddress?: string;
-  daiContract: Contract;
-  poolRegistryContract: Contract;
+  daiContract: pDai;
+  poolRegistryContract: PoolRegistry;
   poolFactoryContract: PoolFactory;
   ethAddress?: string;
   enableEthereum();
@@ -35,8 +37,8 @@ export class blockchainContext implements BlockchainContext {
   provider: BaseProvider;
   signer?: Signer;
   ethAddress?: string;
-  daiContract: Contract;
-  poolRegistryContract: Contract;
+  daiContract: pDai;
+  poolRegistryContract: PoolRegistry;
   poolFactoryContract: PoolFactory;
 
   constructor() {
@@ -91,18 +93,21 @@ export class blockchainContext implements BlockchainContext {
     const network = await web3Provider.getNetwork();
     this.chainId = network.chainId;
     this.networkName = network.name;
-    this.approvedNetwork = (this.approvedChainId === this.chainId)
+    this.approvedNetwork = (this.approvedChainId === this.chainId);
     this.signer = web3Provider.getSigner();
 
-    if (this.approvedNetwork) {
+    if (this.approvedNetwork && this.signer) {
+      // @ts-ignore
       const writeableDaiContract = this.daiContract.connect(this.signer);
       this.daiContract = writeableDaiContract;
       
+      // @ts-ignore
       const writeablePoolRegistryContract = this.poolRegistryContract.connect(this.signer);
       this.poolRegistryContract = writeablePoolRegistryContract;
 
-      // const writeablePoolFactoryContract = this.poolFactoryContract.connect(this.signer);
-      // this.poolFactoryContract = writeablePoolFactoryContract;
+      // @ts-ignore
+      const writeablePoolFactoryContract = this.poolFactoryContract.connect(this.signer);
+      this.poolFactoryContract = writeablePoolFactoryContract;
     }
 
     return this;

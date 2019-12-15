@@ -25,7 +25,7 @@ function* deployedPoolWatcher() {
 function* createPoolSaga(action) {
   const {poolFactoryContract}: BlockchainContext = yield getContext('blockchain');
   try {
-    // TODO Figure out where to populate the withdraw address
+    // TODO Figure out how to populate the withdraw address, what to do with the user's period, fee and other parameters
     yield call([poolFactoryContract, poolFactoryContract.deployBasicPool], '0xed266174978Cc3ec95Ae6C28F4e5Dd378B9036b9', 'test', 'test')
     yield put(createPool.success());
   } catch (error) {
