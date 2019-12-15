@@ -69,15 +69,19 @@ const styles = ({ spacing, zIndex, mixins }: Theme) => createStyles({
   },
   navItem: {
     minWidth: 100,
+  },
+  networkNotification: {
+    minWidth: 300,
+    backgroundColor: 'red',
   }
 });
 
 interface OwnProps extends WithStyles<typeof styles> {
   children: React.ReactNode;
   isMetamaskInstalled: boolean,
-  isLoggedIn: boolean,
   ethAddress?: string,
   authorizedNetwork: boolean,
+  approvedNetworkName: string,
   isAdmin: boolean,
   daiBalance?: number,
   connect(): void
@@ -90,12 +94,14 @@ const AppWrapper: React.FunctionComponent<Props> = ({
   classes,
   children,
   isMetamaskInstalled,
-  isLoggedIn,
-  isAdmin,
+  authorizedNetwork,
+  approvedNetworkName,
   ethAddress,
+  isAdmin,
   connect
 }: Props) => {
   const [anchorEl, setAnchorEl] = useState<EventTarget | null>(null);
+  const isLoggedIn = (ethAddress) ? true : false;
   return (
     <div className={classes.body}>
       <AppBar position="fixed" className={classes.appBar} >
@@ -106,7 +112,11 @@ const AppWrapper: React.FunctionComponent<Props> = ({
             </Link>
             <div className={classes.navAccount}>
               <List className={classes.navList}>
-                {isLoggedIn &&
+                {isLoggedIn && !authorizedNetwork &&
+                  <ListItem className={classes.networkNotification}>
+                    <Typography>Select the <strong>{approvedNetworkName}</strong> in metamask</Typography>
+                  </ListItem>}
+                {isLoggedIn && authorizedNetwork &&
                   <>
                     <ListItem button selected={location.pathname === '/'} onClick={() => forwardTo('/')} className={classes.navItem}>
                       <Typography className="navButton">Dashboard</Typography>
@@ -115,7 +125,7 @@ const AppWrapper: React.FunctionComponent<Props> = ({
                       <Typography className="navButton">Portfolio</Typography>
                     </ListItem>
                   </>}
-                {isLoggedIn && isAdmin &&
+                {isLoggedIn && authorizedNetwork && isAdmin &&
                   <ListItem button selected={location.pathname === '/admin/pools'} onClick={() => forwardTo('/admin/pools')} className={classes.navItem}>
                     <Typography className="navButton">Pools</Typography>
                   </ListItem>}
@@ -148,7 +158,7 @@ const AppWrapper: React.FunctionComponent<Props> = ({
                         }}
                         open={Boolean(anchorEl)}
                         onClose={() => setAnchorEl(null)}>
-                        <MenuItem onClick={() => alert('log out')}>Log Out</MenuItem>
+                        <MenuItem>D</MenuItem>
                       </Menu>
                     </>
                   )}

@@ -25,14 +25,13 @@ const styles = ({palette}: Theme) =>
 
 interface OwnProps extends WithStyles<typeof styles> {
   pools: Array<Pool>,
-  createPool(): void,
 }
 
-const PoolListing: React.FunctionComponent<OwnProps> = ({ pools, classes, createPool }: OwnProps) => (
+const PoolListing: React.FunctionComponent<OwnProps> = ({ pools, classes }: OwnProps) => (
   <Container maxWidth='lg'>
     <Grid container direction='row' className={classes.pageHeader}>
       <Typography variant='h3'>Pool Overview</Typography>
-      <Button onClick={() => createPool()}> Create New Pool</Button>
+      <Button onClick={() => forwardTo('/admin/pool/create')}>Create New Pool</Button>
     </Grid>
     <Table>
       <TableHead className={classes.tableHeader}>

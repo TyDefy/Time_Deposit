@@ -43,9 +43,9 @@ interface OwnProps {
 
 export interface StateProps {
   isMetamaskInstalled: boolean,
-  isLoggedIn: boolean,
   ethAddress?: string,
   authorizedNetwork: boolean,
+  approvedNetworkName: string,
   isAdmin: boolean,
   daiBalance?: number,
 }
@@ -91,20 +91,21 @@ const ProtectedRoute: React.FunctionComponent<any> = ({ component: Component, is
 );
 
 const App: React.FunctionComponent<Props> = (props: Props) => {
+  const { isAdmin, ethAddress } = props;
   return (
     <>
       <Notification />
       <TransactionModal />
       <AppWrapper {...props}>
         <Switch>
-          <ProtectedRoute exact path='/admin/pools' component={AdminPoolsOverviewPage} isAuthorized={props.isAdmin} />
-          <ProtectedRoute exact path='/admin/pool/create' component={CreatePool} isAuthorized={props.isAdmin} />
-          <ProtectedRoute exact path='/admin/pool/:id' component={AdminPoolDetailsPage} isAuthorized={props.isAdmin} />
-          <ProtectedRoute exact path='/portfolio' component={PortfolioPage} isAuthorized={props.isLoggedIn}/>
+          <ProtectedRoute exact path='/admin/pools' component={AdminPoolsOverviewPage} isAuthorized={isAdmin} />
+          <ProtectedRoute exact path='/admin/pool/create' component={CreatePool} isAuthorized={isAdmin} />
+          <ProtectedRoute exact path='/admin/pool/:id' component={AdminPoolDetailsPage} isAuthorized={isAdmin} />
+          <ProtectedRoute exact path='/portfolio' component={PortfolioPage} isAuthorized={ethAddress && true}/>
           <Route exact path='/pool/:id' component={PoolDetailsPage} />
           <Route exact path='/' component={HomePage} />
           <Route exact path='/404'>Not Found</Route>
-          <Route exact path='/403'>You are not authorized to view this page. </Route>
+          <Route exact path='/403'>You are not authorized to view this page</Route>
           <Route component={NotFoundRedirect} />
         </Switch>
       </AppWrapper>
