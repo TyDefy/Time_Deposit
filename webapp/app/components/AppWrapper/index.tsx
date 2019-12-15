@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { List, Container, Button, Menu, Avatar, MenuItem, ListItem, Typography } from '@material-ui/core';
+import React from 'react';
+import { List, Container, Button, Avatar, ListItem, Typography } from '@material-ui/core';
 import { createStyles, withStyles, WithStyles, Theme } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Blockies from 'react-blockies';
@@ -97,10 +97,10 @@ const AppWrapper: React.FunctionComponent<Props> = ({
   authorizedNetwork,
   approvedNetworkName,
   ethAddress,
+  daiBalance,
   isAdmin,
   connect
 }: Props) => {
-  const [anchorEl, setAnchorEl] = useState<EventTarget | null>(null);
   const isLoggedIn = (ethAddress) ? true : false;
   return (
     <div className={classes.body}>
@@ -114,7 +114,8 @@ const AppWrapper: React.FunctionComponent<Props> = ({
               <List className={classes.navList}>
                 {isLoggedIn && !authorizedNetwork &&
                   <ListItem className={classes.networkNotification}>
-                    <Typography>Select the <strong>{approvedNetworkName}</strong> in metamask</Typography>
+                    <Typography>Select the <strong>{approvedNetworkName}</strong> in Metamask</Typography>
+                    <Typography>App functionality will be limited to read-only</Typography>
                   </ListItem>}
                 {isLoggedIn && authorizedNetwork &&
                   <>
@@ -123,6 +124,9 @@ const AppWrapper: React.FunctionComponent<Props> = ({
                     </ListItem>
                     <ListItem button selected={location.pathname === '/portfolio'} onClick={() => forwardTo('/portfolio')} className={classes.navItem}>
                       <Typography className="navButton">Portfolio</Typography>
+                    </ListItem>
+                    <ListItem className={classes.navItem}>
+                      <Typography className="navButton">{`${(daiBalance || 0).toFixed(2)} DAI`}</Typography>
                     </ListItem>
                   </>}
                 {isLoggedIn && authorizedNetwork && isAdmin &&
@@ -140,27 +144,9 @@ const AppWrapper: React.FunctionComponent<Props> = ({
                     <Button onClick={() => connect()}>Connect with Metamask</Button>
                   </div>
                 ) : (
-                    <>
-                      <Avatar onClick={(e) => setAnchorEl(e.currentTarget)} className={classes.avatar}>
-                        <Blockies seed={ethAddress || '0x'} size={10} />
-                      </Avatar>
-                      <Menu
-                        id="menu-appbar"
-                        anchorEl={anchorEl as Element}
-                        getContentAnchorEl={null}
-                        anchorOrigin={{
-                          vertical: 'bottom',
-                          horizontal: 'right',
-                        }}
-                        transformOrigin={{
-                          vertical: 'top',
-                          horizontal: 'right',
-                        }}
-                        open={Boolean(anchorEl)}
-                        onClose={() => setAnchorEl(null)}>
-                        <MenuItem>D</MenuItem>
-                      </Menu>
-                    </>
+                    <Avatar className={classes.avatar}>
+                      <Blockies seed={ethAddress || '0x'} size={10} />
+                    </Avatar>
                   )}
             </div>
           </Toolbar>
