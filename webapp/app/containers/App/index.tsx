@@ -56,7 +56,9 @@ export interface DispatchProps {
 
 export interface Pool {
   address: string;
+  withdraw: string;
   name: string;
+  description: string;
   type: string;
   period: number;
   balance: number;
