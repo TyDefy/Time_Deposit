@@ -5,7 +5,7 @@
   "scripts": {
     "start": "etherlime ganache --networkId=1337",
     "start:dev": "run-p start deploy:local",
-    "build": "etherlime compile --runs=999 --exportAbi",
+    "build": "etherlime compile --runs=999 --exportAbi && yarn generate-typings",
     "deploy:local": "etherlime deploy --runs=500",
     "deploy:rinkeby": "etherlime deploy --network=rinkeby --runs=500",
     "deploy:rinkeby:debug": "node --inspect-brk ./node_modules/etherlime/cli.js --timeout 30000 deploy --network=rinkeby --runs=50",
