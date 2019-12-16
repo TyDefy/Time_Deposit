@@ -7,12 +7,17 @@
 import { ContainerActions } from './types';
 import * as AppActions from './actions';
 import { getType } from 'typesafe-actions';
+import { Pool } from '.';
 
-export const initialState = {
+export interface PoolState {
+  [index: string]: Pool;
+}
+
+export const initialState: PoolState = {
 
 };
 
-function poolsReducer(state = initialState, action: ContainerActions) {
+function poolsReducer(state: PoolState = initialState, action: ContainerActions) {
   switch (action.type) {
     case getType(AppActions.poolDeployed): {
       return {
