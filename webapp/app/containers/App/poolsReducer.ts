@@ -9,9 +9,7 @@ import * as AppActions from './actions';
 import { getType } from 'typesafe-actions';
 
 export const initialState = {
-  pools: {
 
-  },
 };
 
 function poolsReducer(state = initialState, action: ContainerActions) {
@@ -19,11 +17,8 @@ function poolsReducer(state = initialState, action: ContainerActions) {
     case getType(AppActions.poolDeployed): {
       return {
         ...state,
-        pools: {
-          ...state.pools,
-          [action.payload.address]: {
-            ...action.payload,
-          } 
+        [action.payload.address]: {
+          ...action.payload,
         }
       }
     }
