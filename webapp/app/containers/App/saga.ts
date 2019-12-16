@@ -5,6 +5,7 @@ import { getType } from "typesafe-actions";
 import { eventChannel } from "redux-saga";
 import { BigNumber, formatEther } from "ethers/utils";
 import poolFactorySaga from "./poolFactorySaga";
+import poolSaga from "./poolSaga";
 
 export function* daiBalanceListener() {
   const { daiContract, ethAddress = '0x' }: BlockchainContext = yield getContext('blockchain');
@@ -116,5 +117,6 @@ function* blockchain() {
 
 export default function* root() {
   yield fork(blockchain);
-  yield fork(poolFactorySaga)
+  yield fork(poolFactorySaga);
+  yield fork(poolSaga);
 }
