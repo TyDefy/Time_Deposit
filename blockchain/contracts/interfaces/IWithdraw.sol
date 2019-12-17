@@ -49,5 +49,9 @@ contract IWithdraw {
 		view
         returns(uint256, uint256);
 
-	function getPenalty() public view returns(address);
+	  function getPenalty() public view returns(address);
+
+    function cantWithdrawInViolation() public view returns(bool);
+
+    function getCycle() public view returns(uint256);
 }
