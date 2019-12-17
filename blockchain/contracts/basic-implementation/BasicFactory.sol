@@ -35,9 +35,9 @@ contract BasicFactory is WhitelistAdminRole {
     )
         public
     {
+        addWhitelistAdmin(_admin);
         collateral_ = _collateral;
         interestCollateral_ = _interestToken;
-        addWhitelistAdmin(_admin);
         registryInstance_ = BasicRegistry(_registry);
     }
 

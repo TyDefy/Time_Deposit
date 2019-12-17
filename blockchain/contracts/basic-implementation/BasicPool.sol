@@ -1,11 +1,11 @@
 pragma solidity 0.5.10;
 
+import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
 import { IWithdraw } from "../interfaces/IWithdraw.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 import { ICToken } from "../interfaces/ICToken.sol";
 
-contract BasicPool {
-    address internal admin_;
+contract BasicPool is WhitelistAdminRole {
     // Instance of the withdraw library 
     IWithdraw internal withdrawInstance_;
     // Instance of the collateral token (DAI) that this
@@ -29,14 +29,6 @@ contract BasicPool {
     // A mapping of all active suers
     mapping(address => UserInfo) internal users_;
 
-    modifier onlyAdmin() {
-        require(
-            msg.sender == admin_,
-            "Access denided - incorrect permissions"
-        );
-        _;
-    }
-
     modifier mutex() {
         require(
             lock_,
@@ -55,7 +47,7 @@ contract BasicPool {
     )
         public
     {
-        admin_ = _admin;
+        addWhitelistAdmin(_admin);
         withdrawInstance_ = IWithdraw(_withdraw);
         collateralInstance_ = IERC20(_collateralToken);
         cTokenInstance_ = ICToken(_cToken);
@@ -75,7 +67,6 @@ contract BasicPool {
             ) >= _amount,
             "Contract has not been approved as spender"
         );
-
         require(
             collateralInstance_.transferFrom(
                 msg.sender,
@@ -84,7 +75,6 @@ contract BasicPool {
             ),
             "Transfering collateral failed"
         );
-// move to constructor
         require(
             collateralInstance_.approve(
                 address(cTokenInstance_),
