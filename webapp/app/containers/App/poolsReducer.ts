@@ -24,6 +24,7 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         ...state,
         [action.payload.address]: {
           ...action.payload,
+          type: 'cDAI', // TODO: Get this from the action payload
           transactions: [],
         }
       }

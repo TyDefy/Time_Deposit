@@ -25,7 +25,9 @@ export const poolDeployed = createStandardAction('POOL_DEPLOYED')<{
   address: string, 
   withdraw: string,
   name: string,
-  description: string
+  description: string,
+  // TODO: Add pool type here
+  period: number,
 }>();
 
 export const createPool = createAsyncAction(
