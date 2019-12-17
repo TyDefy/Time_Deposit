@@ -36,7 +36,9 @@ type Props = StateProps & DispatchProps & OwnProps;
 
 const poolDetails: PoolDetails = {
   address: '0x1',
+  withdraw: '0x',
   name: 'Test',
+  description: 'test description',
   period: 3,
   interestRate: 0.07,
   type: 'cDAI',

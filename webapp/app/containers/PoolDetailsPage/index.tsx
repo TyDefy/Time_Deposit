@@ -42,7 +42,9 @@ export interface UserPoolDetails extends Pool {
 
 const pool: UserPoolDetails = {
   address: '0x1',
+  withdraw: '0xWithdraw',
   name: 'Test',
+  description: 'test description',
   period: 3,
   interestRate: 0.07,
   type: 'cDAI',

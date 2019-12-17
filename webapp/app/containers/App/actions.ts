@@ -21,7 +21,12 @@ export const setWeb3 = createStandardAction('BLOCKCHAIN_READY')<{
 
 export const setDaiBalance = createStandardAction('SET_DAI_BALANCE')<number>();
 export const setIsAdmin = createStandardAction('SET_IS_ADMIN')<boolean>();
-export const poolDeployed = createStandardAction('POOL_DEPLOYED')<{pool: string, withdraw: string}>();
+export const poolDeployed = createStandardAction('POOL_DEPLOYED')<{
+  address: string, 
+  withdraw: string,
+  name: string,
+  description: string
+}>();
 
 export const createPool = createAsyncAction(
   '@TX_REQUEST/CREATE_POOL',
