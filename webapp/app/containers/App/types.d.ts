@@ -2,10 +2,6 @@ import { ActionType } from 'typesafe-actions';
 import * as actions from './actions';
 import { ApplicationRootState } from 'types';
 
-enum UserType {
-
-}
-
 /* --- STATE --- */
 interface AppState {
   isMetamaskInstalled: boolean;
@@ -27,4 +23,4 @@ type RootState = ApplicationRootState;
 type ContainerState = AppState;
 type ContainerActions = AppActions;
 
-export { RootState, ContainerState, ContainerActions, UserType };
+export { RootState, ContainerState, ContainerActions };

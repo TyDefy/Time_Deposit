@@ -33,7 +33,7 @@ import AdminPoolsOverviewPage from 'containers/AdminPoolsOverviewPage';
 import TransactionModal from 'containers/TransactionModal';
 import AdminPoolDetailsPage from 'containers/AdminPoolDetailsPage';
 import CreatePool from 'containers/CreatePool';
-import PoolDetailsPage from 'containers/PoolDetailsPage';
+import PoolDetailsPage, { Transaction } from 'containers/PoolDetailsPage';
 import PortfolioPage from 'containers/PortfolioPage';
 
 interface OwnProps {
@@ -64,11 +64,11 @@ export interface Pool {
   balance: number;
   participants: number;
   interestRate: number;
-  description: string;
   contribution?: number;
   interestAccrued?: number;
   availableInterest?: number;
   daysUntilAccess?: number;
+  transactions?: Array<Transaction>;
 }
 
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;
