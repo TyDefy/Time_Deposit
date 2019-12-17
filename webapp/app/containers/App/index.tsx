@@ -64,6 +64,7 @@ export interface Pool {
   balance: number;
   participants: number;
   interestRate: number;
+  description: string;
   contribution?: number;
   interestAccrued?: number;
   availableInterest?: number;

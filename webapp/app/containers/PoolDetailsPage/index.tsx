@@ -53,6 +53,7 @@ const pool: UserPoolDetails = {
   availableInterest: 0,
   interestAccrued: 10,
   contribution: 50,
+  description: "",
   transactions: [
     { address: '0x2', time: new Date(), type: 'Contribute', amount: 1 },
     { address: '0x3', time: new Date(), type: 'Contribute', amount: 1 },
