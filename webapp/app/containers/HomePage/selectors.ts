@@ -15,7 +15,7 @@ const selectPools = createSelector((state: RootState) => state.pools, selectEthA
     participants: new Set(p.transactions?.map(t => t.address)).size,
     contribution: ethAddress ? 
       p.transactions?.filter(t => t.address === ethAddress)
-      .reduce((contribution, t) => t.type === 'Contribute' ? contribution += t.amount : contribution -= t.amount,0) : 0,
+      .reduce((contribution, t) => t.type === 'Contribute' ? contribution += t.amount : contribution -= t.amount, 0) : 0,
   }))
 ); 
 const selectPoolsBalance = createSelector(selectPools, allPools => allPools.reduce((totalBalance, pool) => totalBalance += pool.balance, 0))
