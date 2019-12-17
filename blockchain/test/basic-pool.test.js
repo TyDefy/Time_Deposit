@@ -64,25 +64,28 @@ describe("Basic Pool Tests", async () => {
             cDaiInstance.contract.address,
         );
 
+        // Minting admin Dai
         await pDaiInstance.from(admin).mint();
-        // await pDaiInstance.from(admin).transfer(
-        //     cDaiInstance.contract.address,
-        //     test_settings.basicPool.deposit
-        // );
+        // Minting user 1 dai
         await pDaiInstance.from(user1).mint();
+        // Approving cDai as a spender
         await pDaiInstance.from(user1).approve(
             cDaiInstance.contract.address,
             test_settings.basicPool.deposit
         );
+        // Approving dai as a spender
         await cDaiInstance.from(user1).approve(
             pDaiInstance.contract.address,
             test_settings.basicPool.deposit
         );
+        // Minting dai for user 2
         await pDaiInstance.from(user2).mint();
+        // Approving cDai as a spender
         await pDaiInstance.from(user2).approve(
             cDaiInstance.contract.address,
             test_settings.basicPool.deposit
         );
+        // Approving dai as a spender
         await cDaiInstance.from(user2).approve(
             pDaiInstance.contract.address,
             test_settings.basicPool.deposit
@@ -211,10 +214,12 @@ describe("Basic Pool Tests", async () => {
             let userBalanceDaiBeforeDeposit = await pDaiInstance.balanceOf(user1.signer.address);
             let poolBalanceCdaiBeforeDeposit = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
             let cTokenBalanceDaiBeforeDeposit = await pDaiInstance.balanceOf(cDaiInstance.contract.address);
+            
             await pDaiInstance.from(user1).approve(
-                basicPoolInstance.contract.address,
+                cDaiInstance.contract.address,
                 test_settings.basicPool.deposit
             );
+
             let allowance = await pDaiInstance.from(user1).allowance(
                 user1.signer.address,
                 basicPoolInstance.contract.address
@@ -250,25 +255,29 @@ describe("Basic Pool Tests", async () => {
             // Pool cDai balance
             assert.equal(
                 poolBalanceCdaiBeforeDeposit.toString(),
-                test_settings.basicPool.deposit,
+                0,
                 "Pool has pre-existing dai balance"
             );
             // Allowance is correct
             assert.equal(
                 allowance.toString(),
-                test_settings.basicPool.deposit,
-                "Pool has pre-existing dai balance"
+                test_settings.basicPool.deposit.toString(),
+                "User cDai allowance is incorrect"
             );
             // Balance of cToken in Dai
             assert.equal(
                 cTokenBalanceDaiBeforeDeposit.toString(),
                 0,
-                "Pool has pre-existing dai balance"
+                "cDai contract has dai balance before deposit"
             );
+
+            console.log("0");
 
             await basicPoolInstance.from(user1).deposit(
                 test_settings.basicPool.deposit
             );
+
+            console.log("0");
 
             let userInfoAfterDeposit = await basicPoolInstance.getUserInfo(user1.signer.address);
             let userBalanceInDaiAfterDeposit = await pDaiInstance.balanceOf(user1.signer.address);
@@ -644,8 +653,6 @@ describe("Basic Pool Tests", async () => {
             )).wait();
             await basicPoolInstance.getInterestAmount(user1.signer.address);
         });
-
-        
     });
 
     describe("Supporting Functionality", async () => {
