@@ -28,7 +28,6 @@ const styles = ({ palette }: Theme) =>
       display: "inline-block",
       float: "left",
       padding: 8,
-      textTransform: "uppercase"
     },
     period: {
       verticalAlign: "top",
@@ -39,15 +38,22 @@ const styles = ({ palette }: Theme) =>
     },
     currentInterest: {
       verticalAlign: "top",
+      
       display: "inline-block",
       float: "right",
       padding: 8,
       margin: 20
     },
+    percentageInterest: {
+
+    },
     label:{
+      fontSize: '1em',
+      opacity: '75%',
       margin: "12px 8px 0px 12px"
     },
     value: {
+      fontSize: '1.5em',
       margin: "8px 8px 0px 12px"
     }
 
@@ -76,7 +82,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         <Grid item xs={4}><Typography variant='h3' className={classes.poolName}>{name}</Typography></Grid>
         <Grid item xs={4}><Chip className={classes.period} label={`${period} month(s)`} /></Grid>
         <Grid item xs={4}>
-          <Typography className={classes.currentInterest}>Current Interest: <strong>{`${(interestRate * 100).toFixed(2)} %`}</strong></Typography>
+          <Typography className={classes.currentInterest}>Current Interest: <strong className={classes.percentageInterest}>{`${(interestRate * 100).toFixed(2)} %`}</strong></Typography>
         </Grid>
       </Grid>
       <Grid container direction='row' spacing={0} className={classes.poolDetailsRow}>
@@ -113,7 +119,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
       <Table>
         <TableHead className={classes.tableHeader}>
           <TableRow>
-            <TableCell>Participant</TableCell>
+            <TableCell>Transaction ID</TableCell>
             <TableCell>Time</TableCell>
             <TableCell>Type</TableCell>
             <TableCell>Amount</TableCell>
