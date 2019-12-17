@@ -11,13 +11,46 @@ import { UserPoolDetails } from 'containers/PoolDetailsPage';
 
 const styles = ({ palette }: Theme) =>
   createStyles({
+    poolDetailsHeaderRow: {
+      justifyContent: 'space-around',
+      width: '100%'
+    },
     poolDetailsRow: {
-      justifyContent: 'space-around'
+      justifyContent: 'space-around',
+      width: '60%'
     },
     tableHeader: {
       backgroundColor: 'lightgrey',
       borderTop: `${palette.primary.main} 2px solid`,
     },
+    poolName: {
+      verticalAlign: "top",
+      display: "inline-block",
+      float: "left",
+      padding: 8,
+      textTransform: "uppercase"
+    },
+    period: {
+      verticalAlign: "top",
+      display: "inline-block",
+      float: "left",
+      padding: 8,
+      margin: 20
+    },
+    currentInterest: {
+      verticalAlign: "top",
+      display: "inline-block",
+      float: "right",
+      padding: 8,
+      margin: 20
+    },
+    label:{
+      margin: "12px 8px 0px 12px"
+    },
+    value: {
+      margin: "8px 8px 0px 12px"
+    }
+
   });
 
 interface OwnProps extends WithStyles<typeof styles>, UserPoolDetails { 
@@ -39,41 +72,44 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
   showModal,
 }: OwnProps) => (
     <Container maxWidth='lg'>
-      <Grid container direction='row' className={classes.poolDetailsRow}>
-        <Grid item><Typography variant='h3'>{name}</Typography></Grid>
-        <Grid item><Chip label={`${period} month(s)`} /></Grid>
-        <Grid item direction='row'>
-          <Typography>Current Interest: <strong>{`${(interestRate * 100).toFixed(2)} %`}</strong></Typography>
+      <Grid container direction='row' className={classes.poolDetailsHeaderRow}>
+        <Grid item xs={4}><Typography variant='h3' className={classes.poolName}>{name}</Typography></Grid>
+        <Grid item xs={4}><Chip className={classes.period} label={`${period} month(s)`} /></Grid>
+        <Grid item xs={4}>
+          <Typography className={classes.currentInterest}>Current Interest: <strong>{`${(interestRate * 100).toFixed(2)} %`}</strong></Typography>
         </Grid>
       </Grid>
-      <Grid container direction='row' className={classes.poolDetailsRow}>
-        <Grid item>
-          <Typography>Currency Type</Typography>
-          <Typography>{type}</Typography>
+      <Grid container direction='row' spacing={0} className={classes.poolDetailsRow}>
+        <Grid item xs={4}>
+          <Typography className={classes.label}>Currency Type</Typography>
+          <Typography className={classes.value}>{type}</Typography>
         </Grid>
-        <Grid item>
-          <Typography>Pool Total</Typography>
-          <Typography>{balance.toFixed(2)}</Typography>
+        <Grid item xs={4}>
+          <Typography className={classes.label}>Pool Total</Typography>
+          <Typography className={classes.value}>{balance.toFixed(2)}</Typography>
         </Grid>
-        <Grid item>
-          <Typography>Pool Participants</Typography>
-          <Typography>{participants}</Typography>
-        </Grid>
-      </Grid>
-      <Grid container direction='row' className={classes.poolDetailsRow}>
-        <Grid item>
-          <Typography>Your contribution</Typography>
-          <Typography>{contribution}</Typography>
-        </Grid>
-        <Grid item>
-          <Typography>Your Interest</Typography>
-          <Typography>{interestAccrued.toFixed(2)}</Typography>
-        </Grid>
-        <Grid item>
-          <Typography>Available Interest</Typography>
-          <Typography>{availableInterest}</Typography>
+        <Grid item xs={4}>
+          <Typography className={classes.label}>Pool Participants</Typography>
+          <Typography className={classes.value}>{participants}</Typography>
         </Grid>
       </Grid>
+      <br/>
+      <Grid container direction='row' className={classes.poolDetailsRow}>
+        <Grid item xs={4}>
+          <Typography  className={classes.label}>Your contribution</Typography>
+          <Typography  className={classes.value}>{contribution}</Typography>
+        </Grid>
+        <Grid item xs={4}>
+          <Typography  className={classes.label}>Your Interest</Typography>
+          <Typography  className={classes.value}>{interestAccrued.toFixed(2)}</Typography>
+        </Grid>
+        <Grid item xs={4}>
+          <Typography  className={classes.label}>Available Interest</Typography>
+          <Typography  className={classes.value}>{availableInterest}</Typography>
+        </Grid>
+      </Grid>
+      <br/>
+
       <Table>
         <TableHead className={classes.tableHeader}>
           <TableRow>
