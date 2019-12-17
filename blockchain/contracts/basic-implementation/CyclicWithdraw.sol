@@ -3,7 +3,7 @@ pragma solidity 0.5.10;
 import { IWithdraw } from "../interfaces/IWithdraw.sol";
 import { IPenalty } from "../interfaces/IPenalty.sol";
 
-contract CyclicWithdraw is IWithdraw, WhitelistAdminRole {
+contract CyclicWithdraw is IWithdraw {
     // How long each user must wait to withdraw leggaly again.
     uint256 internal cycleLength_;
     // Withdraw control for pool
