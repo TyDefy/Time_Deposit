@@ -65,10 +65,10 @@ describe("Basic Pool Tests", async () => {
         );
 
         await pDaiInstance.from(admin).mint();
-        await pDaiInstance.from(admin).transfer(
-            cDaiInstance.contract.address,
-            test_settings.basicPool.deposit
-        );
+        // await pDaiInstance.from(admin).transfer(
+        //     cDaiInstance.contract.address,
+        //     test_settings.basicPool.deposit
+        // );
         await pDaiInstance.from(user1).mint();
         await pDaiInstance.from(user1).approve(
             cDaiInstance.contract.address,
@@ -122,35 +122,86 @@ describe("Basic Pool Tests", async () => {
             let userBalanceBefore = await cDaiInstance.balanceOf(user1.signer.address);
             let userDaiBalanceBefore = await pDaiInstance.balanceOf(user1.signer.address);
             let pcTokenBalanceInDaiBefore = await pDaiInstance.balanceOf(cDaiInstance.contract.address);
+            
             let mintTx = await(await cDaiInstance.from(user1).mint(
                 test_settings.basicPool.deposit
             )).wait();
+
             let userBalanceAfterMint = await cDaiInstance.balanceOf(user1.signer.address);
             let userDaiBalanceAfterMint = await pDaiInstance.balanceOf(user1.signer.address);
             let pcTokenBalanceInDai = await pDaiInstance.balanceOf(cDaiInstance.contract.address);
             
-            console.log("User cDai balance:\t" + userBalanceBefore.toString());
-            console.log("User Dai balance:\t" + userDaiBalanceBefore.toString());
-            console.log("cDai balance in Dai:\t" + pcTokenBalanceInDaiBefore.toString());
-            console.log(">>> Mint <<<");
-            console.log("Minted cDai:\t\t" + mintTx.events[0].args.value.toString());
-            console.log("Collateral spent:\t" + mintTx.events[1].args.value.toString());
-            console.log("User cDai balance:\t" + userBalanceAfterMint.toString());
-            console.log("User dai balance:\t" + userDaiBalanceAfterMint.toString())
-            console.log("cDai balance in Dai:\t" + pcTokenBalanceInDai.toString())
+            // Before mint value checks
+            assert.equal(
+                userBalanceBefore.toString(),
+                0,
+                "User has cDai balance before minting"
+            );
+            assert.equal(
+                userDaiBalanceBefore.toString(),
+                test_settings.pDaiSettings.mintAmount.toString(),
+                "User has incorrect dai balance"
+            );
+            assert.equal(
+                pcTokenBalanceInDaiBefore.toString(),
+                0,
+                "cDai contract has dai balance before mint"
+            );
+            // After mint value checks
+            assert.equal(
+                mintTx.events[0].args.value.toString(),
+                test_settings.pcTokenSettings.mintAmount.toString(),
+                "User has incorrect cDai balance after minting"
+            );
+            assert.equal(
+                mintTx.events[1].args.value.toString(),
+                test_settings.basicPool.deposit.toString(),
+                "Event and deposit amount differ after minting"
+            );
+            assert.equal(
+                userBalanceAfterMint.toString(),
+                test_settings.pcTokenSettings.mintAmount.toString(),
+                "User has incorrect cDai balance after minting"
+            );
+            assert.equal(
+                userDaiBalanceAfterMint.toString(),
+                test_settings.pDaiSettings.mintAmountMinusDeposit.toString(),
+                "User has incorrect dai balance after minting"
+            );
+            assert.equal(
+                pcTokenBalanceInDai.toString(),
+                test_settings.basicPool.deposit.toString(),
+                "User has incorrect dai balance after minting"
+            );
 
             let print = await(await cDaiInstance.from(user1).redeem(
                 userBalanceAfterMint)
             ).wait();
+
             let userBalanceAfterRedeem = await cDaiInstance.balanceOf(user1.signer.address);
             let userDaiBalanceAfterRedeem = await pDaiInstance.balanceOf(user1.signer.address);
             let pcTokenBalanceInDaiAfter = await pDaiInstance.balanceOf(cDaiInstance.contract.address);
 
-            console.log(">>> Redeem <<<");
-            console.log("User cDai balance:\t" + userBalanceAfterRedeem.toString());
-            console.log("User dai balance:\t" + userDaiBalanceAfterRedeem.toString());
-            console.log("User redeem amount:\t" + print.events[1].args.value.toString());
-            console.log("cDai balance in dai:\t" + pcTokenBalanceInDaiAfter.toString())
+            assert.equal(
+                userBalanceAfterRedeem.toString(),
+                0,
+                "User has incorrect cDai balance after redeem"
+            );
+            assert.equal(
+                userDaiBalanceAfterRedeem.toString(),
+                test_settings.pDaiSettings.mintAmount.toString(),
+                "User has incorrect dai balance after redeem"
+            );
+            assert.equal(
+                print.events[1].args.value.toString(),
+                test_settings.basicPool.deposit.toString(),
+                "User has been redeemed the incorrect amount"
+            );
+            assert.equal(
+                pcTokenBalanceInDaiAfter.toString(),
+                0,
+                "cDai contract has a balance in dai after redeem"
+            );
         });
     });
 
