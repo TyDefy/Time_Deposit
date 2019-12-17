@@ -3,6 +3,7 @@ pragma solidity 0.5.10;
 import { BasicRegistry } from "./BasicRegistry.sol";
 import { BasicPool } from "./BasicPool.sol";
 import { CyclicWithdraw } from "./CyclicWithdraw.sol";
+import { IWithdraw } from "../interfaces/IWithdraw.sol";
 import { BasicPenalty } from "./BasicPenalty.sol";
 import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
 
@@ -24,7 +25,8 @@ contract BasicFactory is WhitelistAdminRole {
         address indexed pool,
         address indexed withdraw,
         string name,
-        string description
+        string description,
+        uint256 cycleLength
     );
 
     constructor(
@@ -68,7 +70,9 @@ contract BasicFactory is WhitelistAdminRole {
             "Pool registration falied"
         );
 
-        emit DeployedPool(address(newPool), _withdraw, _poolName, _poolDescription);
+        uint256 cycleLength = IWithdraw(_withdraw).getCycle();
+
+        emit DeployedPool(address(newPool), _withdraw, _poolName, _poolDescription, cycleLength);
 
         return(address(newPool));
     }
