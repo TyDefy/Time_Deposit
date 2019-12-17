@@ -74,9 +74,11 @@ contract pcToken is ICToken, ERC20 {
         //     "User has insuficient balance"
         // );
 
-        uint tokenAmount = redeemTokens/exchangeRateCurrent();
+        // plus 1 becuse of math witchcraft
+        uint tokenAmount = (redeemTokens*exchangeRateCurrent())/10**28 + 1;
 
-        balances[msg.sender] = balances[msg.sender].sub(tokenAmount);
+        // balances[msg.sender] = balances[msg.sender].sub(tokenAmount);
+        // totalSupply_.sub(tokenAmount);
 
         require(
             collateralInstance_.transfer(
@@ -85,12 +87,10 @@ contract pcToken is ICToken, ERC20 {
             ),
             "Transerfer failed"
         );
-
-        // totalSupply_.sub(tokenAmount);
         
         emit Transfer(address(this), msg.sender, tokenAmount);
 
-        return tokenAmount;
+        return 0;
     }
 
     function redeemUnderlying(uint redeemAmount) public returns(uint) {

@@ -232,21 +232,43 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     function withdrawInterest() public killSwitch() {
-        // uint256 penaltyRewardInCdai  = ((users_[msg.sender].balance*10**18)/totalCCollateral_
-        //     )/10**18*penaltyPot_; 
-
-        // uint256 penaltyPotReward = (
+        // uint256 penaltyRewardInCdai  = (
         //         (users_[msg.sender].balance*10**18)/totalCCollateral_
-        //     )/10**18*penaltyPot_;
+        //     )/10**18*penaltyPot_; 
             
-        // uint256 interestEarned = users_[msg.sender].balance - ((
+        // uint256 interestEarnedInCdai = users_[msg.sender].balance - ((
         //         users_[msg.sender].collateralInvested*10**18
         //     )/cTokenInstance_.exchangeRateCurrent()
         // );
-        // uint256 reward = penaltyPotReward + interestEarned;
+        // uint256 rewardInCdai = penaltyRewardInCdai + interestEarnedInCdai;
+
+        // totalCCollateral_ -= rewardInCdai;
+        // users_[msg.sender].collateralInvested -= _amount;
+        // users_[msg.sender].balance -= rewardInCdai;
+        // users_[msg.sender].lastWtihdraw = now;
+
+        // uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
+        // uint256 balanceBeforeInCdai = cTokenInstance_.balanceOf(address(this));
+
+        // require(
+        //     cTokenInstance_.redeem(withdrawAmount) == 0,
+        //     "Interest collateral transfer failed"
+        // );
+
+        // uint256 balanceAfter = collateralInstance_.balanceOf(address(this));
+        // uint256 balanceAfterInCdai = cTokenInstance_.balanceOf(address(this));
+        // uint256 rewardInDai = balanceAfter - balanceBefore;
+
+        // require(
+        //     collateralInstance_.transfer(
+        //         msg.sender,
+        //         rewardInDai
+        //     ),
+        //     "Collateral transfer failed"
+        // );
     }
 
-    function withdraw() public {
+    function finalWithdraw() public killSwitch() {
         // Ensureing this can only be called once contract is killed
         require(
             !isAlive_,
@@ -255,7 +277,7 @@ contract BasicPool is WhitelistAdminRole {
         // Withdraw full balance 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
         uint256 balanceBeforeInCdai = cTokenInstance_.balanceOf(address(this));
-        uint256 fullUserBalance = users_[msg.sender].collateralInvested;
+        uint256 fullUserBalance = users_[msg.sender].collateralInvested; //TODO add penalty pot portion
 
         require(
             cTokenInstance_.redeemUnderlying(
@@ -266,7 +288,6 @@ contract BasicPool is WhitelistAdminRole {
 
         uint256 balanceAfter = collateralInstance_.balanceOf(address(this));
         uint256 balanceAfterInCdai = cTokenInstance_.balanceOf(address(this));
-
         uint256 cDaiBurnt = balanceBeforeInCdai - balanceAfterInCdai;
         uint256 daiRecived = balanceAfter - balanceBefore;
         
@@ -289,6 +310,8 @@ contract BasicPool is WhitelistAdminRole {
             0
         );
     }
+
+    // View functions
 
     function getInterestAmount(address _user) public returns(uint256) {
         uint256 penaltyPotReward = (
