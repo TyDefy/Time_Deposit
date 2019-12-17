@@ -15,7 +15,7 @@ describe("Basic Pool Tests", async () => {
     let admin = accounts[2];
     let user1 = accounts[3];
     let user2 = accounts[4];
-    let deployer = new etherlime.EtherlimeGanacheDeployer(deployerInsecure.secretKey);;
+    let deployer = new etherlime.EtherlimeGanacheDeployer(deployerInsecure.secretKey);
     
     let basicPoolInstance, 
         cyclicWithdrawInstance, 
@@ -116,6 +116,41 @@ describe("Basic Pool Tests", async () => {
                 mintTx.events[0].args.value.toString(),
                 "User balance incorrect after mint"
             );
+        });
+
+        it("Redeem token", async () => {
+            let userBalanceBefore = await cDaiInstance.balanceOf(user1.signer.address);
+            let userDaiBalanceBefore = await pDaiInstance.balanceOf(user1.signer.address);
+            let pcTokenBalanceInDaiBefore = await pDaiInstance.balanceOf(cDaiInstance.contract.address);
+            let mintTx = await(await cDaiInstance.from(user1).mint(
+                test_settings.basicPool.deposit
+            )).wait();
+            let userBalanceAfterMint = await cDaiInstance.balanceOf(user1.signer.address);
+            let userDaiBalanceAfterMint = await pDaiInstance.balanceOf(user1.signer.address);
+            let pcTokenBalanceInDai = await pDaiInstance.balanceOf(cDaiInstance.contract.address);
+            
+            console.log("User cDai balance:\t" + userBalanceBefore.toString());
+            console.log("User Dai balance:\t" + userDaiBalanceBefore.toString());
+            console.log("cDai balance in Dai:\t" + pcTokenBalanceInDaiBefore.toString());
+            console.log(">>> Mint <<<");
+            console.log("Minted cDai:\t\t" + mintTx.events[0].args.value.toString());
+            console.log("Collateral spent:\t" + mintTx.events[1].args.value.toString());
+            console.log("User cDai balance:\t" + userBalanceAfterMint.toString());
+            console.log("User dai balance:\t" + userDaiBalanceAfterMint.toString())
+            console.log("cDai balance in Dai:\t" + pcTokenBalanceInDai.toString())
+
+            let print = await(await cDaiInstance.from(user1).redeem(
+                userBalanceAfterMint)
+            ).wait();
+            let userBalanceAfterRedeem = await cDaiInstance.balanceOf(user1.signer.address);
+            let userDaiBalanceAfterRedeem = await pDaiInstance.balanceOf(user1.signer.address);
+            let pcTokenBalanceInDaiAfter = await pDaiInstance.balanceOf(cDaiInstance.contract.address);
+
+            console.log(">>> Redeem <<<");
+            console.log("User cDai balance:\t" + userBalanceAfterRedeem.toString());
+            console.log("User dai balance:\t" + userDaiBalanceAfterRedeem.toString());
+            console.log("User redeem amount:\t" + print.events[1].args.value.toString());
+            console.log("cDai balance in dai:\t" + pcTokenBalanceInDaiAfter.toString())
         });
     });
 
