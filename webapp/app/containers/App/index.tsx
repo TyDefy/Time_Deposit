@@ -103,7 +103,7 @@ const App: React.FunctionComponent<Props> = (props: Props) => {
           <ProtectedRoute exact path='/admin/pools' component={AdminPoolsOverviewPage} isAuthorized={isAdmin} />
           <ProtectedRoute exact path='/admin/pool/create' component={CreatePool} isAuthorized={isAdmin} />
           <ProtectedRoute exact path='/admin/pool/:id' component={AdminPoolDetailsPage} isAuthorized={isAdmin} />
-          <ProtectedRoute exact path='/portfolio' component={PortfolioPage} isAuthorized={ethAddress && true}/>
+          <ProtectedRoute exact path='/portfolio' component={PortfolioPage} isAuthorized={ethAddress}/>
           <Route exact path='/pool/:id' component={PoolDetailsPage} />
           <Route exact path='/' component={HomePage} />
           <Route exact path='/404'>Not Found</Route>

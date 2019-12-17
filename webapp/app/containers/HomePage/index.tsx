@@ -19,8 +19,8 @@ interface DispatchProps {
 }
 
 export interface StateProps {
-  // pools: Array<Pool>,
-  // poolsBalance: number,
+  pools: Array<Pool>,
+  poolsBalance: number,
 }
 
 type Props = StateProps & DispatchProps & OwnProps;
