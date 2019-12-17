@@ -527,6 +527,10 @@ describe("Basic Pool Tests", async () => {
             console.log("Pool cDai balance:\t" + poolCdaiBalanceAfter.toString());
         });
 
+        it("💵 Can withdraw (with penalty and fee)", async () => {
+
+        });
+
         it("🚫 Negative testing withdraw", async () => {
             //TODO if expired 
             //TODO if disabled they cannot withdraw
@@ -552,13 +556,10 @@ describe("Basic Pool Tests", async () => {
             let tx = await(await basicPoolInstance.from(user2).withdraw(
                 test_settings.basicPool.deposit
             )).wait();
-            let result = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
-            console.log(result);
+            await basicPoolInstance.getInterestAmount(user1.signer.address);
         });
 
-        it("", async () => {
-
-        });
+        
     });
 
     describe("Supporting Functionality", async () => {
@@ -664,7 +665,7 @@ describe("Basic Pool Tests", async () => {
             );
         });
 
-        it("", async () => {
+        it("Get interest", async () => {
 
         });
 

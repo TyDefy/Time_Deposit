@@ -22,6 +22,8 @@ contract BasicPool is WhitelistAdminRole {
     uint256 internal totalCCollateral_;
     // The amount of cToken allocated to the penalty pool
     uint256 internal penaltyPot_;
+    // 
+    bool internal acceptingDeposits_;
 
     // struct of all user withdraw information
     struct UserInfo {
@@ -43,6 +45,26 @@ contract BasicPool is WhitelistAdminRole {
         lock_ = true;
     }
 
+    modifier closed() {
+        require(
+            acceptingDeposits_,
+            "This pool is no longer accepting deposits"
+        );
+        _;
+    }
+
+    event Deposit(
+        address indexed user,
+        uint256 amountInCollateral,
+        uint256 amountInInterestEarning
+    );
+    event Withdraw(
+        address indexed user,
+        uint256 amount,
+        uint256 penalty
+    );
+    event WithdrawInterest();
+
     constructor(
         address _admin,
         address _withdraw,
@@ -61,13 +83,18 @@ contract BasicPool is WhitelistAdminRole {
         feePercentage_ = _fee;
     }
 
+    function closePool(bool _isOpen) public onlyWhitelistAdmin() {
+        acceptingDeposits_ = _isOpen;
+    }
+    
+
     /**
       * @notice Allows a user to deposit raw collateral (DAI) into
       *         the contract, where it will then be converted into
       *         the interest earning asset (cDAI)
       * @param  _amount the amount of the raw token they  are depositng
       */
-    function deposit(uint256 _amount) public {
+    function deposit(uint256 _amount) public closed() {
         require(
             collateralInstance_.allowance(
                 msg.sender,
@@ -109,7 +136,12 @@ contract BasicPool is WhitelistAdminRole {
         if(users_[msg.sender].lastWtihdraw == 0) {
             users_[msg.sender].lastWtihdraw = now;
         }
-        //TODO emit
+        
+        emit Deposit(
+            msg.sender,
+            _amount,
+            mintedTokens
+        );
     }
 
     function withdraw(uint256 _amount) public {
@@ -163,6 +195,11 @@ contract BasicPool is WhitelistAdminRole {
         uint256 cDaiBurnt = balanceBeforeInCdai - balanceAfterInCdai;
         uint256 daiRecived = balanceAfter - balanceBefore;
 
+        totalCCollateral_ -= cDaiBurnt;
+        users_[msg.sender].collateralInvested -= _amount;
+        users_[msg.sender].balance -= cDaiBurnt;
+        users_[msg.sender].lastWtihdraw = now;
+
         require(
             collateralInstance_.transfer(
                 msg.sender,
@@ -171,10 +208,11 @@ contract BasicPool is WhitelistAdminRole {
             "Collateral transfer failed"
         );
 
-        totalCCollateral_ -= cDaiBurnt;
-        users_[msg.sender].collateralInvested -= _amount;
-        users_[msg.sender].balance -= cDaiBurnt;
-        users_[msg.sender].lastWtihdraw = now;
+        emit Withdraw(
+            msg.sender,
+            withdrawAmount,
+            penaltyAmount
+        );
     }
 
     function canWithdraw(
