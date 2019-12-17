@@ -27,22 +27,21 @@ const styles = ({ palette }: Theme) =>
       verticalAlign: "top",
       display: "inline-block",
       float: "left",
-      padding: 8,
+      margin: "20px 0 0 8px"
     },
     period: {
       verticalAlign: "top",
       display: "inline-block",
       float: "left",
       padding: 8,
-      margin: 20
+      margin: "25px 20px 0 20px"
     },
     currentInterest: {
       verticalAlign: "top",
       
       display: "inline-block",
       float: "right",
-      padding: 8,
-      margin: 20
+      margin: "25px 20px 0 20px"
     },
     percentageInterest: {
 
