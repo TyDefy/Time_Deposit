@@ -92,13 +92,23 @@ const styles = ( theme: Theme) =>
     }
   });
 
-interface OwnProps extends WithStyles<typeof styles> {
-  pool: Pool,
+interface OwnProps extends Pool, WithStyles<typeof styles> {
+
 }
 
 const PoolCard: React.FunctionComponent<OwnProps> = ({
   classes,
-  pool,
+  address,
+  name,
+  period,
+  type,
+  interestRate,
+  description,
+  balance,
+  contribution = 0,
+  interestAccrued = 0,
+  availableInterest = 0,
+  daysUntilAccess=0
 }: OwnProps) => {
   
   const [expanded, setExpanded] = React.useState(false);
@@ -108,26 +118,16 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
   };
 
   return(
+ 
+}: OwnProps) => (
     <Grid item xs={12} sm={6} md={4}>
       <Card elevation={3} className={classes.card} >
      
         <CardHeader
           className={classes.cardHeader}
-          title={pool.name}
+          title={name}
           action={
-            <>
-            <Chip color="primary" className={classes.chip} label={pool.period} />
-            <IconButton
-            className={clsx(classes.expand, {
-              [classes.expandOpen]: expanded,
-            })}
-            onClick={handleExpandClick}
-            aria-expanded={expanded}
-            aria-label="show more"
-          >
-            <ExpandMoreIcon />
-          </IconButton>
-          </>
+            <Chip color="primary" className={classes.chip} label={(period === 0) ? 'Rolling' : `${period} months`} />
           }
         />
          <Collapse in={expanded} timeout="auto" unmountOnExit>
@@ -138,10 +138,10 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
             <Grid item xs={12}>
               <Paper elevation={4} className={classes.cardMetric}>
                 <Typography className={classes.topMetricLabel}>
-                  {pool.type}
+                  {type}
                 </Typography>
                 <Typography className={classes.topMetricValue}>
-                  {`${(pool.interestRate*100).toFixed(2)} %`}
+                  {`${(interestRate*100).toFixed(2)} %`}
                 </Typography>
               </Paper>
             </Grid>
@@ -151,7 +151,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
                   Pool Total
                 </Typography>
                 <Typography className={classes.value}>
-                  {`$ ${pool.balance.toFixed(2)}`}
+                  {`${balance.toFixed(2)} DAI`}
                 </Typography>
               </Paper>
             </Grid>
@@ -161,7 +161,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
                   Balance
                 </Typography>
                 <Typography className={classes.value}>
-                  200 DAI
+                  {`${contribution?.toFixed(2)} DAI`}
                 </Typography>
               </Paper>
             </Grid>
@@ -171,7 +171,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
                   Interest
                 </Typography>
                 <Typography className={classes.value}>
-                  10 DAI
+                  {`${interestAccrued?.toFixed(2)} DAI`}
                 </Typography>
               </Paper>
             </Grid>
@@ -184,7 +184,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
                   Available Interest
                 </Typography>
                 <Typography className={classes.value}>
-                  10 DAI
+                  {`${availableInterest?.toFixed(2)} DAI`}
                 </Typography>
               </Paper>
             </Grid>
@@ -194,7 +194,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
                   Days until access
                 </Typography>
                 <Typography className={classes.value}>
-                  20 DAYS
+                  {`${daysUntilAccess?.toFixed(2)}`}
                 </Typography>
               </Paper>
             </Grid>

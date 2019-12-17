@@ -1,42 +1,113 @@
 pragma solidity 0.5.10;
 
-// import { BasicRegistry } from "./BasicRegistry.sol";
-// import { BasicPool } from "./BasicPool.sol";
-// import { CyclicWithdraw } from "./CyclicWithdraw.sol";
-// import { BasicPenalty } from "./BasicPenalty.sol";
+import { BasicRegistry } from "./BasicRegistry.sol";
+import { BasicPool } from "./BasicPool.sol";
+import { CyclicWithdraw } from "./CyclicWithdraw.sol";
+import { BasicPenalty } from "./BasicPenalty.sol";
+import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
 
-contract BasicFactory {
+contract BasicFactory is WhitelistAdminRole {
+    address internal collateral_;
+    address internal interestCollateral_;
+    BasicRegistry internal registryInstance_;
 
-//     constructor(address _admin, address _collateral, address _interestToken) public {
+    event DeployedUtilities(address indexed withdraw, address indexed penalty);
+    event DeployedPool(address indexed pool, address indexed withdraw);
 
-//     }
+    constructor(
+        address _admin, 
+        address _registry, 
+        address _collateral, 
+        address _interestToken
+    )
+        public 
+    {
+        collateral_ = _collateral;
+        interestCollateral_ = _interestToken;
+        addWhitelistAdmin(_admin);
+        registryInstance_ = BasicRegistry(_registry);
+    }
 
-//     function deployBasicPool(
+    function deployBasicPool(
+        address _withdraw,
+        string memory _poolName,
+        string memory _poolDescription
+    )
+        public 
+        onlyWhitelistAdmin()
+        returns(address)
+    {
+        BasicPool newPool = new BasicPool(
+            msg.sender,
+            _withdraw,
+            collateral_,
+            interestCollateral_
+        );
 
-//     ) public {
-//         BasicPenalty newPenalty = new BasicPenalty(
+        require(
+            registryInstance_.registerPool(
+                msg.sender,
+                address(newPool),
+                _withdraw,
+                _poolName,
+                _poolDescription
+            ),
+            "Pool registration falied"
+        );
 
-//         );
+        emit DeployedPool(address(newPool), _withdraw);
 
-//         CyclicWithdraw newWithdraw = new CyclicWithdraw(
+        return(address(newPool));
+    }
 
-//         );
+    function deployUtility(
+        uint8 _penaltyPercentage,
+        uint256 _cycleLength,
+        string memory _penaltyName,
+        string memory _penaltyDescription,
+        string memory _withdrawName,
+        string memory _withdrawDescription
+    )
+        public
+        onlyWhitelistAdmin()
+        returns(address, address)
+    {
+        BasicPenalty newPenalty = new BasicPenalty(
+            _penaltyPercentage
+        );
 
-//         BasicPool newPool = new BasicPool(
+        CyclicWithdraw newWithdraw = new CyclicWithdraw(
+            address(newPenalty),
+            _cycleLength,
+            true
+        );
 
-//         );
+        require(
+            registryInstance_.registerUtility(
+                msg.sender,
+                address(newPenalty),
+                _penaltyName,
+                _penaltyDescription,
+                2
+            ),
+            "Penalty registration failed"
+        );
+        require(
+            registryInstance_.registerUtility(
+                msg.sender,
+                address(newWithdraw),
+                _withdrawName,
+                _withdrawDescription,
+                1
+            ),
+            "Penalty registration failed"
+        );
 
-//         BasicRegistry.registerUtility(
-//             address(newPenalty),
+        emit DeployedUtilities(address(newWithdraw), address(newPenalty));
 
-//         );
-//     }
-
-//     function deployUtility(
-
-//     )
-//         public
-//     {
-
-//     }
+        return(
+            address(newWithdraw),
+            address(newPenalty)
+        );
+    }
 }
