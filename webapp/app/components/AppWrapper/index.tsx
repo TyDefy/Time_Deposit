@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { List, Container, Button, Menu, Avatar, MenuItem } from '@material-ui/core';
+import React from 'react';
+import { List, Container, Button, Avatar, ListItem, Typography } from '@material-ui/core';
 import { createStyles, withStyles, WithStyles, Theme } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Blockies from 'react-blockies';
 import Toolbar from '@material-ui/core/Toolbar';
 import { RouteComponentProps, Link } from 'react-router-dom';
 import ReactSVG from 'react-svg';
+import { forwardTo } from 'utils/history';
 
 const spacingFromProfile = 20;
 const footerHeight = 300;
@@ -32,6 +33,7 @@ const styles = ({ spacing, zIndex, mixins }: Theme) => createStyles({
     paddingTop: spacing(8),
     paddingLeft: spacing(2),
     paddingRight: spacing(2),
+    paddingBottom: spacing(2),
     position: "relative",
     minHeight: `calc(100vh - ${footerHeight}px)`,
   },
@@ -65,33 +67,23 @@ const styles = ({ spacing, zIndex, mixins }: Theme) => createStyles({
   connectButton: {
     marginRight: spacing(3),
   },
-  navButton: {
-    fontFamily: "Montserrat",
-    fontWeight: "bold",
-    fontSize: "14px",
+  navItem: {
+    minWidth: 100,
   },
-  background: {
-    display: "block",
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    maxHeight: `calc(100vh - ${footerHeight}px)`,
-    zIndex: -1,
-    "& img": {
-      width: "100%",
-      maxHeight: `calc(100vh - ${footerHeight}px)`,
-    },
-    "& ~ *": {
-      zIndex: 0
-    }
-  },
+  networkNotification: {
+    minWidth: 300,
+    backgroundColor: 'red',
+  }
 });
 
 interface OwnProps extends WithStyles<typeof styles> {
   children: React.ReactNode;
-  isMetamaskInstalled: boolean;
-  ethAddress?: string;
+  isMetamaskInstalled: boolean,
+  ethAddress?: string,
+  authorizedNetwork: boolean,
+  approvedNetworkName: string,
+  isAdmin: boolean,
+  daiBalance?: number,
   connect(): void
 }
 
@@ -102,54 +94,61 @@ const AppWrapper: React.FunctionComponent<Props> = ({
   classes,
   children,
   isMetamaskInstalled,
+  authorizedNetwork,
+  approvedNetworkName,
   ethAddress,
+  daiBalance,
+  isAdmin,
   connect
 }: Props) => {
-  const [anchorEl, setAnchorEl] = useState<EventTarget | null>(null);
+  const isLoggedIn = (ethAddress) ? true : false;
   return (
     <div className={classes.body}>
       <AppBar position="fixed" className={classes.appBar} >
         <Container maxWidth='lg'>
           <Toolbar disableGutters={true} className={classes.toolbar}>
             <Link className={classes.appBarLogo} to="/">
-              <ReactSVG src="/nobuntu-logo.svg"/>
+              <ReactSVG src="/nobuntu-logo.svg" />
             </Link>
             <div className={classes.navAccount}>
               <List className={classes.navList}>
-
+                {isLoggedIn && !authorizedNetwork &&
+                  <ListItem className={classes.networkNotification}>
+                    <Typography>Select the <strong>{approvedNetworkName}</strong> in Metamask</Typography>
+                    <Typography>App functionality will be limited to read-only</Typography>
+                  </ListItem>}
+                {isLoggedIn && authorizedNetwork &&
+                  <>
+                    <ListItem button selected={location.pathname === '/'} onClick={() => forwardTo('/')} className={classes.navItem}>
+                      <Typography className="navButton">Dashboard</Typography>
+                    </ListItem>
+                    <ListItem button selected={location.pathname === '/portfolio'} onClick={() => forwardTo('/portfolio')} className={classes.navItem}>
+                      <Typography className="navButton">Portfolio</Typography>
+                    </ListItem>
+                  </>}
+                {isLoggedIn && authorizedNetwork && isAdmin &&
+                  <ListItem button selected={location.pathname === '/admin/pools'} onClick={() => forwardTo('/admin/pools')} className={classes.navItem}>
+                    <Typography className="navButton">Pools</Typography>
+                  </ListItem>}
+                {isLoggedIn &&
+                  <ListItem className={classes.navItem}>
+                    <Typography className="navButton">{`${(daiBalance || 0).toFixed(2)} DAI`}</Typography>
+                  </ListItem>}
               </List>
               {!isMetamaskInstalled ? (
                 <div className={classes.connectButton}>
                   <Button onClick={() => alert('install metamask')}>Install Metamask</Button>
                 </div>
-              ) : 
+              ) :
                 !ethAddress ? (
                   <div className={classes.connectButton}>
                     <Button onClick={() => connect()}>Connect with Metamask</Button>
                   </div>
                 ) : (
-                  <>
-                    <Avatar onClick={(e) => setAnchorEl(e.currentTarget)} className={classes.avatar}>
+                    <Avatar className={classes.avatar}>
                       <Blockies seed={ethAddress || '0x'} size={10} />
                     </Avatar>
-                    <Menu
-                      id="menu-appbar"
-                      anchorEl={anchorEl as Element}
-                      getContentAnchorEl={null}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'right',
-                      }}
-                      transformOrigin={{
-                        vertical: 'top',
-                        horizontal: 'right',
-                      }}
-                      open={Boolean(anchorEl)}
-                      onClose={() => setAnchorEl(null)}>
-                      <MenuItem onClick={() => alert('log out')}>Log Out</MenuItem>
-                    </Menu>
-                  </>
-                )}
+                  )}
             </div>
           </Toolbar>
         </Container>

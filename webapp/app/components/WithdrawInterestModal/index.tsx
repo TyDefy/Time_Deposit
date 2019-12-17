@@ -29,7 +29,7 @@ const WithdrawInterestModal: React.FC<OwnProps> = ({
 }: OwnProps) => {
   const [value, setValue] = useState(0);
   const submit = () => onSubmit(value);
-  return <Container maxWidth='xs'>
+  return <Container maxWidth='sm'>
     <Grid container direction='column' alignItems='center'>
       <Typography variant='h6'>Withdraw Interest</Typography>
       <Typography>Pool</Typography>

@@ -6,6 +6,7 @@ import { combineReducers } from 'redux';
 // tslint:disable-next-line:no-duplicate-imports
 import Redux from 'redux';
 import notificationReducer from 'containers/Notification/reducer';
+import poolsReducer from 'containers/App/poolsReducer';
 
 // tslint:disable-next-line:no-submodule-imports
 // tslint:disable-next-line:no-implicit-dependencies
@@ -16,6 +17,7 @@ import notificationReducer from 'containers/Notification/reducer';
 export default function createReducer(injectedReducers: Redux.ReducersMapObject = {}): Redux.Reducer<any> {
   return combineReducers({
     notification: notificationReducer,
+    pools: poolsReducer,
     ...injectedReducers,
   });
 }

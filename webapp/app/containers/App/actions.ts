@@ -19,11 +19,16 @@ export const setWeb3 = createStandardAction('BLOCKCHAIN_READY')<{
   approvedChainId: number
 }>();
 
-export const saveStorageValue = createStandardAction('SAVE_STORAGE_VALUE')<number>();
-export const setNewStorageValue = createAsyncAction(
-  '@TX_REQUEST/UPDATE_CONTRACT_VALUE',
-  '@TX_SUCCESS/UPDATE_CONTRACT_VALUE',
-  '@TX_FAILURE/UPDATE_CONTRACT_VALUE')<number,undefined,string>();
-
 export const setDaiBalance = createStandardAction('SET_DAI_BALANCE')<number>();
 export const setIsAdmin = createStandardAction('SET_IS_ADMIN')<boolean>();
+export const poolDeployed = createStandardAction('POOL_DEPLOYED')<{
+  address: string, 
+  withdraw: string,
+  name: string,
+  description: string
+}>();
+
+export const createPool = createAsyncAction(
+  '@TX_REQUEST/CREATE_POOL',
+  '@TX_SUCCESS/CREATE_POOL',
+  '@TX_FAILURE/CREATE_POOL')<number,undefined,string>();

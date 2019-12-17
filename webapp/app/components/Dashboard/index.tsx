@@ -21,12 +21,12 @@ interface OwnProps extends WithStyles<typeof styles> {
 }
 
 const Dashboard: React.FunctionComponent<OwnProps> = ({pools, allPoolsBalance}: OwnProps) => (
-  <Container>
+  <Container maxWidth='lg'>
     <HomeHeader allPoolsBalance={allPoolsBalance} />
-    <br></br>
-    <br></br>
-    <br></br>
-    <PoolCardList pools={pools} />
+    <br />
+    <br />
+    <br />
+    <PoolCardList pools={pools} listLabel='AvailablePools' />
   </Container>
 );
 

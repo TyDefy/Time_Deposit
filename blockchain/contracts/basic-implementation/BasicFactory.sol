@@ -11,16 +11,29 @@ contract BasicFactory is WhitelistAdminRole {
     address internal interestCollateral_;
     BasicRegistry internal registryInstance_;
 
-    event DeployedUtilities(address indexed withdraw, address indexed penalty);
-    event DeployedPool(address indexed pool, address indexed withdraw);
+    event DeployedUtilities(
+        address indexed withdraw,
+        string _withdrawName,
+        string _withdrawDescription,
+        address indexed penalty,
+        string _penaltyName,
+        string _penaltyDescription
+    );
+
+    event DeployedPool(
+        address indexed pool,
+        address indexed withdraw,
+        string name,
+        string description
+    );
 
     constructor(
-        address _admin, 
-        address _registry, 
-        address _collateral, 
+        address _admin,
+        address _registry,
+        address _collateral,
         address _interestToken
     )
-        public 
+        public
     {
         collateral_ = _collateral;
         interestCollateral_ = _interestToken;
@@ -33,7 +46,7 @@ contract BasicFactory is WhitelistAdminRole {
         string memory _poolName,
         string memory _poolDescription
     )
-        public 
+        public
         onlyWhitelistAdmin()
         returns(address)
     {
@@ -55,7 +68,7 @@ contract BasicFactory is WhitelistAdminRole {
             "Pool registration falied"
         );
 
-        emit DeployedPool(address(newPool), _withdraw);
+        emit DeployedPool(address(newPool), _withdraw, _poolName, _poolDescription);
 
         return(address(newPool));
     }
@@ -103,7 +116,14 @@ contract BasicFactory is WhitelistAdminRole {
             "Penalty registration failed"
         );
 
-        emit DeployedUtilities(address(newWithdraw), address(newPenalty));
+        emit DeployedUtilities(
+            address(newWithdraw),
+            _withdrawName,
+            _withdrawDescription,
+            address(newPenalty),
+            _penaltyName,
+            _penaltyDescription
+        );
 
         return(
             address(newWithdraw),
