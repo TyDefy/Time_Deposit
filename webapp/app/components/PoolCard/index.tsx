@@ -110,7 +110,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
   availableInterest = 0,
   daysUntilAccess=0
 }: OwnProps) => {
-  
+
   const [expanded, setExpanded] = React.useState(false);
 
   const handleExpandClick = () => {
@@ -118,8 +118,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
   };
 
   return(
- 
-}: OwnProps) => (
+ <>
     <Grid item xs={12} sm={6} md={4}>
       <Card elevation={3} className={classes.card} >
      
@@ -127,13 +126,25 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
           className={classes.cardHeader}
           title={name}
           action={
+            <>
             <Chip color="primary" className={classes.chip} label={(period === 0) ? 'Rolling' : `${period} months`} />
+            <IconButton
+            className={clsx(classes.expand, {
+              [classes.expandOpen]: expanded,
+            })}
+            onClick={handleExpandClick}
+            aria-expanded={expanded}
+            aria-label="show more"
+          >
+            <ExpandMoreIcon />
+            </IconButton>
+            </>
           }
         />
          <Collapse in={expanded} timeout="auto" unmountOnExit>
-           <Typography className={classes.description}> {pool.description} </Typography>
+           <Typography className={classes.description}> {description} </Typography>
         </Collapse>
-        <CardContent onClick={() => forwardTo(`/pool/${pool.address}`)}>
+        <CardContent onClick={() => forwardTo(`/pool/${address}`)}>
           <Grid container spacing={2} direction="column">
             <Grid item xs={12}>
               <Paper elevation={4} className={classes.cardMetric}>
@@ -201,6 +212,8 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
           </Grid>
         </CardContent>
       </Card>
-    </Grid>)};
+    </Grid>
+    </>
+    )};
 
 export default withStyles(styles, { withTheme: true })(PoolCard);
