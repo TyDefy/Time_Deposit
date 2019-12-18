@@ -26,7 +26,7 @@ export const poolDeployed = createStandardAction('POOL_DEPLOYED')<{
   withdraw: string,
   name: string,
   description: string,
-  // TODO: Add pool type here
+  type: string,
   period: number,
 }>();
 

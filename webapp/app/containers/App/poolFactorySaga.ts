@@ -13,7 +13,7 @@ function* deployedPoolWatcher() {
       ...eventArgs,
     });
 
-    poolFactoryContract.on(poolFactoryContract.filters.DeployedPool(null, null, null, null, null), poolDeployedHandler);
+    poolFactoryContract.on(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null), poolDeployedHandler);
     return () => {
       poolFactoryContract.off('accountsChanged', poolDeployedHandler);
     };
@@ -27,6 +27,7 @@ function* deployedPoolWatcher() {
       withdraw: newPool.withdraw,
       name: newPool.name,
       description: newPool.description,
+      type: newPool.tokenSymbol,
       period: newPool.cycleLength.toNumber(),
     }));
   }
@@ -47,7 +48,7 @@ export default function* poolFactorySaga() {
   const { poolFactoryContract, provider }: BlockchainContext = yield getContext('blockchain')
 
   const deployedPoolEventFilter = {
-    ...poolFactoryContract.filters.DeployedPool(null, null, null, null, null),
+    ...poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null),
     fromBlock: 0,
     toBlock: 'latest',
   }
@@ -63,6 +64,7 @@ export default function* poolFactorySaga() {
           withdraw: log.withdraw,
           name: log.name,
           description: log.description,
+          type: log.tokenSymbol,
           period: log.cycleLength.toNumber(),
         })
       );
