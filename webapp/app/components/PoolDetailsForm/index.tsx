@@ -96,7 +96,7 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
             max: 100,
             step: 1
           }} />
-        <Button type='submit'>Create Pool</Button>
+        <Button color='primary' type='submit'>Create Pool</Button>
       </Grid>
     </Form>
   </Container>;
