@@ -7,7 +7,7 @@ import { selectEthAddress } from 'containers/App/selectors';
  * Direct selector to the homePage state domain
  */
 
-const selectPools = createSelector((state: RootState) => state.pools, selectEthAddress, (pools, ethAddress) => 
+export const selectPools = createSelector((state: RootState) => state.pools, selectEthAddress, (pools, ethAddress) => 
   Object.values(pools).map(p => ({
     ...p,
     balance: p.transactions?.reduce((poolBalance, t) => 

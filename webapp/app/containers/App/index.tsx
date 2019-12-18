@@ -63,7 +63,7 @@ export interface Pool {
   period: number;
   balance: number;
   participants: number;
-  interestRate: number;
+  interestRate?: number;
   contribution?: number;
   interestAccrued?: number;
   availableInterest?: number;

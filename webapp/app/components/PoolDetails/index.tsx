@@ -7,7 +7,7 @@
 import React from 'react';
 import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, Chip, Table, TableHead, TableRow, TableCell, TableBody, Button } from '@material-ui/core';
 import dayjs from 'dayjs';
-import { UserPoolDetails } from 'containers/PoolDetailsPage';
+import { Pool } from 'containers/App';
 
 const styles = ({ palette }: Theme) =>
   createStyles({
@@ -20,7 +20,7 @@ const styles = ({ palette }: Theme) =>
     },
   });
 
-interface OwnProps extends WithStyles<typeof styles>, UserPoolDetails { 
+interface OwnProps extends WithStyles<typeof styles>, Pool { 
   showModal(value: 'invest' | 'withdrawInterest' | 'withdrawAll'): void
 }
 
@@ -43,7 +43,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         <Grid item><Typography variant='h3'>{name}</Typography></Grid>
         <Grid item><Chip label={`${period} month(s)`} /></Grid>
         <Grid item direction='row'>
-          <Typography>Current Interest: <strong>{`${(interestRate * 100).toFixed(2)} %`}</strong></Typography>
+          <Typography>Current Interest: <strong>{`${((interestRate || 0)* 100).toFixed(2)} %`}</strong></Typography>
         </Grid>
       </Grid>
       <Grid container direction='row' className={classes.poolDetailsRow}>
@@ -67,7 +67,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         </Grid>
         <Grid item>
           <Typography>Your Interest</Typography>
-          <Typography>{interestAccrued.toFixed(2)}</Typography>
+          <Typography>{(interestAccrued || 0).toFixed(2)}</Typography>
         </Grid>
         <Grid item>
           <Typography>Available Interest</Typography>
@@ -84,7 +84,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {transactions.map(t =>
+          {transactions?.map(t =>
             <TableRow>
               <TableCell>{t.address}</TableCell>
               <TableCell>{dayjs(t.time).format('YYYY-MM-DD HH:mm')}</TableCell>

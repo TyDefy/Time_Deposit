@@ -6,13 +6,15 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { compose, Dispatch } from 'redux';
+import { compose } from 'redux';
 import PoolListing from 'components/PoolListing';
 import { Pool } from 'containers/App';
+import selectAdminPoolsOverview from './selectors';
 
 interface OwnProps { }
 
-interface StateProps {
+export interface StateProps {
+  pools: Array<Pool>;
 }
 
 interface DispatchProps { }
@@ -32,18 +34,11 @@ const AdminPoolsOverviewPage: React.FunctionComponent<Props> = (
   return <PoolListing pools={pools}/>
 };
 
-const mapDispatchToProps = (
-  dispatch: Dispatch,
-  ownProps: OwnProps,
-): DispatchProps => {
-  return {
-    dispatch: dispatch,
-  };
-};
+const mapStateToProps = state => selectAdminPoolsOverview(state);
 
 const withConnect = connect(
+  mapStateToProps,
   null,
-  mapDispatchToProps,
 );
 
 export default compose(withConnect)(AdminPoolsOverviewPage);

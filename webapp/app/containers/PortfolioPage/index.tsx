@@ -9,10 +9,20 @@ import { connect } from 'react-redux';
 
 import { compose, Dispatch } from 'redux';
 import Portfolio from 'components/Portfolio';
+import { Pool } from 'containers/App';
 
 interface OwnProps {}
 
 interface DispatchProps {}
+
+export interface StateProps {
+  pools: Array<Pool>,
+  totalHoldings: number,
+  portfolioInterestRate: number,
+  contributed: number,
+  interestAccrued: number,
+  interestAvailable: number,
+}
 
 type Props = DispatchProps & OwnProps;
 
@@ -31,6 +41,8 @@ const portfolioProps = {
 
 const PortfolioPage: React.FC<Props> = (props: Props) => <Portfolio {...portfolioProps} />;
 
+// const mapStateToProps = (state) => selectPorfolioPage(state);
+
 const mapDispatchToProps = (
   dispatch: Dispatch,
   ownProps: OwnProps,
@@ -41,7 +53,7 @@ const mapDispatchToProps = (
 };
 
 const withConnect = connect(
-  null,
+  null, // mapStateToProps,
   mapDispatchToProps,
 );
 
