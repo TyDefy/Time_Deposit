@@ -16,7 +16,9 @@ interface OwnProps {}
 
 interface DispatchProps {}
 
-export interface StateProps {}
+export interface StateProps {
+  pool: PoolDetails,
+}
 
 export interface PoolParticipant {
   address: string;

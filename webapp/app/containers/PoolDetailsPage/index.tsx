@@ -39,6 +39,7 @@ export interface Transaction {
   time: Date;
   type: 'Contribute' | 'Withdraw';
   amount: number;
+  txHash: string;
 }
 
 type Props = StateProps & DispatchProps & OwnProps;
