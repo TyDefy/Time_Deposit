@@ -23,7 +23,7 @@ contract BasicPool is WhitelistAdminRole {
     // The amount of cToken allocated to the penalty pool
     uint256 internal penaltyPot_;
     // A reversable switch to stop accepting deposits
-    bool internal acceptingDeposits_;
+    bool internal acceptingDeposits_ = true;
     // A non-reversable switch to kill the contract
     bool internal isAlive_ = true;
 

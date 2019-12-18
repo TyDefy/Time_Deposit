@@ -216,7 +216,7 @@ describe("Basic Pool Tests", async () => {
             let cTokenBalanceDaiBeforeDeposit = await pDaiInstance.balanceOf(cDaiInstance.contract.address);
             
             await pDaiInstance.from(user1).approve(
-                cDaiInstance.contract.address,
+                basicPoolInstance.contract.address,
                 test_settings.basicPool.deposit
             );
 
@@ -271,13 +271,9 @@ describe("Basic Pool Tests", async () => {
                 "cDai contract has dai balance before deposit"
             );
 
-            console.log("0");
-
             await basicPoolInstance.from(user1).deposit(
                 test_settings.basicPool.deposit
             );
-
-            console.log("0");
 
             let userInfoAfterDeposit = await basicPoolInstance.getUserInfo(user1.signer.address);
             let userBalanceInDaiAfterDeposit = await pDaiInstance.balanceOf(user1.signer.address);
@@ -287,19 +283,19 @@ describe("Basic Pool Tests", async () => {
             // User info in pool after deposit
             assert.equal(
                 userInfoAfterDeposit[0].toString(),
-                test_settings.basicPool.deposit,
+                test_settings.basicPool.deposit.toString(),
                 "User collateral invested after deposit incorrect"
             );
             assert.equal(
                 userInfoAfterDeposit[1].toString(),
-                test_settings.basicPool.mintAmount,
-                "User balance after depositing incorrect"
+                test_settings.pcTokenSettings.mintAmount.toString(),
+                "User pool cDai balance after depositing incorrect"
             );
             // User balance in Dai after
             assert.equal(
                 userBalanceInDaiAfterDeposit.toString(),
-                test_settings.pDaiSettings.mintAmountMinusDeposit,
-                "User Dai balance after deposit incorrect"
+                test_settings.pDaiSettings.mintAmountMinusDeposit.toString(),
+                "User dai balance after deposit incorrect"
             );
             // Pool balance in dai after
             assert.equal(
@@ -310,10 +306,9 @@ describe("Basic Pool Tests", async () => {
             // Pool balance in cdai after
             assert.equal(
                 poolBalanceCdaiAfterDeposit.toString(),
-                test_settings.basicPool.mintAmount,
+                test_settings.pcTokenSettings.mintAmount.toString(),
                 "Pool has incorrect cDai balance after deposit"
             );
-
         });
 
         it("🚫 Negative testing deposit", async () => {
@@ -355,7 +350,7 @@ describe("Basic Pool Tests", async () => {
             // user dai balance 
             assert.equal(
                 userBalanceDaiBeforeDeposit.toString(),
-                test_settings.pDaiSettings.mintAmount,
+                test_settings.pDaiSettings.mintAmount.toString(),
                 "user has incorrect dai balance"
             );
             // Pool dai balance
@@ -373,13 +368,13 @@ describe("Basic Pool Tests", async () => {
             // Allowance is correct
             assert.equal(
                 allowance.toString(),
-                test_settings.basicPool.withdraw,
+                test_settings.basicPool.withdraw.toString(),
                 "Pool allowed spending for user incorrect"
             );
             // Balance of cToken in Dai
             assert.equal(
                 cTokenBalanceDaiBeforeDeposit.toString(),
-                test_settings.basicPool.deposit,
+                test_settings.basicPool.deposit.toString(),
                 "cToken has pre-existing balance before deposit"
             );
 
@@ -532,14 +527,16 @@ describe("Basic Pool Tests", async () => {
                 0,
                 "Pool has cDai before mint"
             );
-
+            console.log("0");
             await pDaiInstance.from(user1).approve(
                 basicPoolInstance.contract.address,
                 test_settings.basicPool.deposit
             );
+            
             await basicPoolInstance.from(user1).deposit(
                 test_settings.basicPool.deposit
             );
+            console.log("0");
             let balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
             let balanceInPcToken = await cDaiInstance.balanceOf(user1.signer.address);
             let poolDaiBalanceAfterDeposit = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
@@ -640,7 +637,7 @@ describe("Basic Pool Tests", async () => {
             await basicPoolInstance.from(user1).deposit(
                 test_settings.basicPool.deposit
             );
-
+            console.log("0");
             await pDaiInstance.from(user2).approve(
                 basicPoolInstance.contract.address,
                 test_settings.basicPool.deposit
@@ -648,10 +645,20 @@ describe("Basic Pool Tests", async () => {
             await basicPoolInstance.from(user2).deposit(
                 test_settings.basicPool.deposit
             );
+            console.log("0");
             let tx = await(await basicPoolInstance.from(user2).withdraw(
                 test_settings.basicPool.deposit
             )).wait();
+            console.log("0");
             await basicPoolInstance.getInterestAmount(user1.signer.address);
+        });
+
+        it("Close pool to deposits", async () => {
+
+        });
+
+        it("Kill switch on pool", async () => {
+
         });
     });
 
