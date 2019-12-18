@@ -27,7 +27,8 @@ const styles = ({ palette }: Theme) =>
       verticalAlign: "top",
       display: "inline-block",
       float: "left",
-      margin: "20px 0 0 8px"
+      margin: "20px 0 0 8px",
+      fontWeight: 'bold',
     },
     period: {
       verticalAlign: "top",
@@ -48,7 +49,8 @@ const styles = ({ palette }: Theme) =>
     },
     label:{
       fontSize: '1em',
-      opacity: '75%',
+      opacity: '60%',
+      fontWeight: 'bold',
       margin: "12px 8px 0px 12px"
     },
     value: {
