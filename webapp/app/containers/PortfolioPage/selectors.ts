@@ -20,6 +20,7 @@ const selectPortfolioInterestAccrued = createSelector(selectPortfolioPools,
 
 const selectPortfolioInterestAvailable = createSelector(selectPortfolioPools,
   pools => pools.reduce((total, pool) => total += pool.interestAccrued || 0, 0));
+
 const selectPortfolioPage = createStructuredSelector<RootState, StateProps>({
   pools: selectPortfolioPools,
   totalHoldings: selectPortfolioTotalHoldings,
