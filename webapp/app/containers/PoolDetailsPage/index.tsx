@@ -44,7 +44,7 @@ export interface Transaction {
 type Props = StateProps & DispatchProps & OwnProps;
 type ModalType = 'invest' | 'withdrawInterest' | 'withdrawAll';
 
-const PoolDetailsPage: React.FunctionComponent<Props> = ({pool, daiBalance}: Props) => {
+const PoolDetailsPage: React.FunctionComponent<Props> = ({ pool, daiBalance }: Props) => {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<ModalType>('invest');
 
@@ -68,19 +68,19 @@ const PoolDetailsPage: React.FunctionComponent<Props> = ({pool, daiBalance}: Pro
               onClose={() => setShowModal(false)}
               onSubmit={(value) => console.log(value)} />;
           case 'withdrawInterest':
-            return <WithdrawInterestModal 
+            return <WithdrawInterestModal
               name={pool.name}
               type={pool.type}
               availableInterest={pool.availableInterest || 0}
               onSubmit={(value) => console.log(value)}
               onClose={() => setShowModal(false)} />;
           case 'withdrawAll':
-            return <WithdrawAllModal 
-            name={pool.name}
-            type={pool.type}
-            availableFunds={pool.availableInterest || 0}
-            onSubmit={(value) => console.log(value)}
-            onClose={() => setShowModal(false)} />;
+            return <WithdrawAllModal
+              name={pool.name}
+              type={pool.type}
+              availableFunds={pool.availableInterest || 0}
+              onSubmit={(value) => console.log(value)}
+              onClose={() => setShowModal(false)} />;
           default:
             return null;
         }
