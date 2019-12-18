@@ -37,9 +37,9 @@ contract BasicFactory is WhitelistAdminRole {
         address _admin,
         address _registry,
         address _collateral,
-        string _collateralSymbol,
+        string memory _collateralSymbol,
         address _interestToken,
-        string _tokenSymbol
+        string memory _tokenSymbol
     )
         public
     {
