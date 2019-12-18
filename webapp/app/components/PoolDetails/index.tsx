@@ -9,7 +9,7 @@ import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typograph
 import dayjs from 'dayjs';
 import { UserPoolDetails } from 'containers/PoolDetailsPage';
 
-const styles = ({ palette }: Theme) =>
+const styles = ({ spacing , palette }: Theme) =>
   createStyles({
     poolDetailsHeaderRow: {
       justifyContent: 'space-around',
@@ -56,8 +56,13 @@ const styles = ({ palette }: Theme) =>
     value: {
       fontSize: '1.5em',
       margin: "8px 8px 0px 12px"
+    },
+    button: {
+      width: spacing(20)
+    },
+    buttonBar: {
+      marginTop: spacing(8)
     }
-
   });
 
 interface OwnProps extends WithStyles<typeof styles>, UserPoolDetails { 
@@ -136,10 +141,10 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
             </TableRow>)}
         </TableBody>
       </Table>
-      <Grid container direction='row' justify='space-around'>
-        <Button color='primary' onClick={() => showModal('invest')}>INVEST</Button>
-        <Button color='primary' onClick={() => showModal('withdrawInterest')}>WITHDRAW INTEREST</Button>
-        <Button color='primary' onClick={() => showModal('withdrawAll')}>WITHDRAW & CLOSE</Button>
+      <Grid container direction='row' justify='space-around' className={classes.buttonBar}>
+        <Button className={classes.button} color='primary' onClick={() => showModal('invest')}>INVEST</Button>
+        <Button className={classes.button} color='primary' onClick={() => showModal('withdrawInterest')}>WITHDRAW INTEREST</Button>
+        <Button className={classes.button} color='primary' onClick={() => showModal('withdrawAll')}>WITHDRAW & CLOSE</Button>
       </Grid>
     </Container>
   );
