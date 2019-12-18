@@ -29,6 +29,7 @@ type Props = StateProps & DispatchProps & OwnProps;
 const CreatePool: React.FunctionComponent<Props> = (props: Props) => {
   const CreatePoolSchema = Yup.object().shape({
     name: Yup.string().max(120, 'Name is too long').required('Name is required'),
+    description: Yup.string().max(180, 'Description is too long').required('Description is required'),
     type: Yup.number().required(),
     period: Yup.number().required(),
     feeRate: Yup.number().min(0).max(100).required(),
@@ -47,6 +48,7 @@ const CreatePool: React.FunctionComponent<Props> = (props: Props) => {
     <Formik
       initialValues={{
         name: '',
+        description: '',
         type: 0,
         period: 0,
         feeRate: 0,

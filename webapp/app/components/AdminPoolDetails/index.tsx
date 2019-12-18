@@ -9,7 +9,7 @@ import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typograph
 import { PoolDetails } from 'containers/AdminPoolDetailsPage';
 import dayjs from 'dayjs';
 
-const styles = ({palette}: Theme) =>
+const styles = ({spacing, palette}: Theme) =>
   createStyles({
     poolDetailsHeaderRow: {
       justifyContent: 'space-around',
@@ -17,7 +17,9 @@ const styles = ({palette}: Theme) =>
     },
     poolDetailsRow: {
       justifyContent: 'space-around',
-      width: '60%'
+      width: '100%',
+      marginTop: spacing(3),
+      marginBottom: spacing(3)
     },
     tableHeader: {
       backgroundColor: 'lightgrey',
@@ -83,27 +85,27 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
         </Grid>
       </Grid>
       <Grid container direction='row' className={classes.poolDetailsRow}>
-        <Grid item xs={1}>
+        <Grid item xs={2}>
           <Typography className={classes.label}>Currency Type</Typography>
           <Typography className={classes.value}>{type}</Typography>
         </Grid>
-        <Grid item xs={1}>
+        <Grid item xs={2}>
           <Typography className={classes.label}>Pool Total</Typography>
           <Typography className={classes.value}>{totalStaked.toFixed(2)}</Typography>
         </Grid>
-        <Grid item xs={1}>
+        <Grid item xs={2}>
           <Typography className={classes.label}>Pool Participants</Typography>
           <Typography className={classes.value}>{participants}</Typography>
         </Grid>
-        <Grid item xs={1}>
+        <Grid item xs={2}>
           <Typography className={classes.label}>Total Interest</Typography>
           <Typography className={classes.value}>{totalInterest.toFixed(2)}</Typography>
         </Grid>
-        <Grid item xs={1}>
+        <Grid item xs={2}>
           <Typography className={classes.label}>Fee</Typography>
           <Typography className={classes.value}>{`${(feeRate * 100).toFixed(2)} %`}</Typography>
         </Grid>
-        <Grid item xs={1}>
+        <Grid item xs={2}>
           <Typography className={classes.label}>Penalty</Typography>
           <Typography className={classes.value}>{`${(pentalyRate * 100).toFixed(2)} %`}</Typography>
         </Grid>
