@@ -37,7 +37,7 @@ export interface StateProps {
 export interface Transaction {
   address: string;
   time: Date;
-  type: 'Contribute' | 'Withdraw';
+  type: 'Deposit' | 'Withdraw';
   amount: number;
   txHash: string;
 }

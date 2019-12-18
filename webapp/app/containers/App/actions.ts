@@ -34,3 +34,12 @@ export const createPool = createAsyncAction(
   '@TX_REQUEST/CREATE_POOL',
   '@TX_SUCCESS/CREATE_POOL',
   '@TX_FAILURE/CREATE_POOL')<number,undefined,string>();
+
+export const addPoolTx = createStandardAction('ADD_POOL_TX')<{
+  poolAddress: string,
+  userAddress: string;
+  time: Date;
+  type: 'Deposit' | 'Withdraw';
+  amount: number;
+  txHash: string;
+}>()

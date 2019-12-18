@@ -15,7 +15,7 @@ function* deployedPoolWatcher() {
 
     poolFactoryContract.on(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null), poolDeployedHandler);
     return () => {
-      poolFactoryContract.off('accountsChanged', poolDeployedHandler);
+      poolFactoryContract.off(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null), poolDeployedHandler);
     };
   });
 
