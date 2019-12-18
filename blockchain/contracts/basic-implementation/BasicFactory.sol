@@ -9,7 +9,9 @@ import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles
 
 contract BasicFactory is WhitelistAdminRole {
     address internal collateral_;
-    address internal interestCollateral_;
+    string internal collateralSymbol_;
+    address internal interestToken_;
+    string internal tokenSymbol_;
     BasicRegistry internal registryInstance_;
 
     event DeployedUtilities(
@@ -26,20 +28,29 @@ contract BasicFactory is WhitelistAdminRole {
         address indexed withdraw,
         string name,
         string description,
-        uint256 cycleLength
+        uint256 cycleLength,
+        string collateralSymbol,
+        string tokenSymbol
     );
 
     constructor(
         address _admin,
         address _registry,
         address _collateral,
-        address _interestToken
+        string _collateralSymbol,
+        address _interestToken,
+        string _tokenSymbol
     )
         public
     {
         addWhitelistAdmin(_admin);
+
         collateral_ = _collateral;
-        interestCollateral_ = _interestToken;
+        collateralSymbol_ = _collateralSymbol;
+
+        interestToken_ = _interestToken;
+        tokenSymbol_ = _tokenSymbol;
+
         registryInstance_ = BasicRegistry(_registry);
     }
 
@@ -56,7 +67,7 @@ contract BasicFactory is WhitelistAdminRole {
             msg.sender,
             _withdraw,
             collateral_,
-            interestCollateral_
+            interestToken_
         );
 
         require(
@@ -72,7 +83,15 @@ contract BasicFactory is WhitelistAdminRole {
 
         uint256 cycleLength = IWithdraw(_withdraw).getCycle();
 
-        emit DeployedPool(address(newPool), _withdraw, _poolName, _poolDescription, cycleLength);
+        emit DeployedPool(
+            address(newPool), 
+            _withdraw, 
+            _poolName, 
+            _poolDescription, 
+            cycleLength,
+            collateralSymbol_,
+            tokenSymbol_
+        );
 
         return(address(newPool));
     }
