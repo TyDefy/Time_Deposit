@@ -374,7 +374,7 @@ describe("Basic Pool Tests", async () => {
             // Balance of cToken in Dai
             assert.equal(
                 cTokenBalanceDaiBeforeDeposit.toString(),
-                test_settings.basicPool.deposit.toString(),
+                0,
                 "cToken has pre-existing balance before deposit"
             );
 
