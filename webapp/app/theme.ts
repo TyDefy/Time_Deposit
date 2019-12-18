@@ -18,6 +18,22 @@ const theme = (createMuiTheme)({
   overrides: {
   MuiTypography: {
   },
+  MuiButton: {
+    root: {
+      color: 'white',
+      marginTop: '24px',
+      marginLeft: '8px',
+      marginBottom: '24px',
+      border: '#FD9920 2px solid',
+    },
+    text: {
+      paddingLeft: '16px',
+      paddingRight: '16px',
+      paddingTop: '8px',
+      color: 'white',
+    }
+  }
+
 }
 });
 
