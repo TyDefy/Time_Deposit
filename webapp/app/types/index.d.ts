@@ -1,6 +1,7 @@
 import { Reducer, Store } from 'redux';
 import { ContainerState as AppState } from '../containers/App/types';
 import { ContainerState as TransactionModalState } from '../containers/TransactionModal/types';
+import { PoolState } from 'containers/App/poolsReducer';
 
 export interface LifeStore extends Store<ApplicationRootState> {
   injectedReducers: any;
@@ -25,4 +26,5 @@ export interface ApplicationRootState {
   readonly app: AppState;
   readonly transactionModal: TransactionModalState;
   readonly createPool: never;
+  readonly pools: PoolState;
 }

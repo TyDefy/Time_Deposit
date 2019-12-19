@@ -29,7 +29,7 @@ const deploy = async (network, secret) => {
 		network = 'local';
 	}
 
-	const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS;
+	const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS_PUBLIC_KEY;
 
 	if (network === 'local') {
 		const deployer = new etherlime.JSONRPCPrivateKeyDeployer(secret, 'http://localhost:8545/', defaultConfigs);
@@ -65,7 +65,9 @@ const deploy = async (network, secret) => {
 			ADMIN_ADDRESS,
 			poolRegistryInstance.contract.address,
 			pDaiInstance.contract.address,
-			pcDaiInstance.contract.address
+			"DAI",
+			pcDaiInstance.contract.address,
+			"cDai"
 		);
 
 		await poolRegistryInstance.registerDeployer(

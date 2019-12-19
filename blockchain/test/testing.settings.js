@@ -29,12 +29,13 @@ const test_settings = {
         symbol: "PDAI",
         decimals: 18,
         mintAmount: "100000000000000000000000000",
-        mintAmountMinusDeposit: "99999900000000000000000000"
+        mintAmountMinusDeposit: "99999900000000000000000000",
     },
     pcTokenSettings: {
         name: "pcToken",
         symbol: "PCT",
-        decimals: 18
+        decimals: 18,
+        mintAmount: "4737129700923136780314"
     },
     registrySettings: {
         penalty: {

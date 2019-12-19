@@ -125,13 +125,14 @@ const AppWrapper: React.FunctionComponent<Props> = ({
                     <ListItem button selected={location.pathname === '/portfolio'} onClick={() => forwardTo('/portfolio')} className={classes.navItem}>
                       <Typography className="navButton">Portfolio</Typography>
                     </ListItem>
-                    <ListItem className={classes.navItem}>
-                      <Typography className="navButton">{`${(daiBalance || 0).toFixed(2)} DAI`}</Typography>
-                    </ListItem>
                   </>}
                 {isLoggedIn && authorizedNetwork && isAdmin &&
                   <ListItem button selected={location.pathname === '/admin/pools'} onClick={() => forwardTo('/admin/pools')} className={classes.navItem}>
                     <Typography className="navButton">Pools</Typography>
+                  </ListItem>}
+                {isLoggedIn &&
+                  <ListItem className={classes.navItem}>
+                    <Typography className="navButton">{`${(daiBalance || 0).toFixed(2)} DAI`}</Typography>
                   </ListItem>}
               </List>
               {!isMetamaskInstalled ? (

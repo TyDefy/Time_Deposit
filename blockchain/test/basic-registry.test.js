@@ -15,6 +15,7 @@ describe("Basic Registry Tests", async () => {
     let deployerInsecure = accounts[1];
     let admin = accounts[2];
     let registeredDeployer = accounts[3];
+    let user1 = accounts[4];
     let deployer;
     
     let basicPoolInstance, 
@@ -48,7 +49,7 @@ describe("Basic Registry Tests", async () => {
             penaltyAbi,
             false,
             test_settings.penalty.percentage
-        )
+        );
 
         cyclicWithdrawInstance = await deployer.deploy(
             cyclicWithdrawAbi, 
@@ -77,6 +78,13 @@ describe("Basic Registry Tests", async () => {
             registeredDeployer.signer.address,
             true
         );
+
+        await pDaiInstance.from(admin).mint();
+        await pDaiInstance.from(admin).transfer(
+            cDaiInstance.contract.address,
+            10000
+        );
+        await pDaiInstance.from(user1).mint();
     });
 
     describe("Core Functionality", async () => {
