@@ -47,6 +47,7 @@ const poolDetails: PoolDetails = {
   pentalyRate: 0.01,
   totalInterest: 10,
   participants: 5,
+  description: "",
   participantDetails: [
     { address: '0x2', joined: new Date(), contributed: 10, interest: 1 },
     { address: '0x3', joined: new Date(), contributed: 10, interest: 1 },
