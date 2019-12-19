@@ -103,4 +103,8 @@ contract pcToken is ICToken, ERC20 {
         return 211098294354306448527248519;
         // return (getCash() + totalBorrows() - totalReserves_) / totalSupply();
     }
+
+    function supplyRatePerBlock() public view returns(uint) {
+        return 8556432781;
+    }
 }
