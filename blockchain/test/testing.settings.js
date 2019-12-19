@@ -26,16 +26,18 @@ const test_settings = {
     },
     pDaiSettings: {
         name: "pDai",
-        symbol: "PDAI",
+        symbol: "DAI",
         decimals: 18,
         mintAmount: "100000000000000000000000000",
         mintAmountMinusDeposit: "99999900000000000000000000",
+        withdrawWithPenalty: "99999985000000000000000000"
     },
     pcTokenSettings: {
-        name: "pcToken",
-        symbol: "PCT",
+        name: "cToken",
+        symbol: "cDAI",
         decimals: 18,
-        mintAmount: "4737129700923136780314"
+        mintAmount: "4737129700923136780314",
+        interestRateYearly: "17989044278774400"
     },
     registrySettings: {
         penalty: {

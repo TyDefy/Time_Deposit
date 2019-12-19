@@ -1,13 +1,15 @@
 pragma solidity 0.5.10;
 
 interface ICToken {
-    function mint(uint mintAmount) external returns(uint);
+    function mint(uint mintAmount) external returns (uint);
 
-    function exchangeRateCurrent() external returns(uint);
+    function exchangeRateCurrent() external returns (uint);
 
-    function redeem(uint redeemTokens) external returns(uint);
+    function redeem(uint redeemTokens) external returns (uint);
+    
+    function redeemUnderlying(uint redeemAmount) external returns (uint);
 
-    function redeemUnderlying(uint redeemAmount) external returns(uint);
+    function supplyRatePerBlock() external view returns (uint);
 
     // Standard ERC20 functionality 
 

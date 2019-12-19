@@ -160,6 +160,8 @@ contract BasicPool is WhitelistAdminRole {
         );
     }
 
+    event log(uint256 balance);
+
     function withdraw(uint256 _amount) public killSwitch() {
         require(
             users_[msg.sender].collateralInvested >= _amount,
@@ -170,31 +172,39 @@ contract BasicPool is WhitelistAdminRole {
         uint256 withdrawAmount;
         uint256 penaltyAmount;
 
-        (withdrawAllowed, withdrawAmount, penaltyAmount) = canWithdraw(
-            msg.sender,
-            _amount
+        (withdrawAllowed, withdrawAmount, penaltyAmount) = withdrawInstance_.canWithdraw(
+            _amount,
+            users_[msg.sender].lastWtihdraw
         );
+
+        emit log(users_[msg.sender].balance);
+        // 4737129700923136780314
           
         if(penaltyAmount != 0) {
             // If there is a penalty, this applies it
             uint256 penaltyAmountInCdai = (
                     penaltyAmount*10**18
                 )/cTokenInstance_.exchangeRateCurrent();
+            // Updates the balance of the penalty pot
+            penaltyPot_ = penaltyPot_ + penaltyAmountInCdai;
+            // Updates the balance of the user
+            users_[msg.sender].balance = users_[msg.sender].balance - penaltyAmountInCdai;
+
             if(feePercentage_ != 0) {
                 // If the fee has been set up, this works it out
-                uint256 fee = ((penaltyAmountInCdai*feePercentage_)/100);
-                // Removes the fee from the penalty amount
-                penaltyAmountInCdai = penaltyAmountInCdai - fee;
+                uint256 fee = ((penaltyAmountInCdai*feePercentage_)/10**19);
                 // Works out the fee in dai
                 uint256 feeInDai = ((penaltyAmount*feePercentage_)/100);
                 // Updates the admin balances with the fee
-                users_[admin_].collateralInvested -= feeInDai;
-                users_[admin_].balance -= fee;
+                users_[admin_].collateralInvested += feeInDai;
+                users_[admin_].balance += fee;                
+                // Updates the balance of the user
+                users_[msg.sender].balance = users_[msg.sender].balance - fee;
+                // Updates the balance of the penalty pot
+                penaltyPot_ = penaltyPot_ - fee;
             }
-            // Updates the balance of the penalty pot
-            penaltyPot_ += penaltyAmountInCdai;
-            // Updates the balance of the user
-            users_[msg.sender].balance -= penaltyAmountInCdai;
+            emit log(users_[msg.sender].balance);
+            // 4737129700852079834801
         } 
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
@@ -215,6 +225,10 @@ contract BasicPool is WhitelistAdminRole {
         users_[msg.sender].collateralInvested -= _amount;
         users_[msg.sender].balance -= cDaiBurnt;
         users_[msg.sender].lastWtihdraw = now;
+
+        emit log(users_[msg.sender].balance);
+        // ??
+        //
 
         require(
             collateralInstance_.transfer(
