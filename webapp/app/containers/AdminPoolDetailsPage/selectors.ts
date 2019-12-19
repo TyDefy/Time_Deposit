@@ -16,10 +16,10 @@ const selectAdminPoolDetails = createSelector(
       .map(participant => {
         const userTransactions = pool.transactions?.filter(t => t.address === participant);
         const userContribution = userTransactions?.reduce((userContributed, transaction) => 
-          transaction.type === 'Contribute' ? userContributed += transaction.amount : userContributed -= transaction.amount, 0);
+          transaction.type === 'Deposit' ? userContributed += transaction.amount : userContributed -= transaction.amount, 0) || 0;
         return {
           address: participant,
-          dateJoined: userTransactions?.reduce((minDate, transaction) => minDate < transaction.time ? minDate : transaction.time, new Date()),
+          joined: userTransactions?.reduce((minDate, transaction) => minDate < transaction.time ? minDate : transaction.time, new Date()) || new Date(),
           contributed: userContribution,
           interest: 0, // TODO: Wire this up
         }
@@ -27,6 +27,9 @@ const selectAdminPoolDetails = createSelector(
     return {
       ...pool,
       participantDetails: poolParticipants,
+      totalInterest: 0, 
+      feeRate: 0, 
+      pentalyRate: 0
     }
   }
 )

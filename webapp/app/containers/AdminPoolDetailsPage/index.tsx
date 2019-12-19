@@ -62,7 +62,7 @@ const AdminPoolDetailsPage: React.FunctionComponent<Props> = (props: Props) => {
   return <AdminPoolDetails {...poolDetails} />
 };
 
-const mapStateToProps = (state) => selectAdminPoolDetailsPage(state);
+const mapStateToProps = (state, props) => selectAdminPoolDetailsPage(state, props);
 
 const mapDispatchToProps = (
   dispatch: Dispatch,

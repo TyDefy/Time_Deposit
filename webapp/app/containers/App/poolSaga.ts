@@ -111,7 +111,7 @@ function* poolWatcherSaga(action) {
     console.log('There was an error getting the pools transaction logs');
   }
 
-  yield fork(poolTransactionListener(poolContract));
+  yield fork(poolTransactionListener, poolContract);
 }
 
 export default function* poolSaga() {
