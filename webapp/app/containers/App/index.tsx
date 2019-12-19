@@ -68,7 +68,7 @@ export interface Pool {
   interestAccrued?: number;
   availableInterest?: number;
   daysUntilAccess?: number;
-  transactions?: Array<Transaction>;
+  transactions: Array<Transaction>;
 }
 
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;

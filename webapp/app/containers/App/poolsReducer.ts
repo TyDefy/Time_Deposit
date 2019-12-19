@@ -30,6 +30,18 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         }
       }
     }
+    case getType(AppActions.addPoolTx): {
+      return {
+        ...state,
+        [action.payload.poolAddress]: {
+          ...state[action.payload.poolAddress],
+          transactions: [
+            ...state[action.payload.poolAddress]?.transactions,
+            action.payload,
+          ],
+        }
+      }
+    }
     default:
       return state;
   }

@@ -15,10 +15,15 @@ function* poolTransactionListener(poolContract: Pool) {
   const { provider }: BlockchainContext = yield getContext('blockchain');
 
   const poolTransactionChannel = eventChannel(emit => {
-    const depositHandler = (eventArgs) => emit({
+    const depositHandler = (address, daiAmount, cDaiAmount, tx) => {
+      emit({
       type: 'Deposit',
-      ...eventArgs,
-    });
+      address,
+      daiAmount,
+      cDaiAmount,
+      blockNumber: tx.blockNumber,
+      transactionHash: tx.transactionHash,
+    })};
     const withdrawHandler = (eventArgs) => emit({
       type: 'Withdraw',
       ...eventArgs,
@@ -37,11 +42,11 @@ function* poolTransactionListener(poolContract: Pool) {
     (newTx.type === 'Deposit') ?
       yield put(addPoolTx({
         poolAddress: poolContract.address,
-        userAddress: newTx.user,
+        userAddress: newTx.address,
         type: 'Deposit',
         txHash: newTx.transactionHash || '0x',
         time: new Date(txDate.timestamp * 1000),
-        amount: Number(formatEther(newTx.amountInCollateral)),
+        amount: newTx.daiAmount.toNumber(),
       })) :
       yield put(addPoolTx({
         poolAddress: poolContract.address,
@@ -68,20 +73,20 @@ function* poolWatcherSaga(action) {
       toBlock: 'latest',
     })
 
-    const depositTxActions = yield depositLogs.map(
+    const depositTxActions = yield Promise.all(depositLogs.map(
       async log => {
         const parsedDeposit = poolContract.interface.parseLog(log).values;
-
+        const txDate = await provider.getBlock(log.blockNumber || 0);
         return addPoolTx({
           poolAddress: poolContract.address,
           userAddress: parsedDeposit.user,
           type: 'Deposit',
           txHash: log.transactionHash || '0x',
-          time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
-          amount: Number(formatEther(parsedDeposit.amountInCollateral)),
+          time: new Date(txDate.timestamp * 1000),
+          amount: parsedDeposit.amountInCollateral.toNumber(),
         })
-      });
-
+      }));
+    debugger;
     const withdrawLogs: Log[] = yield call([provider, provider.getLogs], {
       ...poolContract.filters.Withdraw(null, null, null),
       fromBlock: 0,
