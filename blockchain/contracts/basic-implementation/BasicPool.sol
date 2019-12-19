@@ -356,6 +356,10 @@ contract BasicPool is WhitelistAdminRole {
         return users_[_user].collateralInvested;
     }
 
+    function penaltyPotBalance() public view returns(uint256) {
+        return penaltyPot_;
+    }
+
     function getUserInfo(
         address _user
     )
