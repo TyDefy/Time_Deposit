@@ -1,8 +1,6 @@
 import { BlockchainContext } from "blockchainContext";
 import { getContext, takeEvery, call, put, fork, take } from "redux-saga/effects";
-// import { Log } from "ethers/providers";
 import { poolDeployed, addPoolTx } from "./actions";
-// import { eventChannel } from "redux-saga";
 import { getType } from "typesafe-actions";
 import { Contract } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
@@ -17,17 +15,24 @@ function* poolTransactionListener(poolContract: Pool) {
   const poolTransactionChannel = eventChannel(emit => {
     const depositHandler = (address, daiAmount, cDaiAmount, tx) => {
       emit({
-      type: 'Deposit',
-      address,
-      daiAmount,
-      cDaiAmount,
-      blockNumber: tx.blockNumber,
-      transactionHash: tx.transactionHash,
-    })};
-    const withdrawHandler = (eventArgs) => emit({
-      type: 'Withdraw',
-      ...eventArgs,
-    });
+        type: 'Deposit',
+        address,
+        daiAmount,
+        cDaiAmount,
+        blockNumber: tx.blockNumber,
+        transactionHash: tx.transactionHash,
+      })
+    };
+    const withdrawHandler = (address, withdrawAmount, penaltyAmount, tx) => {
+      emit({
+        type: 'Withdraw',
+        address,
+        withdrawAmount,
+        penaltyAmount,
+        blockNumber: tx.blockNumber,
+        transactionHash: tx.transactionHash,
+      })
+    };
     poolContract.on(poolContract.filters.Deposit(null, null, null), depositHandler);
     poolContract.on(poolContract.filters.Withdraw(null, null, null), withdrawHandler);
     return () => {
@@ -46,11 +51,11 @@ function* poolTransactionListener(poolContract: Pool) {
         type: 'Deposit',
         txHash: newTx.transactionHash || '0x',
         time: new Date(txDate.timestamp * 1000),
-        amount: newTx.daiAmount.toNumber(),
+        amount: Number(formatEther(newTx.daiAmount)),
       })) :
       yield put(addPoolTx({
         poolAddress: poolContract.address,
-        userAddress: newTx.user,
+        userAddress: newTx.address,
         type: 'Withdraw',
         txHash: newTx.transactionHash || '0x',
         time: new Date(txDate.timestamp * 1000),
@@ -76,17 +81,16 @@ function* poolWatcherSaga(action) {
     const depositTxActions = yield Promise.all(depositLogs.map(
       async log => {
         const parsedDeposit = poolContract.interface.parseLog(log).values;
-        const txDate = await provider.getBlock(log.blockNumber || 0);
         return addPoolTx({
           poolAddress: poolContract.address,
           userAddress: parsedDeposit.user,
           type: 'Deposit',
           txHash: log.transactionHash || '0x',
-          time: new Date(txDate.timestamp * 1000),
-          amount: parsedDeposit.amountInCollateral.toNumber(),
+          time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
+          amount: Number(formatEther(parsedDeposit.amountInCollateral)),
         })
       }));
-    debugger;
+      
     const withdrawLogs: Log[] = yield call([provider, provider.getLogs], {
       ...poolContract.filters.Withdraw(null, null, null),
       fromBlock: 0,
@@ -114,6 +118,7 @@ function* poolWatcherSaga(action) {
     }
   } catch (error) {
     console.log('There was an error getting the pools transaction logs');
+    console.log(error);
   }
 
   yield fork(poolTransactionListener, poolContract);

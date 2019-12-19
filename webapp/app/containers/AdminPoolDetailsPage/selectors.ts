@@ -11,10 +11,10 @@ import { selectPool } from 'containers/PoolDetailsPage/selectors';
 const selectAdminPoolDetails = createSelector(
   selectPool,
   pool => {
-    const participants = new Set(pool.transactions?.map(p => p.address))
+    const participants = new Set(pool.transactions?.map(p => p.userAddress))
     const poolParticipants = [...participants]
       .map(participant => {
-        const userTransactions = pool.transactions?.filter(t => t.address === participant);
+        const userTransactions = pool.transactions?.filter(t => t.userAddress === participant);
         const userContribution = userTransactions?.reduce((userContributed, transaction) => 
           transaction.type === 'Deposit' ? userContributed += transaction.amount : userContributed -= transaction.amount, 0) || 0;
         return {

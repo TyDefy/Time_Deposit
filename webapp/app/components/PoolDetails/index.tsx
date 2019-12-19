@@ -139,7 +139,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         <TableBody>
           {transactions?.map(t =>
             <TableRow>
-              <TableCell>{t.address}</TableCell>
+              <TableCell>{t.userAddress}</TableCell>
               <TableCell>{dayjs(t.time).format('YYYY-MM-DD HH:mm')}</TableCell>
               <TableCell>{t.type}</TableCell>
               <TableCell>{t.amount.toFixed(2)}</TableCell>

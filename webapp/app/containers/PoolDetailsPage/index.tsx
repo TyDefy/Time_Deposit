@@ -35,7 +35,7 @@ export interface StateProps {
 }
 
 export interface Transaction {
-  address: string;
+  userAddress: string;
   time: Date;
   type: 'Deposit' | 'Withdraw';
   amount: number;
