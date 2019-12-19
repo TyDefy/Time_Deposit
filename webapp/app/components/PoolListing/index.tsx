@@ -9,10 +9,11 @@ import { Theme, createStyles, withStyles, WithStyles, Container, Typography, But
 import { Pool } from 'containers/App';
 import { forwardTo } from 'utils/history';
 
-const styles = ({palette}: Theme) =>
+const styles = ({spacing, palette}: Theme) =>
   createStyles({
     pageHeader: {
       justifyContent: 'space-between',
+      marginTop: spacing(3)
     },
     tableHeader: {
       backgroundColor: 'lightgrey',
@@ -20,6 +21,11 @@ const styles = ({palette}: Theme) =>
     },
     poolRow: {
       cursor: 'pointer'
+    },
+    header: {
+      float: "left",
+      margin: "20px 0 0 8px",
+      fontWeight: 'bold',
     }
   });
 
@@ -30,8 +36,8 @@ interface OwnProps extends WithStyles<typeof styles> {
 const PoolListing: React.FunctionComponent<OwnProps> = ({ pools, classes }: OwnProps) => (
   <Container maxWidth='lg'>
     <Grid container direction='row' className={classes.pageHeader}>
-      <Typography variant='h3'>Pool Overview</Typography>
-      <Button onClick={() => forwardTo('/admin/pool/create')}>Create New Pool</Button>
+      <Typography variant='h4' className={classes.header}>Pool Overview</Typography>
+      <Button color='primary' onClick={() => forwardTo('/admin/pool/create')}>Create New Pool</Button>
     </Grid>
     <Table>
       <TableHead className={classes.tableHeader}>

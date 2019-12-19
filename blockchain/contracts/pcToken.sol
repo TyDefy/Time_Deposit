@@ -21,9 +21,6 @@ contract pcToken is ICToken, ERC20 {
     uint256 internal totalBorrows_;
     IERC20 internal collateralInstance_;
 
-    mapping (address => mapping (address => uint256)) internal allowed;
-    mapping (address => uint256) internal balances;
-
     event Approval(
         address indexed owner,
         address indexed spender,
@@ -69,28 +66,19 @@ contract pcToken is ICToken, ERC20 {
     }
 
     function redeem(uint redeemTokens) public returns (uint) {
-        // require(
-        //     balances[msg.sender] >= redeemTokens,
-        //     "User has insuficient balance"
-        // );
-
-        uint tokenAmount = redeemTokens/exchangeRateCurrent();
-
-        balances[msg.sender] = balances[msg.sender].sub(tokenAmount);
+        // Working out how much Dai the redeemed tokens are worth
+        uint tokenValueInDai = (redeemTokens*exchangeRateCurrent())/10**28 + 1;
+        _burn(msg.sender, redeemTokens);
 
         require(
             collateralInstance_.transfer(
                 msg.sender,
-                tokenAmount
+                tokenValueInDai
             ),
             "Transerfer failed"
         );
 
-        // totalSupply_.sub(tokenAmount);
-        
-        emit Transfer(address(this), msg.sender, tokenAmount);
-
-        return tokenAmount;
+        return 0;
     }
 
     function redeemUnderlying(uint redeemAmount) public returns(uint) {

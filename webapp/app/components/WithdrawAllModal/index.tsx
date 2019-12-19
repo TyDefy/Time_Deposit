@@ -7,9 +7,28 @@
 import React, { useState, useEffect } from 'react';
 import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, TextField, Button } from '@material-ui/core';
 
-const styles = (theme: Theme) =>
+const styles = ({palette, spacing}: Theme) =>
   createStyles({
-    // JSS in CSS goes here
+    container: {
+      width: spacing(20)*2
+    },
+    buttonBar :{
+
+    },
+    header: {
+      margin: spacing(3),
+      fontWeight: "bold"
+    },
+    label: {
+      fontSize: '1em',
+      opacity: '60%',
+      fontWeight: 'bold',
+      margin: "12px 8px 0px 12px"
+    },
+    value: {
+      fontSize: '1.5em',
+      margin: "8px 8px 0px 12px"
+    }
   });
 
 interface OwnProps extends WithStyles<typeof styles> {
@@ -25,7 +44,8 @@ const WithdrawAllModal: React.FC<OwnProps> = ({
   type,
   availableFunds,
   onClose,
-  onSubmit
+  onSubmit,
+  classes
 }: OwnProps) => {
   const [value, setValue] = useState(0);
   const [penaltyAmount, setPenaltyAmount] = useState(0);
@@ -44,21 +64,23 @@ const WithdrawAllModal: React.FC<OwnProps> = ({
   }, [value]);
 
   const submit = () => onSubmit(value);
-  return <Container maxWidth='sm'>
+  return <Container maxWidth='sm' className={classes.container}>
     <Grid container direction='column' alignItems='center'>
-      <Typography variant='h6'>Withdraw All</Typography>
-      <Typography>Pool</Typography>
-      <Typography>{`${name} (${type})`}</Typography>
-      <Typography>Available Funds</Typography>
-      <Typography>{availableFunds.toFixed(2)}</Typography>
-      <Typography>Amount</Typography>
+      <Typography className={classes.header} variant='h6'>Withdraw All</Typography>
+      <Typography className={classes.label}>Pool</Typography>
+      <Typography className={classes.value}>{`${name} (${type})`}</Typography>
+      <Typography className={classes.label}>Available Funds</Typography>
+      <Typography className={classes.value}>{availableFunds.toFixed(2)}</Typography>
+      <Typography className={classes.label}>Amount</Typography>
       <TextField type='number' value={value} onChange={(e) => setValue(parseInt(e.target.value))}/>
-      <Typography>Penalty</Typography>
-      <Typography>{penaltyAmount.toFixed(2)}</Typography>
-      <Typography>Total to Receive</Typography>
-      <Typography>{(value-penaltyAmount).toFixed(2)}</Typography>
-      <Button onClick={onClose}>Cancel</Button>
-      <Button onClick={submit}>Submit</Button>
+      <Typography className={classes.label}>Penalty</Typography>
+      <Typography className={classes.value}>{penaltyAmount.toFixed(2)}</Typography>
+      <Typography className={classes.label}>Total to Receive</Typography>
+      <Typography className={classes.value}>{(value-penaltyAmount).toFixed(2)}</Typography>
+      <Grid container direction='row' justify='space-around' className={classes.buttonBar}>
+      <Button color='primary' onClick={onClose}>Cancel</Button>
+      <Button color='primary' onClick={submit}>Submit</Button>
+      </Grid>
     </Grid>
   </Container>
 };
