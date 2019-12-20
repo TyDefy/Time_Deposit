@@ -6,6 +6,8 @@ import { ApplicationRootState } from 'types';
 
 export const selectEthAddress = createSelector((state: ApplicationRootState) => state.app.ethAddress, substate => substate);
 export const selectDaiBalance = createSelector((state: ApplicationRootState) => state.app.daiBalance, substate => substate);
+export const selectLatestPoolTxTime = (poolAddress: string) => createSelector((state: ApplicationRootState) => 
+  state.pools, pools => pools[poolAddress].transactions.map(t => t.time).reduce((a, b) => a > b ? a : b));
 
 const selectApp = createStructuredSelector<RootState, StateProps>({
   isMetamaskInstalled: createSelector((state: ApplicationRootState) => state.app.isMetamaskInstalled, (substate) => substate),

@@ -1,5 +1,5 @@
 import { BlockchainContext } from "blockchainContext";
-import { getContext, takeEvery, call, put, fork, take } from "redux-saga/effects";
+import { getContext, takeEvery, call, put, fork, take, select } from "redux-saga/effects";
 import { poolDeployed, addPoolTx } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract } from "ethers";
@@ -8,6 +8,7 @@ import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/Bas
 import { Log } from "ethers/providers";
 import { formatEther } from "ethers/utils";
 import { eventChannel } from "redux-saga";
+import { selectLatestPoolTxTime } from "./selectors";
 
 function* poolTransactionListener(poolContract: Pool) {
   const { provider }: BlockchainContext = yield getContext('blockchain');
@@ -44,23 +45,29 @@ function* poolTransactionListener(poolContract: Pool) {
   while (true) {
     const newTx = yield take(poolTransactionChannel);
     const txDate = yield call([provider, provider.getBlock], newTx.blockNumber);
-    (newTx.type === 'Deposit') ?
-      yield put(addPoolTx({
-        poolAddress: poolContract.address,
-        userAddress: newTx.address,
-        type: 'Deposit',
-        txHash: newTx.transactionHash || '0x',
-        time: new Date(txDate.timestamp * 1000),
-        amount: Number(formatEther(newTx.daiAmount)),
-      })) :
-      yield put(addPoolTx({
-        poolAddress: poolContract.address,
-        userAddress: newTx.address,
-        type: 'Withdraw',
-        txHash: newTx.transactionHash || '0x',
-        time: new Date(txDate.timestamp * 1000),
-        amount: Number(formatEther(newTx.amount.add(newTx.penalty)))
-      }))
+    const latestTx = yield select(selectLatestPoolTxTime(poolContract.address));
+    debugger;
+    if (new Date(txDate.timestamp * 1000) > latestTx) {
+      (newTx.type === 'Deposit') ?
+        yield put(addPoolTx({
+          poolAddress: poolContract.address,
+          userAddress: newTx.address,
+          type: 'Deposit',
+          txHash: newTx.transactionHash || '0x',
+          time: new Date(txDate.timestamp * 1000),
+          amount: Number(formatEther(newTx.daiAmount)),
+        })) :
+        yield put(addPoolTx({
+          poolAddress: poolContract.address,
+          userAddress: newTx.address,
+          type: 'Withdraw',
+          txHash: newTx.transactionHash || '0x',
+          time: new Date(txDate.timestamp * 1000),
+          amount: Number(formatEther(newTx.amount.add(newTx.penalty)))
+        }))
+    } else {
+      console.log('duplicate or old tx detected');
+    }
   }
 }
 
@@ -90,7 +97,7 @@ function* poolWatcherSaga(action) {
           amount: Number(formatEther(parsedDeposit.amountInCollateral)),
         })
       }));
-      
+
     const withdrawLogs: Log[] = yield call([provider, provider.getLogs], {
       ...poolContract.filters.Withdraw(null, null, null),
       fromBlock: 0,
