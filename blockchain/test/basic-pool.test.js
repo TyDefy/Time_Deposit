@@ -837,7 +837,7 @@ describe("Basic Pool Tests", async () => {
         });
 
         it("Get interest", async () => {
-            let interestRatePerBlock = await basicPoolInstance.getInterestRatePerBlock();
+            let interestRatePerBlock = await basicPoolInstance.getInterestRatePerYear();
 
             assert.equal(
                 interestRatePerBlock.toString(),

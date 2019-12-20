@@ -51,7 +51,8 @@ const test_settings = {
             type: 1
         },
         pool: {
-            name: "3 Month Savings Pool"
+            name: "3 Month Savings Pool",
+            description: "A short term savings commitment mechanism"
         }
     }
 }
