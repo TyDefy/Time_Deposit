@@ -178,21 +178,20 @@ contract BasicPool is WhitelistAdminRole {
         );
 
         emit log(users_[msg.sender].balance);
-        // 4737129700923136780314
+        // log bal 0
+        //4737129700923136780314
+        //473712970092
+        // ful amount of cdai
           
         if(penaltyAmount != 0) {
             // If there is a penalty, this applies it
             uint256 penaltyAmountInCdai = (
-                    penaltyAmount*10**18
+                    penaltyAmount*10**28
                 )/cTokenInstance_.exchangeRateCurrent();
-            // Updates the balance of the penalty pot
-            penaltyPot_ = penaltyPot_ + penaltyAmountInCdai;
-            // Updates the balance of the user
-            users_[msg.sender].balance = users_[msg.sender].balance - penaltyAmountInCdai;
 
             if(feePercentage_ != 0) {
                 // If the fee has been set up, this works it out
-                uint256 fee = ((penaltyAmountInCdai*feePercentage_)/10**19);
+                uint256 fee = ((penaltyAmountInCdai*feePercentage_)/10**18);
                 // Works out the fee in dai
                 uint256 feeInDai = ((penaltyAmount*feePercentage_)/100);
                 // Updates the admin balances with the fee
@@ -200,11 +199,18 @@ contract BasicPool is WhitelistAdminRole {
                 users_[admin_].balance += fee;                
                 // Updates the balance of the user
                 users_[msg.sender].balance = users_[msg.sender].balance - fee;
-                // Updates the balance of the penalty pot
-                penaltyPot_ = penaltyPot_ - fee;
+                // Remove the fee from the penalty amount
+                penaltyAmountInCdai = penaltyAmountInCdai - fee;
             }
+            // Updates the balance of the user
+            users_[msg.sender].balance = users_[msg.sender].balance - penaltyAmountInCdai;
+            // Updates the balance of the penalty pot
+            penaltyPot_ = penaltyPot_ + penaltyAmountInCdai;
+
             emit log(users_[msg.sender].balance);
-            // 4737129700852079834801
+            // log bal 1
+            //4737129700852079834801
+            // without the penalty 
         } 
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
@@ -213,7 +219,7 @@ contract BasicPool is WhitelistAdminRole {
         require(
             cTokenInstance_.redeemUnderlying(withdrawAmount) == 0,
             "Interest collateral transfer failed"
-        );
+        );// log 2/3
 
         uint256 balanceAfter = collateralInstance_.balanceOf(address(this));
         uint256 balanceAfterInCdai = cTokenInstance_.balanceOf(address(this));
@@ -221,14 +227,15 @@ contract BasicPool is WhitelistAdminRole {
         uint256 cDaiBurnt = balanceBeforeInCdai - balanceAfterInCdai;
         uint256 daiRecived = balanceAfter - balanceBefore;
 
-        totalCCollateral_ -= cDaiBurnt;
-        users_[msg.sender].collateralInvested -= _amount;
-        users_[msg.sender].balance -= cDaiBurnt;
+        totalCCollateral_ = totalCCollateral_ - cDaiBurnt;
+        users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - _amount;
+        users_[msg.sender].balance = users_[msg.sender].balance - cDaiBurnt;
         users_[msg.sender].lastWtihdraw = now;
 
         emit log(users_[msg.sender].balance);
-        // ??
-        //
+        // log bal 4
+        //710569455067413571534
+        // User balance is not 0
 
         require(
             collateralInstance_.transfer(
@@ -236,13 +243,33 @@ contract BasicPool is WhitelistAdminRole {
                 daiRecived
             ),
             "Collateral transfer failed"
-        );
+        );// log 5
 
         emit Withdraw(
             msg.sender,
             withdrawAmount,
             penaltyAmount
-        );
+        );// log 6
+
+        uint256 withdrawAmountInCdai = (
+                    withdrawAmount*10**28
+                )/cTokenInstance_.exchangeRateCurrent();//473712970092
+
+        uint256 penaltyAmountInCdai = (
+                    penaltyAmount*10**28
+                )/cTokenInstance_.exchangeRateCurrent();//0
+
+        emit Withdraw(
+            msg.sender,
+            withdrawAmountInCdai,
+            penaltyAmountInCdai
+        );// log 6
+
+        emit Withdraw(
+            msg.sender,
+            daiRecived,
+            cDaiBurnt
+        );// log 6
     }
 
     function withdrawInterest() public killSwitch() {

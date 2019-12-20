@@ -551,12 +551,12 @@ describe("Basic Pool Tests", async () => {
              * 4 737 129 700 923 136 780 314
              */
             console.log("User withdraw information");
-            console.log("Can withdraw?:\t" + withdrawInformation[0]);
+            console.log("Can withdraw?:\t\t" + withdrawInformation[0]);
             console.log("Withdraw amount:\t" + withdrawInformation[1].toString());
             console.log("Penalty amount:\t\t" + withdrawInformation[2].toString());
-            console.log("User before withdraw");
-            console.log("Pool balance colalteral:\t" + balanceBefore[0].toString());
-            console.log("Pool balance cdai:\t" + balanceBefore[1].toString());
+            console.log("\nUser before withdraw");
+            console.log("user pool dai:\t\t" + balanceBefore[0].toString());
+            console.log("user pool cdai:\t\t" + balanceBefore[1].toString());
             console.log("User cDai balance:\t" + balanceInPcToken.toString());
             console.log("\nPool before withdraw");
             console.log("pool dai balance:\t" + poolDaiBalanceAfterDeposit.toString());
@@ -607,27 +607,33 @@ describe("Basic Pool Tests", async () => {
             let tx = await(await basicPoolInstance.from(user1).withdraw(
                 test_settings.basicPool.deposit
             )).wait();
-
-            // console.log("Before withdrawing:" + tx.events[0].args.balance.toString())
-            // console.log(tx.events[1].args.balance.toString())
-            // console.log(tx.events[2].args)
-            // console.log("After withdraw:")
+            
+            console.log("\nlog balance 0")
             console.log(tx.events[0].args.balance.toString())
-            // before withdrawing, full cDai balance
-            //4737129700923136780314
-            console.log(tx.events[1].args.balance.toString())
-            // Should be: user balance - penalty
-            //4737129700852079834801
+            console.log("\nlog balance 1")
+            console.log(tx.events[1])
+            console.log("\nlog 2")
             console.log(tx.events[2])
-            //??
-            //4026560245784666263267
+            console.log("\nlog 3")
             console.log(tx.events[3])
-            //??
-            //85000000000000000000
-            console.log(tx.events[4].args.balance.toString())
-            //710569455067413571534
+            console.log("\nlog balance 4")
+            console.log(tx.events[4])
+            console.log("\nlog 5")
             console.log(tx.events[5])
-            //85000000000000000000
+            console.log("\nWithdraw event\namount & penalty")
+            console.log(tx.events[6])
+            console.log("\nlog 7")
+            console.log(tx.events[7])
+
+            /**
+             * User cDai balance:           4 737 129700923136780314
+             * The amount of cDai burnt:    4 026 560245784666263267 
+             * Remaining (i.e penalty):       710 569455100000000000
+             * User cDai after withdraw:      710 569455067413571534
+             * Penalty pot balance:           710 56945513
+             * 
+             * 4737129700923136780314
+             */
 
             /**
              * User initial balance in cDai (and pools):
@@ -668,12 +674,13 @@ describe("Basic Pool Tests", async () => {
             let poolDaiBalanceAfter = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
             let poolCdaiBalanceAfter = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
             let penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
+            
+            console.log("\nUser After withdraw");
             console.log("Penalty pot balance")
             console.log(penaltyPotBalance.toString())
-            console.log("User After withdraw");
             console.log("user dai balance:\t" + balanceDaiAFter.toString());
-            console.log("user dai pool balance:\t" + balanceOfUserInPoolAfterWithdraw[0].toString());
-            console.log("User cdai pool balance:\t" + balanceOfUserInPoolAfterWithdraw[1].toString());
+            console.log("user pool dai:\t" + balanceOfUserInPoolAfterWithdraw[0].toString());
+            console.log("User pool cdai:\t" + balanceOfUserInPoolAfterWithdraw[1].toString());
             console.log("\nPool after withdraw");
             console.log("Pool dai balance:\t" + poolDaiBalanceAfter.toString());
             console.log("Pool cDai balance:\t" + poolCdaiBalanceAfter.toString());
