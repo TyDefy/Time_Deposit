@@ -1,14 +1,40 @@
 import { BlockchainContext } from "blockchainContext";
 import { getContext, takeEvery, call, put, fork, take, select } from "redux-saga/effects";
-import { poolDeployed, addPoolTx } from "./actions";
+import { poolDeployed, addPoolTx, connectMetamask, deposit } from "./actions";
 import { getType } from "typesafe-actions";
-import { Contract } from "ethers";
+import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
 import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/BasicPool';
 import { Log } from "ethers/providers";
-import { formatEther } from "ethers/utils";
+import { formatEther, BigNumber } from "ethers/utils";
 import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime } from "./selectors";
+import { enqueueSnackbar } from "containers/Notification/actions";
+
+function* poolDepositListener(poolContract: Pool) {
+  while (true) {
+    const { signer }: BlockchainContext = yield getContext('blockchain');
+
+    if (signer) {
+      //@ts-ignore
+      const writeableContract = poolContract.connect(signer);
+      const action = yield take(getType(deposit.request));
+      if (action.payload.poolAddress === poolContract.address) {
+        // TODO: Check allowance and increase if necessary
+        const tx: ContractTransaction = yield call([poolContract, poolContract.deposit], action.payload.amount);
+        yield call([tx, tx.wait])
+      }
+    } else {
+      yield put(enqueueSnackbar({
+        message: 'Please connect with metamask to continue',
+        options: {
+          variant: 'error'
+        }
+      }))
+      yield take(getType(connectMetamask.success));
+    }
+  }
+}
 
 function* poolTransactionListener(poolContract: Pool) {
   const { provider }: BlockchainContext = yield getContext('blockchain');
@@ -129,6 +155,7 @@ function* poolWatcherSaga(action) {
   }
 
   yield fork(poolTransactionListener, poolContract);
+  yield fork(poolDepositListener, poolContract);
 }
 
 export default function* poolSaga() {
