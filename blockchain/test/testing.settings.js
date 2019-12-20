@@ -25,7 +25,8 @@ const test_settings = {
         withdrawPenalty: ethers.utils.parseUnits("75", 17),
         withdrawAmountOn100: ethers.utils.parseUnits("85", 18),
         penaltyAmountOn100: ethers.utils.parseUnits("15", 18),
-        penaltyAmountInCdai: "710569455138470517047"
+        penaltyAmountInCdai: "710569455138470517047",
+        fee: 20
     },
     pDaiSettings: {
         name: "pDai",

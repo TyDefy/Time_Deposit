@@ -515,7 +515,6 @@ describe("Basic Pool Tests", async () => {
         it("💵 Can withdraw (with penalty)", async () => {   
             let poolDaiBalanceBefore = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
             let poolCdaiBalanceBefore = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
-            let userDaiBalanceBefore = await pDaiInstance.balanceOf(user1.signer.address);
 
             assert.equal(
                 poolDaiBalanceBefore.toString(),
@@ -698,7 +697,138 @@ describe("Basic Pool Tests", async () => {
         });
 
         it("💵 Can withdraw (with penalty and fee)", async () => {
+            await basicPoolInstance.from(admin).init(test_settings.basicPool.fee);
 
+            let feeAmount = await basicPoolInstance.fee();
+
+            assert.equal(
+                feeAmount.toString(),
+                test_settings.basicPool.fee,
+                "Fee has not been implemented"
+            );
+
+            let poolDaiBalanceBefore = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            let poolCdaiBalanceBefore = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            let userDaiBalanceBefore = await pDaiInstance.balanceOf(user1.signer.address);
+
+            assert.equal(
+                poolDaiBalanceBefore.toString(),
+                0,
+                "Pool has Dai before mint"
+            );
+            assert.equal(
+                poolCdaiBalanceBefore.toString(),
+                0,
+                "Pool has cDai before mint"
+            );
+            
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+            
+            let balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
+            let balanceInPcToken = await cDaiInstance.balanceOf(user1.signer.address);
+            let poolDaiBalanceAfterDeposit = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            let poolCdaiBalanceAfterDeposit = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            let withdrawInformation = await basicPoolInstance.canWithdraw(
+                user1.signer.address,
+                test_settings.basicPool.deposit
+            );
+
+            assert.equal(
+                poolDaiBalanceAfterDeposit.toString(),
+                0,
+                "Pool incorrectly has Dai after user deposit"
+            );
+            assert.equal(
+                poolCdaiBalanceAfterDeposit.toString(),
+                test_settings.pcTokenSettings.mintAmount.toString(),
+                "Pool has incorrect cDai balance after user deposit"
+            );
+            assert.equal(
+                balanceBefore[0].toString(),
+                test_settings.basicPool.deposit.toString(),
+                "User pool dai balance incorrect"
+            );
+            assert.equal(
+                balanceBefore[1].toString(),
+                test_settings.pcTokenSettings.mintAmount.toString(),
+                "User pool cDai balance incorrect"
+            );
+            assert.equal(
+                balanceInPcToken.toString(),
+                0,
+                "user incorrectly has cDai balance (against cDai contract)"
+            );
+            assert.equal(
+                withdrawInformation[0],
+                true,
+                "User is incorrectly blocked from withdrawing"
+            );
+            assert.equal(
+                withdrawInformation[1].toString(),
+                test_settings.basicPool.withdrawAmountOn100.toString(),
+                "User is incorrectly blocked from withdrawing"
+            );
+            assert.equal(
+                withdrawInformation[2].toString(),
+                test_settings.basicPool.penaltyAmountOn100.toString(),
+                "User is incorrectly blocked from withdrawing"
+            );
+            assert.equal(
+                balanceBefore[0].toString(),
+                test_settings.basicPool.deposit.toString(),
+                "Pool incorrectly has Dai after deposit"
+            );
+            assert.equal(
+                poolDaiBalanceAfterDeposit.toString(),
+                0,
+                "Pool incorrectly has Dai after deposit"
+            );
+            assert.equal(
+                balanceInPcToken.toString(),
+                0,
+                "User balance in cDai is incorrect"
+            );
+            assert.equal(
+                poolCdaiBalanceAfterDeposit.toString(),
+                balanceBefore[1].toString(),
+                "Pool cDai is different to deposit balance"
+            );
+
+            let withdrawInfo = await basicPoolInstance.canWithdraw(
+                user1.signer.address,
+                test_settings.basicPool.withdraw
+            );
+
+            assert.equal(
+                withdrawInfo[0],
+                true,
+                "User is blocked from withdrawing with penalty"
+            );
+            assert.equal(
+                withdrawInfo[1].toString(),
+                test_settings.basicPool.withdrawAmount,
+                "Withdraw amount is not correct"
+            );
+            assert.equal(
+                withdrawInfo[2].toString(),
+                test_settings.basicPool.withdrawPenalty,
+                "Penalty amount is not correct"
+            );
+
+            await assert.notRevert(basicPoolInstance.from(user1).withdraw(
+                test_settings.basicPool.deposit
+            ));
+
+            //TODO check that the fee has been removed from the penalty,
+            //TODO that it has not been removed from pool cDai balance
+            //TODO check that admin user has been credited correct dai and cDai amount
         });
 
         it("🚫 Negative testing withdraw", async () => {

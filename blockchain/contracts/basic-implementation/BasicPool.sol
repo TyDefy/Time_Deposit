@@ -370,6 +370,10 @@ contract BasicPool is WhitelistAdminRole {
         return penaltyPot_;
     }
 
+    function fee() public view returns(uint256) {
+        return feePercentage_;
+    }
+
     function getUserInfo(
         address _user
     )
