@@ -340,6 +340,13 @@ contract BasicPool is WhitelistAdminRole {
             uint256
         ) 
     {
+        if(users_[_user].collateralInvested == 0) {
+            return (false, 0, 0);
+        }
+        if(users_[_user].collateralInvested < _amount) {
+            _amount = users_[_user].collateralInvested;
+        }
+
         bool withdrawAllowed = true;
         uint256 withdrawAmount = _amount;
         uint256 penaltyAmount = 0;

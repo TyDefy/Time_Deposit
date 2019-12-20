@@ -628,15 +628,30 @@ describe("Basic Pool Tests", async () => {
                 "Penalty amount is not correct"
             );
 
-            await basicPoolInstance.from(user1).withdraw(
+            await assert.notRevert(basicPoolInstance.from(user1).withdraw(
                 test_settings.basicPool.deposit
-            );
+            ));
 
             let withdrawInfo2 = await basicPoolInstance.canWithdraw(
                 user1.signer.address,
                 test_settings.basicPool.deposit
             );
-            console.log(withdrawInfo2)
+
+            assert.equal(
+                withdrawInfo2[0],
+                false,
+                "User can withdraw with 0 balance"
+            );
+            assert.equal(
+                withdrawInfo2[1].toString(),
+                0,
+                "User has withdraw allowance (dai) with 0 balance"
+            );
+            assert.equal(
+                withdrawInfo2[2].toString(),
+                0,
+                "User has withdraw allowance (cDai) with 0 balance"
+            );
 
             let balanceInPcTokenAfter = await cDaiInstance.balanceOf(user1.signer.address);
             let userDaiBalanceAfterWithdraw = await pDaiInstance.balanceOf(user1.signer.address);
