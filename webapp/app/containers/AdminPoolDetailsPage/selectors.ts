@@ -1,14 +1,41 @@
-import { createStructuredSelector } from 'reselect';
+import { createStructuredSelector, createSelector } from 'reselect';
 import { RootState } from 'containers/App/types';
 import { StateProps } from '.';
-
+import { OwnProps } from 'containers/PoolDetailsPage';
+import { selectPool } from 'containers/PoolDetailsPage/selectors';
 
 /**
  * Default selector used by AdminPoolDetailsPage
  */
 
-const selectAdminPoolDetailsPage = createStructuredSelector<RootState, StateProps>({
+const selectAdminPoolDetails = createSelector(
+  selectPool,
+  pool => {
+    const participants = new Set(pool.transactions?.map(p => p.userAddress))
+    const poolParticipants = [...participants]
+      .map(participant => {
+        const userTransactions = pool.transactions?.filter(t => t.userAddress === participant);
+        const userContribution = userTransactions?.reduce((userContributed, transaction) => 
+          transaction.type === 'Deposit' ? userContributed += transaction.amount : userContributed -= transaction.amount, 0) || 0;
+        return {
+          address: participant,
+          joined: userTransactions?.reduce((minDate, transaction) => minDate < transaction.time ? minDate : transaction.time, new Date()) || new Date(),
+          contributed: userContribution,
+          interest: 0, // TODO: Wire this up
+        }
+      });
+    return {
+      ...pool,
+      participantDetails: poolParticipants,
+      totalInterest: 0, 
+      feeRate: 0, 
+      pentalyRate: 0
+    }
+  }
+)
 
+const selectAdminPoolDetailsPage = createStructuredSelector<RootState, OwnProps, StateProps>({
+  pool: selectAdminPoolDetails,
 });
 
 export default selectAdminPoolDetailsPage;

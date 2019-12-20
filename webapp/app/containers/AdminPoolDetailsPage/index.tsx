@@ -16,7 +16,9 @@ interface OwnProps {}
 
 interface DispatchProps {}
 
-export interface StateProps {}
+export interface StateProps {
+  pool: PoolDetails,
+}
 
 export interface PoolParticipant {
   address: string;
@@ -47,7 +49,7 @@ const poolDetails: PoolDetails = {
   pentalyRate: 0.01,
   totalInterest: 10,
   participants: 5,
-  description: "",
+  transactions: [],
   participantDetails: [
     { address: '0x2', joined: new Date(), contributed: 10, interest: 1 },
     { address: '0x3', joined: new Date(), contributed: 10, interest: 1 },
@@ -61,7 +63,7 @@ const AdminPoolDetailsPage: React.FunctionComponent<Props> = (props: Props) => {
   return <AdminPoolDetails {...poolDetails} />
 };
 
-const mapStateToProps = (state) => selectAdminPoolDetailsPage(state);
+const mapStateToProps = (state, props) => selectAdminPoolDetailsPage(state, props);
 
 const mapDispatchToProps = (
   dispatch: Dispatch,

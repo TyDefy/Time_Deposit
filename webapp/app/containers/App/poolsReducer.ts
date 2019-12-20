@@ -24,6 +24,21 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         ...state,
         [action.payload.address]: {
           ...action.payload,
+          type: 'cDAI', // TODO: Get this from the action payload
+          interestRate: 0.05,
+          transactions: [],
+        }
+      }
+    }
+    case getType(AppActions.addPoolTx): {
+      return {
+        ...state,
+        [action.payload.poolAddress]: {
+          ...state[action.payload.poolAddress],
+          transactions: [
+            ...state[action.payload.poolAddress]?.transactions,
+            action.payload,
+          ],
         }
       }
     }

@@ -9,27 +9,27 @@ import { connect } from 'react-redux';
 
 import { compose, Dispatch } from 'redux';
 import Portfolio from 'components/Portfolio';
+import { Pool } from 'containers/App';
+import selectPortfolioPage from './selectors';
 
 interface OwnProps {}
 
 interface DispatchProps {}
 
-type Props = DispatchProps & OwnProps;
-
-const portfolioProps = {
-  totalHoldings: 1100,
-  portfolioInterestRate: 0.035,
-  contributed: 100,
-  interestAccrued: 100,
-  interestAvailable: 50,
-  pools: [
-    { address: '0x1', name: 'Test 1', type: 'cDAI', period: 1, balance: 500, participants: 100, interestRate: 0.035, description: "t" },
-    { address: '0x2', name: 'Test 2', type: 'cDAI', period: 2, balance: 1000, participants: 200, interestRate: 0.07, description: "t" },
-    { address: '0x3', name: 'Test 3', type: 'cDAI', period: 3, balance: 2000, participants: 500, interestRate: 0.105, description: "t" },
-  ],
+export interface StateProps {
+  pools: Array<Pool>,
+  totalHoldings: number,
+  portfolioInterestRate: number,
+  contributed: number,
+  interestAccrued: number,
+  interestAvailable: number,
 }
 
-const PortfolioPage: React.FC<Props> = (props: Props) => <Portfolio {...portfolioProps} />;
+type Props = StateProps & DispatchProps & OwnProps;
+
+const PortfolioPage: React.FC<Props> = (props: Props) => <Portfolio {...props} />;
+
+const mapStateToProps = (state) => selectPortfolioPage(state);
 
 const mapDispatchToProps = (
   dispatch: Dispatch,
@@ -41,7 +41,7 @@ const mapDispatchToProps = (
 };
 
 const withConnect = connect(
-  null,
+  mapStateToProps,
   mapDispatchToProps,
 );
 

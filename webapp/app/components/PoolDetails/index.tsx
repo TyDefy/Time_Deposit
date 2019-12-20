@@ -7,7 +7,7 @@
 import React from 'react';
 import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, Chip, Table, TableHead, TableRow, TableCell, TableBody, Button } from '@material-ui/core';
 import dayjs from 'dayjs';
-import { UserPoolDetails } from 'containers/PoolDetailsPage';
+import { Pool } from 'containers/App';
 
 const styles = ({ spacing , palette }: Theme) =>
   createStyles({
@@ -65,7 +65,7 @@ const styles = ({ spacing , palette }: Theme) =>
     }
   });
 
-interface OwnProps extends WithStyles<typeof styles>, UserPoolDetails { 
+interface OwnProps extends WithStyles<typeof styles>, Pool { 
   showModal(value: 'invest' | 'withdrawInterest' | 'withdrawAll'): void
 }
 
@@ -88,7 +88,12 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         <Grid item xs={4}><Typography variant='h3' className={classes.poolName}>{name}</Typography></Grid>
         <Grid item xs={4}><Chip className={classes.period} label={`${period} month(s)`} /></Grid>
         <Grid item xs={4}>
-          <Typography className={classes.currentInterest}>Current Interest: <strong className={classes.percentageInterest}>{`${(interestRate * 100).toFixed(2)} %`}</strong></Typography>
+          <Typography className={classes.currentInterest}>
+            Current Interest: 
+            <strong className={classes.percentageInterest}>
+              {`${((interestRate || 0) * 100).toFixed(2)} %`}
+            </strong>
+          </Typography>
         </Grid>
       </Grid>
       <Grid container direction='row' spacing={0} className={classes.poolDetailsRow}>
@@ -113,7 +118,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         </Grid>
         <Grid item xs={4}>
           <Typography  className={classes.label}>Your Interest</Typography>
-          <Typography  className={classes.value}>{interestAccrued.toFixed(2)}</Typography>
+          <Typography  className={classes.value}>{(interestAccrued || 0).toFixed(2)}</Typography>
         </Grid>
         <Grid item xs={4}>
           <Typography  className={classes.label}>Available Interest</Typography>
@@ -132,9 +137,9 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {transactions.map(t =>
+          {transactions?.map(t =>
             <TableRow>
-              <TableCell>{t.address}</TableCell>
+              <TableCell>{t.userAddress}</TableCell>
               <TableCell>{dayjs(t.time).format('YYYY-MM-DD HH:mm')}</TableCell>
               <TableCell>{t.type}</TableCell>
               <TableCell>{t.amount.toFixed(2)}</TableCell>

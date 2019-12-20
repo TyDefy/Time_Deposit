@@ -25,10 +25,21 @@ export const poolDeployed = createStandardAction('POOL_DEPLOYED')<{
   address: string, 
   withdraw: string,
   name: string,
-  description: string
+  description: string,
+  type: string,
+  period: number,
 }>();
 
 export const createPool = createAsyncAction(
   '@TX_REQUEST/CREATE_POOL',
   '@TX_SUCCESS/CREATE_POOL',
   '@TX_FAILURE/CREATE_POOL')<number,undefined,string>();
+
+export const addPoolTx = createStandardAction('ADD_POOL_TX')<{
+  poolAddress: string,
+  userAddress: string;
+  time: Date;
+  type: 'Deposit' | 'Withdraw';
+  amount: number;
+  txHash: string;
+}>()
