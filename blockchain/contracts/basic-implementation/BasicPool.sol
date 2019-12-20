@@ -206,7 +206,7 @@ contract BasicPool is WhitelistAdminRole {
         require(
             cTokenInstance_.redeemUnderlying(withdrawAmount) == 0,
             "Interest collateral transfer failed"
-        );// log 2/3
+        );
 
         uint256 balanceAfter = collateralInstance_.balanceOf(address(this));
         uint256 balanceAfterInCdai = cTokenInstance_.balanceOf(address(this));
@@ -225,33 +225,13 @@ contract BasicPool is WhitelistAdminRole {
                 daiRecived
             ),
             "Collateral transfer failed"
-        );// log 5
+        );
 
         emit Withdraw(
             msg.sender,
             withdrawAmount,
             penaltyAmount
-        );// log 6
-
-        uint256 withdrawAmountInCdai = (
-                    withdrawAmount*10**28
-                )/cTokenInstance_.exchangeRateCurrent();//473712970092
-
-        uint256 penaltyAmountInCdai = (
-                    penaltyAmount*10**28
-                )/cTokenInstance_.exchangeRateCurrent();//0
-
-        emit Withdraw(
-            msg.sender,
-            withdrawAmountInCdai,
-            penaltyAmountInCdai
-        );// log 6
-
-        emit Withdraw(
-            msg.sender,
-            daiRecived,
-            cDaiBurnt
-        );// log 6
+        );
     }
 
     function withdrawInterest() public killSwitch() {

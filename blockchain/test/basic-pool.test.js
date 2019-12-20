@@ -636,6 +636,7 @@ describe("Basic Pool Tests", async () => {
                 user1.signer.address,
                 test_settings.basicPool.deposit
             );
+            console.log(withdrawInfo2)
 
             let balanceInPcTokenAfter = await cDaiInstance.balanceOf(user1.signer.address);
             let userDaiBalanceAfterWithdraw = await pDaiInstance.balanceOf(user1.signer.address);
@@ -643,17 +644,17 @@ describe("Basic Pool Tests", async () => {
             let poolDaiBalanceAfter = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
             let poolCdaiBalanceAfter = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
             let penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
-            
-            console.log("\nUser After withdraw");
-            console.log("Penalty pot balance")
-            // console.log(penaltyPotBalance.toString())
-            // console.log("user dai balance:\t" + balanceDaiAFter.toString());
-            console.log("user pool dai:\t" + balanceOfUserInPoolAfterWithdraw[0].toString());
-            console.log("User pool cdai:\t" + balanceOfUserInPoolAfterWithdraw[1].toString());
-            console.log("\nPool after withdraw");
-            // console.log("Pool dai balance:\t" + poolDaiBalanceAfter.toString());
-            // console.log("Pool cDai balance:\t" + poolCdaiBalanceAfter.toString());
 
+            assert.equal(
+                balanceOfUserInPoolAfterWithdraw[0].toString(),
+                0,
+                "User has dai in pool after withdraw"
+            );
+            assert.equal(
+                balanceOfUserInPoolAfterWithdraw[1].toString(),
+                0,
+                "User has cDai in pool after withdraw"
+            );
             assert.equal(
                 userDaiBalanceAfterWithdraw.toString(),
                 test_settings.pDaiSettings.withdrawWithPenalty.toString(),
