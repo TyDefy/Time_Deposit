@@ -160,8 +160,6 @@ contract BasicPool is WhitelistAdminRole {
         );
     }
 
-    event log(uint256 balance);
-
     function withdraw(uint256 _amount) public killSwitch() {
         require(
             users_[msg.sender].collateralInvested >= _amount,
@@ -176,12 +174,6 @@ contract BasicPool is WhitelistAdminRole {
             _amount,
             users_[msg.sender].lastWtihdraw
         );
-
-        emit log(users_[msg.sender].balance);
-        // log bal 0
-        //4737129700923136780314
-        //473712970092
-        // ful amount of cdai
           
         if(penaltyAmount != 0) {
             // If there is a penalty, this applies it
@@ -206,11 +198,6 @@ contract BasicPool is WhitelistAdminRole {
             users_[msg.sender].balance = users_[msg.sender].balance - penaltyAmountInCdai;
             // Updates the balance of the penalty pot
             penaltyPot_ = penaltyPot_ + penaltyAmountInCdai;
-
-            emit log(users_[msg.sender].balance);
-            // log bal 1
-            //4737129700852079834801
-            // without the penalty 
         } 
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
@@ -231,11 +218,6 @@ contract BasicPool is WhitelistAdminRole {
         users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - _amount;
         users_[msg.sender].balance = users_[msg.sender].balance - cDaiBurnt;
         users_[msg.sender].lastWtihdraw = now;
-
-        emit log(users_[msg.sender].balance);
-        // log bal 4
-        //710569455067413571534
-        // User balance is not 0
 
         require(
             collateralInstance_.transfer(

@@ -546,22 +546,46 @@ describe("Basic Pool Tests", async () => {
                 test_settings.basicPool.deposit
             );
 
-            /**
-             * 4 740 000 000 000 000 000 000
-             * 4 737 129 700 923 136 780 314
-             */
-            console.log("User withdraw information");
-            console.log("Can withdraw?:\t\t" + withdrawInformation[0]);
-            console.log("Withdraw amount:\t" + withdrawInformation[1].toString());
-            console.log("Penalty amount:\t\t" + withdrawInformation[2].toString());
-            console.log("\nUser before withdraw");
-            console.log("user pool dai:\t\t" + balanceBefore[0].toString());
-            console.log("user pool cdai:\t\t" + balanceBefore[1].toString());
-            console.log("User cDai balance:\t" + balanceInPcToken.toString());
-            console.log("\nPool before withdraw");
-            console.log("pool dai balance:\t" + poolDaiBalanceAfterDeposit.toString());
-            console.log("pool cDai balance:\t" + poolCdaiBalanceAfterDeposit.toString());
-
+            assert.equal(
+                poolDaiBalanceAfterDeposit.toString(),
+                0,
+                "Pool incorrectly has Dai after user deposit"
+            );
+            assert.equal(
+                poolCdaiBalanceAfterDeposit.toString(),
+                test_settings.pcTokenSettings.mintAmount.toString(),
+                "Pool has incorrect cDai balance after user deposit"
+            );
+            assert.equal(
+                balanceBefore[0].toString(),
+                test_settings.basicPool.deposit.toString(),
+                "User pool dai balance incorrect"
+            );
+            assert.equal(
+                balanceBefore[1].toString(),
+                test_settings.pcTokenSettings.mintAmount.toString(),
+                "User pool cDai balance incorrect"
+            );
+            assert.equal(
+                balanceInPcToken.toString(),
+                0,
+                "user incorrectly has cDai balance (against cDai contract)"
+            );
+            assert.equal(
+                withdrawInformation[0],
+                true,
+                "User is incorrectly blocked from withdrawing"
+            );
+            assert.equal(
+                withdrawInformation[1].toString(),
+                test_settings.basicPool.withdrawAmountOn100.toString(),
+                "User is incorrectly blocked from withdrawing"
+            );
+            assert.equal(
+                withdrawInformation[2].toString(),
+                test_settings.basicPool.penaltyAmountOn100.toString(),
+                "User is incorrectly blocked from withdrawing"
+            );
             assert.equal(
                 balanceBefore[0].toString(),
                 test_settings.basicPool.deposit.toString(),
@@ -604,72 +628,17 @@ describe("Basic Pool Tests", async () => {
                 "Penalty amount is not correct"
             );
 
-            let tx = await(await basicPoolInstance.from(user1).withdraw(
+            await basicPoolInstance.from(user1).withdraw(
                 test_settings.basicPool.deposit
-            )).wait();
-            
-            console.log("\nlog balance 0")
-            console.log(tx.events[0].args.balance.toString())
-            console.log("\nlog balance 1")
-            console.log(tx.events[1])
-            console.log("\nlog 2")
-            console.log(tx.events[2])
-            console.log("\nlog 3")
-            console.log(tx.events[3])
-            console.log("\nlog balance 4")
-            console.log(tx.events[4])
-            console.log("\nlog 5")
-            console.log(tx.events[5])
-            console.log("\nWithdraw event\namount & penalty")
-            console.log(tx.events[6])
-            console.log("\nlog 7")
-            console.log(tx.events[7])
+            );
 
-            /**
-             * User cDai balance:           4 737 129700923136780314
-             * The amount of cDai burnt:    4 026 560245784666263267 
-             * Remaining (i.e penalty):       710 569455100000000000
-             * User cDai after withdraw:      710 569455067413571534
-             * Penalty pot balance:           710 56945513
-             * 
-             * 4737129700923136780314
-             */
-
-            /**
-             * User initial balance in cDai (and pools):
-             * 4 737 . 129700923136780314
-             * 
-             * Other:
-             * 4 737 . 129700852079834801
-             * 
-             * Users balance after withdraw:
-             *   710 . 569 455 067 413571534
-             * 
-             * Pool balance after withdraw:
-             *   710 . 569 455 138 470517047
-             * 
-             * Pool has the following left over:
-             * 4 737 . 129700923136780314
-             *   710 . 569455138470517047
-             * 4 027
-             * 
-             * which is 15% of the users initial balance, thus correct
-             * 
-             * but the user has almost this exact amount left over:
-             * 
-             * 4 737 . 129700923136780314
-             *   710 . 569455067413571534
-             * 
-             * Meaning somewhere along the lines, the user is being left this balance.
-             * As the tokens exchange rate has not been changed (as this is controlled)
-             * there is a bug somewhere allowing the user to keep their balance.
-             * 
-             * What is perplexing is that the 15% left in the user account and in the
-             * pool differ slightly, and I have no idea where this difference is happening. 
-             */
+            let withdrawInfo2 = await basicPoolInstance.canWithdraw(
+                user1.signer.address,
+                test_settings.basicPool.deposit
+            );
 
             let balanceInPcTokenAfter = await cDaiInstance.balanceOf(user1.signer.address);
-            let balanceDaiAFter = await pDaiInstance.balanceOf(user1.signer.address);
+            let userDaiBalanceAfterWithdraw = await pDaiInstance.balanceOf(user1.signer.address);
             let balanceOfUserInPoolAfterWithdraw = await basicPoolInstance.getUserInfo(user1.signer.address);
             let poolDaiBalanceAfter = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
             let poolCdaiBalanceAfter = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
@@ -677,23 +646,38 @@ describe("Basic Pool Tests", async () => {
             
             console.log("\nUser After withdraw");
             console.log("Penalty pot balance")
-            console.log(penaltyPotBalance.toString())
-            console.log("user dai balance:\t" + balanceDaiAFter.toString());
+            // console.log(penaltyPotBalance.toString())
+            // console.log("user dai balance:\t" + balanceDaiAFter.toString());
             console.log("user pool dai:\t" + balanceOfUserInPoolAfterWithdraw[0].toString());
             console.log("User pool cdai:\t" + balanceOfUserInPoolAfterWithdraw[1].toString());
             console.log("\nPool after withdraw");
-            console.log("Pool dai balance:\t" + poolDaiBalanceAfter.toString());
-            console.log("Pool cDai balance:\t" + poolCdaiBalanceAfter.toString());
+            // console.log("Pool dai balance:\t" + poolDaiBalanceAfter.toString());
+            // console.log("Pool cDai balance:\t" + poolCdaiBalanceAfter.toString());
 
+            assert.equal(
+                userDaiBalanceAfterWithdraw.toString(),
+                test_settings.pDaiSettings.withdrawWithPenalty.toString(),
+                "User has not had penalty removed"
+            );
+            assert.equal(
+                poolDaiBalanceAfter.toString(),
+                0,
+                "Pool has dai after withdraw"
+            );
+            assert.equal(
+                penaltyPotBalance.toString(),
+                test_settings.basicPool.penaltyAmountInCdai.toString(),
+                "Penalty pot has not been contributed towards by premature withdraw"
+            );
+            assert.equal(
+                poolCdaiBalanceAfter.toString(),
+                test_settings.basicPool.penaltyAmountInCdai.toString(),
+                "Pool does not own penalty amount of cdai"
+            );
             assert.equal(
                 balanceInPcTokenAfter.toString(),
                 0,
                 "User has cDai balance"
-            );
-            assert.equal(
-                balanceDaiAFter.toString(),
-                test_settings.pDaiSettings.withdrawWithPenalty.toString(),
-                "User dai balance does not have penalty removed"
             );
         });
 
