@@ -6,23 +6,32 @@ import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
 import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/BasicPool';
 import { Log } from "ethers/providers";
-import { formatEther, BigNumber } from "ethers/utils";
+import { formatEther, BigNumber, parseEther } from "ethers/utils";
 import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
 
 function* poolDepositListener(poolContract: Pool) {
   while (true) {
+    const action = yield take(getType(deposit.request));
     const { signer }: BlockchainContext = yield getContext('blockchain');
-
     if (signer) {
       //@ts-ignore
       const writeableContract = poolContract.connect(signer);
-      const action = yield take(getType(deposit.request));
       if (action.payload.poolAddress === poolContract.address) {
         // TODO: Check allowance and increase if necessary
-        const tx: ContractTransaction = yield call([poolContract, poolContract.deposit], action.payload.amount);
-        yield call([tx, tx.wait])
+        try {
+          const tx: ContractTransaction = yield call(
+            //@ts-ignore
+            [writeableContract, writeableContract.deposit], 
+            parseEther(action.payload.amount.toString())
+          );
+          yield call([tx, tx.wait]);
+          yield put(deposit.success());
+
+        } catch (error) {
+          yield put(deposit.failure(error.message));
+        }
       }
     } else {
       yield put(enqueueSnackbar({
@@ -31,6 +40,7 @@ function* poolDepositListener(poolContract: Pool) {
           variant: 'error'
         }
       }))
+      yield put(deposit.failure('Please connect with metamask'));
       yield take(getType(connectMetamask.success));
     }
   }

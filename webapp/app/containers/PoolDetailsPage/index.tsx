@@ -18,6 +18,7 @@ import WithdrawInterestModal from 'components/WithdrawInterestModal';
 import WithdrawAllModal from 'components/WithdrawAllModal';
 import { RouteComponentProps } from 'react-router-dom';
 import { RootState } from './types';
+import { deposit } from 'containers/App/actions';
 
 interface RouteParams {
   poolAddress: string;
@@ -27,7 +28,11 @@ export interface OwnProps extends RouteComponentProps<RouteParams>,
   React.Props<RouteParams> { }
 
 
-interface DispatchProps { }
+interface DispatchProps {
+  deposit(amount: number): void;
+  // withdraw(amount: number): void;
+  // withdrawInterest(amount: number): void;
+}
 
 export interface StateProps {
   pool: Pool,
@@ -45,7 +50,7 @@ export interface Transaction {
 type Props = StateProps & DispatchProps & OwnProps;
 type ModalType = 'invest' | 'withdrawInterest' | 'withdrawAll';
 
-const PoolDetailsPage: React.FunctionComponent<Props> = ({ pool, daiBalance }: Props) => {
+const PoolDetailsPage: React.FunctionComponent<Props> = ({ pool, daiBalance, deposit }: Props) => {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<ModalType>('invest');
 
@@ -67,7 +72,7 @@ const PoolDetailsPage: React.FunctionComponent<Props> = ({ pool, daiBalance }: P
               nextWithdrawlDate={new Date()}
               type={pool.type}
               onClose={() => setShowModal(false)}
-              onSubmit={(value) => console.log(value)} />;
+              onSubmit={(value) => deposit(value)} />;
           case 'withdrawInterest':
             return <WithdrawInterestModal
               name={pool.name}
@@ -97,7 +102,7 @@ const mapDispatchToProps = (
   ownProps: OwnProps,
 ): DispatchProps => {
   return {
-    dispatch: dispatch,
+    deposit: (amount: number) => dispatch(deposit.request({poolAddress: ownProps.match.params.poolAddress, amount})),
   };
 };
 
