@@ -11,7 +11,7 @@ export const selectLatestPoolTxTime = (poolAddress: string) => createSelector((s
   state.pools, pools => pools[poolAddress].transactions.map(t => t.time).reduce((a, b) => a > b ? a : b));
 
 const selectApp = createStructuredSelector<RootState, StateProps>({
-  isMetamaskInstalled: createSelector((state: ApplicationRootState) => state.app.isMetamaskInstalled, (substate) => substate),
+  isMetamaskInstalled: createSelector((state: ApplicationRootState) => state.app.isMetamaskInstalled, substate => substate),
   ethAddress: selectEthAddress,
   authorizedNetwork: createSelector((state: ApplicationRootState) => state.app.approvedNetwork, substate => substate),
   isAdmin: createSelector((state: ApplicationRootState) => state.app.isAdmin, substate => substate),

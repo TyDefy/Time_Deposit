@@ -20,22 +20,21 @@ function* poolDepositListener(poolContract: Pool) {
       const writeableContract = poolContract.connect(signer);
       const { daiContract, ethAddress }: BlockchainContext = yield getContext('blockchain');
       if (action.payload.poolAddress === poolContract.address) {
-        // TODO: Check allowance and increase if necessary
-        //@ts-ignore
-        const allowance: BigNumber = yield call([daiContract, daiContract.allowance], ethAddress, poolContract.address);
-        const depositAmount = parseEther(action.payload.amount.toString());
-        if (allowance.lt(depositAmount)) {
-          //@ts-ignore
-          const approvalTx: ContractTransaction = yield call([daiContract, daiContract.approve], poolContract.address, depositAmount);
-          yield call([approvalTx, approvalTx.wait]);
-          yield put(enqueueSnackbar({
-            message: 'Successfuly increased allowance'
-          }))
-        }
         try {
+          //@ts-ignore
+          const allowance: BigNumber = yield call([daiContract, daiContract.allowance], ethAddress, poolContract.address);
+          const depositAmount = parseEther(action.payload.amount.toString());
+          if (allowance.lt(depositAmount)) {
+            //@ts-ignore
+            const approvalTx: ContractTransaction = yield call([daiContract, daiContract.approve], poolContract.address, depositAmount);
+            yield call([approvalTx, approvalTx.wait]);
+            yield put(enqueueSnackbar({
+              message: 'Successfuly increased allowance'
+            }))
+          }
           const tx: ContractTransaction = yield call(
             //@ts-ignore
-            [writeableContract, writeableContract.deposit], 
+            [writeableContract, writeableContract.deposit],
             depositAmount
           );
           yield call([tx, tx.wait]);
@@ -43,6 +42,12 @@ function* poolDepositListener(poolContract: Pool) {
 
         } catch (error) {
           yield put(deposit.failure(error.message));
+          yield put(enqueueSnackbar({
+            message: 'Something went wrong processing the transaction',
+            options: {
+              variant: 'error',
+            }
+          }))
         }
       }
     } else {
