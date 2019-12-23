@@ -6,7 +6,7 @@ import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
 import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/BasicPool';
 import { Log } from "ethers/providers";
-import { formatEther, BigNumber, parseEther } from "ethers/utils";
+import { formatEther, parseEther, BigNumber } from "ethers/utils";
 import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
@@ -18,13 +18,25 @@ function* poolDepositListener(poolContract: Pool) {
     if (signer) {
       //@ts-ignore
       const writeableContract = poolContract.connect(signer);
+      const { daiContract, ethAddress }: BlockchainContext = yield getContext('blockchain');
       if (action.payload.poolAddress === poolContract.address) {
         // TODO: Check allowance and increase if necessary
+        //@ts-ignore
+        const allowance: BigNumber = yield call([daiContract, daiContract.allowance], ethAddress, poolContract.address);
+        const depositAmount = parseEther(action.payload.amount.toString());
+        if (allowance.lt(depositAmount)) {
+          //@ts-ignore
+          const approvalTx: ContractTransaction = yield call([daiContract, daiContract.approve], poolContract.address, depositAmount);
+          yield call([approvalTx, approvalTx.wait]);
+          yield put(enqueueSnackbar({
+            message: 'Successfuly increased allowance'
+          }))
+        }
         try {
           const tx: ContractTransaction = yield call(
             //@ts-ignore
             [writeableContract, writeableContract.deposit], 
-            parseEther(action.payload.amount.toString())
+            depositAmount
           );
           yield call([tx, tx.wait]);
           yield put(deposit.success());
