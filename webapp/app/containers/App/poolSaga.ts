@@ -10,6 +10,7 @@ import { formatEther, parseEther, BigNumber } from "ethers/utils";
 import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
+import { setTxContext, setTxHash } from "containers/TransactionModal/actions";
 
 function* poolDepositListener(poolContract: Pool) {
   while (true) {
@@ -25,21 +26,27 @@ function* poolDepositListener(poolContract: Pool) {
           const allowance: BigNumber = yield call([daiContract, daiContract.allowance], ethAddress, poolContract.address);
           const depositAmount = parseEther(action.payload.amount.toString());
           if (allowance.lt(depositAmount)) {
+            yield put(setTxContext('Increasing allowance'));
             //@ts-ignore
             const approvalTx: ContractTransaction = yield call([daiContract, daiContract.approve], poolContract.address, depositAmount);
+            yield put(setTxHash(approvalTx.hash));
             yield call([approvalTx, approvalTx.wait]);
             yield put(enqueueSnackbar({
               message: 'Successfuly increased allowance'
             }))
           }
+          yield put(setTxContext('Depositing funds'));
           const tx: ContractTransaction = yield call(
             //@ts-ignore
             [writeableContract, writeableContract.deposit],
             depositAmount
           );
+          yield put(setTxHash(tx.hash));
           yield call([tx, tx.wait]);
           yield put(deposit.success());
-
+          yield put(enqueueSnackbar({
+            message: 'Deposit successful'
+          }))
         } catch (error) {
           yield put(deposit.failure(error.message));
           yield put(enqueueSnackbar({
@@ -99,7 +106,6 @@ function* poolTransactionListener(poolContract: Pool) {
     const newTx = yield take(poolTransactionChannel);
     const txDate = yield call([provider, provider.getBlock], newTx.blockNumber);
     const latestTx = yield select(selectLatestPoolTxTime(poolContract.address));
-    debugger;
     if (new Date(txDate.timestamp * 1000) > latestTx) {
       (newTx.type === 'Deposit') ?
         yield put(addPoolTx({

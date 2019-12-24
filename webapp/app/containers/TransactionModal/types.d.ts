@@ -5,6 +5,8 @@ import { ApplicationRootState } from 'types';
 /* --- STATE --- */
 interface TransactionModalState {
   readonly open: boolean;
+  readonly txContext?: string;
+  readonly txHash?: string;
 }
 
 /* --- ACTIONS --- */

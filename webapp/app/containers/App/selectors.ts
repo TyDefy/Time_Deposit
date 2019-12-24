@@ -8,7 +8,7 @@ export const selectEthAddress = createSelector((state: ApplicationRootState) => 
 export const selectDaiBalance = createSelector((state: ApplicationRootState) => state.app.daiBalance, substate => substate);
 
 export const selectLatestPoolTxTime = (poolAddress: string) => createSelector((state: ApplicationRootState) => 
-  state.pools, pools => pools[poolAddress].transactions.map(t => t.time).reduce((a, b) => a > b ? a : b));
+  state.pools, pools => pools[poolAddress].transactions.map(t => t.time).reduce((a, b) => a > b ? a : b, new Date('01/01/1970')));
 
 const selectApp = createStructuredSelector<RootState, StateProps>({
   isMetamaskInstalled: createSelector((state: ApplicationRootState) => state.app.isMetamaskInstalled, substate => substate),
