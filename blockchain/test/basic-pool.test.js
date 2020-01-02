@@ -454,6 +454,7 @@ describe("Basic Pool Tests", async () => {
             );
 
             await utils.timeTravel(deployer.provider, test_settings.cyclicWithdraw.cycleLength);
+            
             let withdrawInfoAfter = await basicPoolInstance.canWithdraw(
                 user1.signer.address,
                 test_settings.basicPool.withdraw
@@ -627,6 +628,8 @@ describe("Basic Pool Tests", async () => {
                 "Penalty amount is not correct"
             );
 
+            console.log();
+
             await assert.notRevert(basicPoolInstance.from(user1).withdraw(
                 test_settings.basicPool.deposit
             ));
@@ -635,6 +638,8 @@ describe("Basic Pool Tests", async () => {
                 user1.signer.address,
                 test_settings.basicPool.deposit
             );
+
+            console.log();
 
             assert.equal(
                 withdrawInfo2[0],
@@ -822,13 +827,42 @@ describe("Basic Pool Tests", async () => {
                 "Penalty amount is not correct"
             );
 
+            let withdrawInfo2 = await basicPoolInstance.canWithdraw(
+                user1.signer.address,
+                test_settings.basicPool.deposit
+            );
+
             await assert.notRevert(basicPoolInstance.from(user1).withdraw(
                 test_settings.basicPool.deposit
             ));
 
+            let penaltyPotBalanceAfter = await basicPoolInstance.penaltyPotBalance();
+            let feeCollectedAfter = await basicPoolInstance.accumulativeFee();
+            let poolCdaiBalanceAfter = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            console.log("\nLogs:\nPenalty pot balance:");
+            console.log(penaltyPotBalanceAfter.toString());
+            console.log("Penalty amount:");
+            console.log(withdrawInfo2[2].toString());
+            console.log("Fee collected:")
+            console.log(feeCollectedAfter.toString());
+            console.log("pool cDai:")
+            console.log(poolCdaiBalanceAfter.toString());
+
+            let checkSum = BigNumber.sum(penaltyPotBalanceAfter, feeCollectedAfter);
+
             //TODO check that the fee has been removed from the penalty,
             //TODO that it has not been removed from pool cDai balance
             //TODO check that admin user has been credited correct dai and cDai amount
+
+            assert.equal(
+                checkSum.toString(),
+                poolCdaiBalanceAfter.toString(),
+                "Pool cDai balance is not equal to penalty and fee"
+            );
+            // assert.equal(
+
+            // );
         });
 
         it("🚫 Negative testing withdraw", async () => {

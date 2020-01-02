@@ -6,8 +6,8 @@ import { IERC20 } from "../interfaces/IERC20.sol";
 import { ICToken } from "../interfaces/ICToken.sol";
 
 contract BasicPool is WhitelistAdminRole {
-    // Address that will recive fee
-    address internal admin_;
+    // Tracks fee collection
+    uint256 internal accumulativeFeeCollection_;
     // The fee as a percentage of the penality %
     uint256 internal feePercentage_ = 0;
     // Instance of the withdraw library 
@@ -91,7 +91,7 @@ contract BasicPool is WhitelistAdminRole {
 
     function init(uint256 _fee) public onlyWhitelistAdmin() {
         feePercentage_ = _fee;
-    }
+    }//TODO lock so it can only be called once
 
     function closePool(
         bool _isOpen
@@ -102,7 +102,6 @@ contract BasicPool is WhitelistAdminRole {
     {
         acceptingDeposits_ = _isOpen;
     }
-    
 
     /**
       * @notice Allows a user to deposit raw collateral (DAI) into
@@ -161,41 +160,40 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     function withdraw(uint256 _amount) public killSwitch() {
+        // Ensuring the user has a suficcient balance
         require(
             users_[msg.sender].collateralInvested >= _amount,
             "Insufficent balance"
         );
-
+        // Setting up variables to store withdraw information
         bool withdrawAllowed;
         uint256 withdrawAmount;
         uint256 penaltyAmount;
-
+        // Getting the correct withdraw information from the withdraw contract
         (withdrawAllowed, withdrawAmount, penaltyAmount) = withdrawInstance_.canWithdraw(
             _amount,
             users_[msg.sender].lastWtihdraw
         );
-          
+        // Applying the penalty if there is one
         if(penaltyAmount != 0) {
             // If there is a penalty, this applies it
             uint256 penaltyAmountInCdai = (
                     penaltyAmount*10**28
                 )/cTokenInstance_.exchangeRateCurrent();
-
+            // If the fee has been set up, this executes it
             if(feePercentage_ != 0) {
-                // If the fee has been set up, this works it out
-                uint256 fee = ((penaltyAmountInCdai*feePercentage_)/10**18);
+                // Gets the fee amount of the penalty
+                uint256 fee = ((penaltyAmountInCdai*feePercentage_)/100);
                 // Works out the fee in dai
                 uint256 feeInDai = ((penaltyAmount*feePercentage_)/100);
-                // Updates the admin balances with the fee
-                users_[admin_].collateralInvested += feeInDai;
-                users_[admin_].balance += fee;                
-                // Updates the balance of the user
-                users_[msg.sender].balance = users_[msg.sender].balance - fee;
+                // Updates the admin balances with the fee   
+                accumulativeFeeCollection_ = accumulativeFeeCollection_ + fee;
                 // Remove the fee from the penalty amount
                 penaltyAmountInCdai = penaltyAmountInCdai - fee;
             }
             // Updates the balance of the user
             users_[msg.sender].balance = users_[msg.sender].balance - penaltyAmountInCdai;
+            users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - penaltyAmount;
             // Updates the balance of the penalty pot
             penaltyPot_ = penaltyPot_ + penaltyAmountInCdai;
         } 
@@ -372,6 +370,10 @@ contract BasicPool is WhitelistAdminRole {
 
     function fee() public view returns(uint256) {
         return feePercentage_;
+    }
+
+    function accumulativeFee() public view returns(uint256) {
+        return accumulativeFeeCollection_;
     }
 
     function getUserInfo(
