@@ -169,6 +169,7 @@ contract BasicPool is WhitelistAdminRole {
         bool withdrawAllowed;
         uint256 withdrawAmount;
         uint256 penaltyAmount;
+        uint256 fee = 0;
         // Getting the correct withdraw information from the withdraw contract
         (withdrawAllowed, withdrawAmount, penaltyAmount) = withdrawInstance_.canWithdraw(
             _amount,
@@ -183,19 +184,17 @@ contract BasicPool is WhitelistAdminRole {
             // If the fee has been set up, this executes it
             if(feePercentage_ != 0) {
                 // Gets the fee amount of the penalty
-                uint256 fee = ((penaltyAmountInCdai*feePercentage_)/100);
+                fee = ((penaltyAmountInCdai*feePercentage_)/100);
                 // Works out the fee in dai
                 uint256 feeInDai = ((penaltyAmount*feePercentage_)/100);
                 // Updates the admin balances with the fee   
                 accumulativeFeeCollection_ = accumulativeFeeCollection_ + fee;
-                // Remove the fee from the penalty amount
-                penaltyAmountInCdai = penaltyAmountInCdai - fee;
             }
             // Updates the balance of the user
             users_[msg.sender].balance = users_[msg.sender].balance - penaltyAmountInCdai;
             users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - penaltyAmount;
             // Updates the balance of the penalty pot
-            penaltyPot_ = penaltyPot_ + penaltyAmountInCdai;
+            penaltyPot_ = penaltyPot_ + (penaltyAmountInCdai - fee);
         } 
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
@@ -213,7 +212,7 @@ contract BasicPool is WhitelistAdminRole {
         uint256 daiRecived = balanceAfter - balanceBefore;
 
         totalCCollateral_ = totalCCollateral_ - cDaiBurnt;
-        users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - _amount;
+        users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - withdrawAmount;
         users_[msg.sender].balance = users_[msg.sender].balance - cDaiBurnt;
         users_[msg.sender].lastWtihdraw = now;
 
