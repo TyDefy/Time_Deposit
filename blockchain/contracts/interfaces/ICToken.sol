@@ -9,6 +9,8 @@ interface ICToken {
 
     function redeemUnderlying(uint redeemAmount) external returns(uint);
 
+    function supplyRatePerBlock() external view returns(uint);
+
     // Standard ERC20 functionality 
 
     /**

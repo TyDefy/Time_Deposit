@@ -14,7 +14,6 @@ export const selectPool = createSelector(
   selectSelectedPoolAddress, 
   (allPools, ethAddress, selectedPool) => {
     const pool = allPools.filter(p => p.address === selectedPool)[0];
-    debugger;
     pool.transactions = pool.transactions?.filter(t => t.userAddress === ethAddress);
     return pool;
   })
