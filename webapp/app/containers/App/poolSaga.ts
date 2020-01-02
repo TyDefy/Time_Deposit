@@ -1,6 +1,6 @@
 import { BlockchainContext } from "blockchainContext";
 import { getContext, takeEvery, call, put, fork, take, select } from "redux-saga/effects";
-import { poolDeployed, addPoolTx, connectMetamask, deposit } from "./actions";
+import { poolDeployed, addPoolTx, connectMetamask, deposit, withdraw } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
@@ -46,6 +46,98 @@ function* poolDepositListener(poolContract: Pool) {
           yield put(deposit.success());
           yield put(enqueueSnackbar({
             message: 'Deposit successful'
+          }))
+        } catch (error) {
+          yield put(deposit.failure(error.message));
+          yield put(enqueueSnackbar({
+            message: 'Something went wrong processing the transaction',
+            options: {
+              variant: 'error',
+            }
+          }))
+        }
+      }
+    } else {
+      yield put(enqueueSnackbar({
+        message: 'Please connect with metamask to continue',
+        options: {
+          variant: 'error'
+        }
+      }))
+      yield put(deposit.failure('Please connect with metamask'));
+      yield take(getType(connectMetamask.success));
+    }
+  }
+}
+
+function* poolWithdrawListener(poolContract: Pool) {
+  while (true) {
+    const action = yield take(getType(withdraw.request));
+    const { signer }: BlockchainContext = yield getContext('blockchain');
+    if (signer) {
+      //@ts-ignore
+      const writeableContract = poolContract.connect(signer);
+      if (action.payload.poolAddress === poolContract.address) {
+        try {
+          //@ts-ignore
+          const withdrawAmount = parseEther(action.payload.amount.toString());
+          yield put(setTxContext('Withdrawing funds'));
+          const tx: ContractTransaction = yield call(
+            //@ts-ignore
+            [writeableContract, writeableContract.withdrawInterest],
+            withdrawAmount
+          );
+          yield put(setTxHash(tx.hash));
+          yield call([tx, tx.wait]);
+          yield put(deposit.success());
+          yield put(enqueueSnackbar({
+            message: 'Withdrawl successful'
+          }))
+        } catch (error) {
+          yield put(deposit.failure(error.message));
+          yield put(enqueueSnackbar({
+            message: 'Something went wrong processing the transaction',
+            options: {
+              variant: 'error',
+            }
+          }))
+        }
+      }
+    } else {
+      yield put(enqueueSnackbar({
+        message: 'Please connect with metamask to continue',
+        options: {
+          variant: 'error'
+        }
+      }))
+      yield put(deposit.failure('Please connect with metamask'));
+      yield take(getType(connectMetamask.success));
+    }
+  }
+}
+
+function* poolWithdrawInterestListener(poolContract: Pool) {
+  while (true) {
+    const action = yield take(getType(withdraw.request));
+    const { signer }: BlockchainContext = yield getContext('blockchain');
+    if (signer) {
+      //@ts-ignore
+      const writeableContract = poolContract.connect(signer);
+      if (action.payload.poolAddress === poolContract.address) {
+        try {
+          //@ts-ignore
+          const withdrawAmount = parseEther(action.payload.amount.toString());
+          yield put(setTxContext('Withdrawing intterest'));
+          const tx: ContractTransaction = yield call(
+            //@ts-ignore
+            [writeableContract, writeableContract.withdrawInterest],
+            withdrawAmount
+          );
+          yield put(setTxHash(tx.hash));
+          yield call([tx, tx.wait]);
+          yield put(deposit.success());
+          yield put(enqueueSnackbar({
+            message: 'Withdrawl successful'
           }))
         } catch (error) {
           yield put(deposit.failure(error.message));
@@ -189,6 +281,8 @@ function* poolWatcherSaga(action) {
 
   yield fork(poolTransactionListener, poolContract);
   yield fork(poolDepositListener, poolContract);
+  yield fork(poolWithdrawListener, poolContract);
+  yield fork(poolWithdrawInterestListener, poolContract);
 }
 
 export default function* poolSaga() {
