@@ -119,20 +119,18 @@ function* poolWithdrawListener(poolContract: Pool) {
 function* poolWithdrawInterestListener(poolContract: Pool) {
   while (true) {
     const action = yield take(getType(withdrawInterest.request));
-    debugger;
     const { signer }: BlockchainContext = yield getContext('blockchain');
     if (signer) {
       //@ts-ignore
       const writeableContract = poolContract.connect(signer);
       if (action.payload.poolAddress === poolContract.address) {
         try {
-          //@ts-ignore
-          const withdrawAmount = parseEther(action.payload.amount.toString());
+          // const withdrawAmount = parseEther(action.payload.amount.toString());
           yield put(setTxContext('Withdrawing interest'));
           const tx: ContractTransaction = yield call(
             //@ts-ignore
             [writeableContract, writeableContract.withdrawInterest],
-            withdrawAmount
+            // withdrawAmount
           );
           yield put(setTxHash(tx.hash));
           yield call([tx, tx.wait]);
@@ -229,7 +227,6 @@ function* poolWatcherSaga(action) {
   const poolContract: Pool = new Contract(action.payload.address, PoolContractAbi, signer || provider)
 
   // TODO: Get current pool interest rate
-  // Get all past transactions (deposits/withdrawls)
   try {
     const depositLogs: Log[] = yield call([provider, provider.getLogs], {
       ...poolContract.filters.Deposit(null, null, null),
@@ -256,7 +253,7 @@ function* poolWatcherSaga(action) {
       toBlock: 'latest',
     })
 
-    const withdrawTxActions = yield withdrawLogs.map(
+    const withdrawTxActions = yield Promise.all(withdrawLogs.map(
       async log => {
         const parsedWithdraw = poolContract.interface.parseLog(log).values;
 
@@ -268,7 +265,7 @@ function* poolWatcherSaga(action) {
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
           amount: Number(formatEther(parsedWithdraw.amount.add(parsedWithdraw.penalty)))
         })
-      });
+      }));
 
     const actions = depositTxActions.concat(withdrawTxActions).sort((a, b) => a.time - b.time);
 
