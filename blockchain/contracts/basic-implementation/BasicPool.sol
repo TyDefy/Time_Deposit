@@ -185,8 +185,6 @@ contract BasicPool is WhitelistAdminRole {
             if(feePercentage_ != 0) {
                 // Gets the fee amount of the penalty
                 fee = ((penaltyAmountInCdai*feePercentage_)/100);
-                // Works out the fee in dai
-                uint256 feeInDai = ((penaltyAmount*feePercentage_)/100);
                 // Updates the admin balances with the fee   
                 accumulativeFeeCollection_ = accumulativeFeeCollection_ + fee;
             }
