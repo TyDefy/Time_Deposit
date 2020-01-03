@@ -49,3 +49,15 @@ export const deposit = createAsyncAction(
   '@TX_SUCCESS/POOL_DEPOSIT',
   '@TX_FAILURE/POOL_DEPOSIT',
 )<{poolAddress: string, amount: number}, undefined, string>();
+
+export const withdrawInterest = createAsyncAction(
+  '@TX_REQUEST/WITHDRAW_INTEREST',
+  '@TX_SUCCESS/WITHDRAW_INTEREST',
+  '@TX_FAILURE/WITHDRAW_INTEREST',
+)<{poolAddress: string, amount: number}, undefined, string>();
+
+export const withdraw = createAsyncAction(
+  '@TX_REQUEST/WITHDRAW',
+  '@TX_SUCCESS/WITHDRAW',
+  '@TX_FAILURE/WITHDRAW',
+)<{poolAddress: string, amount: number}, undefined, string>();
