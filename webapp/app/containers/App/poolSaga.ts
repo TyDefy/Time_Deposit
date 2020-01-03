@@ -1,6 +1,6 @@
 import { BlockchainContext } from "blockchainContext";
 import { getContext, takeEvery, call, put, fork, take, select } from "redux-saga/effects";
-import { poolDeployed, addPoolTx, connectMetamask, deposit, withdraw } from "./actions";
+import { poolDeployed, addPoolTx, connectMetamask, deposit, withdraw, withdrawInterest } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
@@ -84,17 +84,17 @@ function* poolWithdrawListener(poolContract: Pool) {
           yield put(setTxContext('Withdrawing funds'));
           const tx: ContractTransaction = yield call(
             //@ts-ignore
-            [writeableContract, writeableContract.withdrawInterest],
+            [writeableContract, writeableContract.withdraw],
             withdrawAmount
           );
           yield put(setTxHash(tx.hash));
           yield call([tx, tx.wait]);
-          yield put(deposit.success());
+          yield put(withdraw.success());
           yield put(enqueueSnackbar({
             message: 'Withdrawl successful'
           }))
         } catch (error) {
-          yield put(deposit.failure(error.message));
+          yield put(withdraw.failure(error.message));
           yield put(enqueueSnackbar({
             message: 'Something went wrong processing the transaction',
             options: {
@@ -110,7 +110,7 @@ function* poolWithdrawListener(poolContract: Pool) {
           variant: 'error'
         }
       }))
-      yield put(deposit.failure('Please connect with metamask'));
+      yield put(withdraw.failure('Please connect with metamask'));
       yield take(getType(connectMetamask.success));
     }
   }
@@ -118,7 +118,8 @@ function* poolWithdrawListener(poolContract: Pool) {
 
 function* poolWithdrawInterestListener(poolContract: Pool) {
   while (true) {
-    const action = yield take(getType(withdraw.request));
+    const action = yield take(getType(withdrawInterest.request));
+    debugger;
     const { signer }: BlockchainContext = yield getContext('blockchain');
     if (signer) {
       //@ts-ignore
@@ -127,7 +128,7 @@ function* poolWithdrawInterestListener(poolContract: Pool) {
         try {
           //@ts-ignore
           const withdrawAmount = parseEther(action.payload.amount.toString());
-          yield put(setTxContext('Withdrawing intterest'));
+          yield put(setTxContext('Withdrawing interest'));
           const tx: ContractTransaction = yield call(
             //@ts-ignore
             [writeableContract, writeableContract.withdrawInterest],
@@ -135,12 +136,12 @@ function* poolWithdrawInterestListener(poolContract: Pool) {
           );
           yield put(setTxHash(tx.hash));
           yield call([tx, tx.wait]);
-          yield put(deposit.success());
+          yield put(withdrawInterest.success());
           yield put(enqueueSnackbar({
             message: 'Withdrawl successful'
           }))
         } catch (error) {
-          yield put(deposit.failure(error.message));
+          yield put(withdrawInterest.failure(error.message));
           yield put(enqueueSnackbar({
             message: 'Something went wrong processing the transaction',
             options: {
@@ -156,7 +157,7 @@ function* poolWithdrawInterestListener(poolContract: Pool) {
           variant: 'error'
         }
       }))
-      yield put(deposit.failure('Please connect with metamask'));
+      yield put(withdrawInterest.failure('Please connect with metamask'));
       yield take(getType(connectMetamask.success));
     }
   }
