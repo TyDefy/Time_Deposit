@@ -32,7 +32,7 @@ function* poolDepositListener(poolContract: Pool) {
             yield put(setTxHash(approvalTx.hash));
             yield call([approvalTx, approvalTx.wait]);
             yield put(enqueueSnackbar({
-              message: 'Successfuly increased allowance'
+              message: 'Successfully increased allowance'
             }))
           }
           yield put(setTxContext('Depositing funds'));
@@ -231,7 +231,7 @@ function* poolWatcherSaga(action) {
     poolAddress: poolContract.address, 
     interestRate: Number(formatEther(poolInterestRate))
   }));
-  
+
   try {
     const depositLogs: Log[] = yield call([provider, provider.getLogs], {
       ...poolContract.filters.Deposit(null, null, null),
