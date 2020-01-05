@@ -114,7 +114,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
       <Grid container direction='row' className={classes.poolDetailsRow}>
         <Grid item xs={4}>
           <Typography  className={classes.label}>Your contribution</Typography>
-          <Typography  className={classes.value}>{contribution}</Typography>
+          <Typography  className={classes.value}>{contribution?.toFixed(2)}</Typography>
         </Grid>
         <Grid item xs={4}>
           <Typography  className={classes.label}>Your Interest</Typography>
