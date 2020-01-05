@@ -44,6 +44,11 @@ export const addPoolTx = createStandardAction('ADD_POOL_TX')<{
   txHash: string;
 }>()
 
+export const setPoolInterestRate = createStandardAction('SET_POOL_INTEREST_RATE')<{
+  poolAddress: string;
+  interestRate: number;
+}>()
+
 export const deposit = createAsyncAction(
   '@TX_REQUEST/POOL_DEPOSIT',
   '@TX_SUCCESS/POOL_DEPOSIT',
