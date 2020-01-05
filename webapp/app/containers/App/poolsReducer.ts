@@ -38,6 +38,15 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         }
       }
     }
+    case getType(AppActions.setPoolInterestAccrued): {
+      return {
+        ...state,
+        [action.payload.poolAddress]: {
+          ...state[action.payload.poolAddress],
+          interestAccrued: action.payload.interestAccrued,
+        }
+      }
+    }
     case getType(AppActions.addPoolTx): {
       return {
         ...state,

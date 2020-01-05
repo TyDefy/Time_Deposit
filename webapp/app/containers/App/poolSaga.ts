@@ -1,6 +1,6 @@
 import { BlockchainContext } from "blockchainContext";
 import { getContext, takeEvery, call, put, fork, take, select } from "redux-saga/effects";
-import { poolDeployed, addPoolTx, connectMetamask, deposit, withdraw, withdrawInterest, setPoolInterestRate } from "./actions";
+import { poolDeployed, addPoolTx, connectMetamask, deposit, withdraw, withdrawInterest, setPoolInterestRate, setPoolInterestAccrued } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
@@ -222,15 +222,22 @@ function* poolTransactionListener(poolContract: Pool) {
 }
 
 function* poolWatcherSaga(action) {
-  const { provider, signer }: BlockchainContext = yield getContext('blockchain');
+  const { provider, signer, ethAddress }: BlockchainContext = yield getContext('blockchain');
 
   const poolContract: Pool = new Contract(action.payload.address, PoolContractAbi, signer || provider)
   const poolInterestRate: BigNumber = yield call([poolContract, poolContract.getInterestRatePerYear]);
-  // TODO: Get current pool interest rate
   yield put(setPoolInterestRate({
     poolAddress: poolContract.address, 
     interestRate: Number(formatEther(poolInterestRate))
   }));
+
+  if (ethAddress) {
+    const poolInterestAccrued: BigNumber = yield call([poolContract, poolContract.getInterestAmount], ethAddress);
+    yield put(setPoolInterestAccrued({
+      poolAddress: poolContract.address,
+      interestAccrued: Number(formatEther(poolInterestAccrued))}
+    ))
+  }
 
   try {
     const depositLogs: Log[] = yield call([provider, provider.getLogs], {

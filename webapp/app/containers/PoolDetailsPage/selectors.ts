@@ -17,7 +17,6 @@ export const selectPool = createSelector(
     pool.transactions = pool.transactions?.filter(t => t.userAddress.toLowerCase() === ethAddress);
     pool.contribution = pool.transactions?.reduce((total, transaction) => 
       (transaction.type === 'Deposit') ? total += transaction.amount : total -= transaction.amount, 0);
-    pool.interestAccrued = 
     return pool;
   })
 
