@@ -138,7 +138,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         </TableHead>
         <TableBody>
           {transactions?.map(t =>
-            <TableRow>
+            <TableRow key={t.txHash}>
               <TableCell>{t.txHash}</TableCell>
               <TableCell>{dayjs(t.time).format('YYYY-MM-DD HH:mm')}</TableCell>
               <TableCell>{t.type}</TableCell>

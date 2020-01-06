@@ -1,6 +1,15 @@
 import { BlockchainContext } from "blockchainContext";
 import { getContext, takeEvery, call, put, fork, take, select, delay } from "redux-saga/effects";
-import { poolDeployed, addPoolTx, connectMetamask, deposit, withdraw, withdrawInterest, setPoolInterestRate, setPoolInterestAccrued } from "./actions";
+import { 
+  poolDeployed, 
+  addPoolTx, 
+  connectMetamask, 
+  deposit, 
+  withdraw, 
+  withdrawInterest, 
+  setPoolInterestRate, 
+  // setPoolInterestAccrued 
+} from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
