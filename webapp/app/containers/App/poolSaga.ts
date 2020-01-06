@@ -222,7 +222,7 @@ function* poolTransactionListener(poolContract: Pool) {
           type: 'Withdraw',
           txHash: newTx.transactionHash || '0x',
           time: new Date(txDate.timestamp * 1000),
-          amount: Number(formatEther(newTx.amount.add(newTx.penalty)))
+          amount: Number(formatEther(newTx.withdrawAmount.add(newTx.penaltyAmount)))
         }))
     } else {
       console.log('duplicate or old tx detected');
@@ -293,7 +293,7 @@ function* poolWatcherSaga(action) {
           type: 'Withdraw',
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
-          amount: Number(formatEther(parsedWithdraw.amount.add(parsedWithdraw.penalty)))
+          amount: Number(formatEther(parsedWithdraw.withdrawAmount.add(parsedWithdraw.penaltyAmount)))
         })
       }));
 
