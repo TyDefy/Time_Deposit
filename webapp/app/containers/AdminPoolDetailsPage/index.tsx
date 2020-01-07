@@ -36,31 +36,8 @@ export interface PoolDetails extends Pool {
 
 type Props = StateProps & DispatchProps & OwnProps;
 
-const poolDetails: PoolDetails = {
-  address: '0x1',
-  withdraw: '0x',
-  name: 'Test',
-  description: 'test description',
-  period: 3,
-  interestRate: 0.07,
-  type: 'cDAI',
-  balance: 900,
-  feeRate: 0.01,
-  pentalyRate: 0.01,
-  totalInterest: 10,
-  participants: 5,
-  transactions: [],
-  participantDetails: [
-    { address: '0x2', joined: new Date(), contributed: 10, interest: 1 },
-    { address: '0x3', joined: new Date(), contributed: 10, interest: 1 },
-    { address: '0x4', joined: new Date(), contributed: 10, interest: 1 },
-    { address: '0x5', joined: new Date(), contributed: 10, interest: 1 },
-    { address: '0x6', joined: new Date(), contributed: 10, interest: 1 },
-  ]
-}
-
-const AdminPoolDetailsPage: React.FunctionComponent<Props> = (props: Props) => {
-  return <AdminPoolDetails {...poolDetails} />
+const AdminPoolDetailsPage: React.FunctionComponent<Props> = ({pool}: Props) => {
+  return <AdminPoolDetails {...pool} />
 };
 
 const mapStateToProps = (state, props) => selectAdminPoolDetailsPage(state, props);
