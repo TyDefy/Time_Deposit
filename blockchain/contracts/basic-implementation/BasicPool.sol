@@ -22,8 +22,6 @@ contract BasicPool is WhitelistAdminRole {
     uint256 internal totalCCollateral_;
     // The amount of cToken allocated to the penalty pool
     uint256 internal penaltyPot_;
-    // A reversable switch to stop accepting deposits
-    bool internal acceptingDeposits_ = true;
     // A non-reversable switch to kill the contract
     bool internal isAlive_ = true;
 
@@ -45,14 +43,6 @@ contract BasicPool is WhitelistAdminRole {
         lock_ = false;
         _;
         lock_ = true;
-    }
-
-    modifier closed() {
-        require(
-            acceptingDeposits_,
-            "This pool is no longer accepting deposits"
-        );
-        _;
     }
 
     modifier killSwitch() {
@@ -100,14 +90,8 @@ contract BasicPool is WhitelistAdminRole {
         feePercentage_ = _fee;
     }//TODO lock so it can only be called once
 
-    function closePool(
-        bool _isOpen
-    )
-        public
-        onlyWhitelistAdmin()
-        killSwitch()
-    {
-        acceptingDeposits_ = _isOpen;
+    function terminatePool() public onlyWhitelistAdmin() {
+        isAlive_ = false;
     }
 
     /**
@@ -116,7 +100,7 @@ contract BasicPool is WhitelistAdminRole {
       *         the interest earning asset (cDAI)
       * @param  _amount the amount of the raw token they  are depositng
       */
-    function deposit(uint256 _amount) public closed() killSwitch() {
+    function deposit(uint256 _amount) public killSwitch() {
         require(
             collateralInstance_.allowance(
                 msg.sender,
@@ -178,36 +162,37 @@ contract BasicPool is WhitelistAdminRole {
         uint256 penaltyAmount;
         uint256 fee = 0;
 
-        // if(address(withdrawInstance_) == 0) { 
-            // withdrawAmount = _amount;
-            // penaltyAmount = 0;
-            // withdrawAllowed = true;
-        // } else {
-        // Getting the correct withdraw information from the withdraw contract
-        (withdrawAllowed, withdrawAmount, penaltyAmount) = withdrawInstance_.canWithdraw(
-            _amount,
-            users_[msg.sender].lastWtihdraw
-        );
-        // Applying the penalty if there is one
-        if(penaltyAmount != 0) {
-            // If there is a penalty, this applies it
-            uint256 penaltyAmountInCdai = (
-                    penaltyAmount*10**28
-                )/cTokenInstance_.exchangeRateCurrent();
-            // If the fee has been set up, this executes it
-            if(feePercentage_ != 0) {
-                // Gets the fee amount of the penalty
-                fee = ((penaltyAmountInCdai*feePercentage_)/100);
-                // Updates the admin balances with the fee   
-                accumulativeFeeCollection_ = accumulativeFeeCollection_ + fee;
-            }
-            // Updates the balance of the user
-            users_[msg.sender].balance = users_[msg.sender].balance - penaltyAmountInCdai;
-            users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - penaltyAmount;
-            // Updates the balance of the penalty pot
-            penaltyPot_ = penaltyPot_ + (penaltyAmountInCdai - fee);
-            totalCCollateral_ = totalCCollateral_ - penaltyAmountInCdai;
-        } 
+        if(address(withdrawInstance_) == address(0)) { 
+            withdrawAmount = _amount;
+            penaltyAmount = 0;
+            withdrawAllowed = true;
+        } else {
+            // Getting the correct withdraw information from the withdraw contract
+            (withdrawAllowed, withdrawAmount, penaltyAmount) = withdrawInstance_.canWithdraw(
+                _amount,
+                users_[msg.sender].lastWtihdraw
+            );
+            // Applying the penalty if there is one
+            if(penaltyAmount != 0) {
+                // If there is a penalty, this applies it
+                uint256 penaltyAmountInCdai = (
+                        penaltyAmount*10**28
+                    )/cTokenInstance_.exchangeRateCurrent();
+                // If the fee has been set up, this executes it
+                if(feePercentage_ != 0) {
+                    // Gets the fee amount of the penalty
+                    fee = ((penaltyAmountInCdai*feePercentage_)/100);
+                    // Updates the admin balances with the fee   
+                    accumulativeFeeCollection_ = accumulativeFeeCollection_ + fee;
+                }
+                // Updates the balance of the user
+                users_[msg.sender].balance = users_[msg.sender].balance - penaltyAmountInCdai;
+                users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - penaltyAmount;
+                // Updates the balance of the penalty pot
+                penaltyPot_ = penaltyPot_ + (penaltyAmountInCdai - fee);
+                totalCCollateral_ = totalCCollateral_ - penaltyAmountInCdai;
+            } 
+        }
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
         uint256 balanceBeforeInCdai = cTokenInstance_.balanceOf(address(this));
@@ -249,7 +234,6 @@ contract BasicPool is WhitelistAdminRole {
 
         totalCCollateral_ = totalCCollateral_ - rewardInCdai;
         users_[msg.sender].balance = users_[msg.sender].balance - rewardInCdai;
-        // // users_[msg.sender].lastWtihdraw = now;
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
         uint256 balanceBeforeInCdai = cTokenInstance_.balanceOf(address(this));
@@ -277,42 +261,29 @@ contract BasicPool is WhitelistAdminRole {
         );
     }
 
-    function finalWithdraw() public killSwitch() {
+    function withdrawAndClose() public killSwitch() {
+        uint256 fullUserBalance = users_[msg.sender].collateralInvested;
+        // Withdraw full balance 
+        withdrawInterest();
+        withdraw(fullUserBalance);
+
+        emit Withdraw(
+            msg.sender,
+            fullUserBalance,
+            0
+        );
+    }
+
+    function finalWithdraw() public {
+        uint256 fullUserBalance = users_[msg.sender].collateralInvested;
         // Ensureing this can only be called once contract is killed
         require(
             !isAlive_,
             "Contract has not been terminated. Please use other withdraw"
         );
         // Withdraw full balance 
-        uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
-        uint256 balanceBeforeInCdai = cTokenInstance_.balanceOf(address(this));
-        uint256 fullUserBalance = users_[msg.sender].collateralInvested; 
-        //TODO add penalty pot portion
-
-        require(
-            cTokenInstance_.redeemUnderlying(
-                fullUserBalance
-            ) == 0,
-            "Interest collateral transfer failed"
-        );
-
-        uint256 balanceAfter = collateralInstance_.balanceOf(address(this));
-        uint256 balanceAfterInCdai = cTokenInstance_.balanceOf(address(this));
-        uint256 cDaiBurnt = balanceBeforeInCdai - balanceAfterInCdai;
-        uint256 daiRecived = balanceAfter - balanceBefore;
-        
-        totalCCollateral_ -= cDaiBurnt;
-        users_[msg.sender].collateralInvested = 0;
-        users_[msg.sender].balance = 0;
-        users_[msg.sender].lastWtihdraw = now;
-
-        require(
-            collateralInstance_.transfer(
-                msg.sender,
-                daiRecived
-            ),
-            "Collateral transfer failed"
-        );
+        withdrawInterest();
+        withdraw(users_[msg.sender].collateralInvested);
 
         emit Withdraw(
             msg.sender,
