@@ -77,6 +77,10 @@ contract BasicPool is WhitelistAdminRole {
         address indexed user,
         uint256 amount
     );
+    event InterestAvailable(
+        address indexed user,
+        uint256 amount
+    );
 
     constructor(
         address _admin,
@@ -240,17 +244,8 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     function withdrawInterest() public killSwitch() {
-        // Gets the users portion of the penalty pot
-        uint256 penaltyRewardInCdai  = (
-                (users_[msg.sender].balance*10**18)/totalCCollateral_
-            )/10**18*penaltyPot_; 
-        // Works out the interest earned
-        uint256 interestEarnedInCdai = ((
-                users_[msg.sender].collateralInvested*10**28
-            )/cTokenInstance_.exchangeRateCurrent()
-        ) - users_[msg.sender].balance;
         // Calculating total interest available
-        uint256 rewardInCdai = penaltyRewardInCdai + interestEarnedInCdai;
+        uint256 rewardInCdai = getInterestAmount(msg.sender);
 
         // totalCCollateral_ -= rewardInCdai;
         // users_[msg.sender].balance -= rewardInCdai;
@@ -342,8 +337,15 @@ contract BasicPool is WhitelistAdminRole {
                 users_[_user].collateralInvested*10**28
             )/cTokenInstance_.exchangeRateCurrent()
         );
+        // Adding the two
+        uint256 availableInterest = (interestEarnedInCdai + penaltyPotShare);
+        // Emits the interest for the user
+        emit InterestAvailable(
+            _user,
+            availableInterest
+        );
         // Calculating total interest available
-        return (interestEarnedInCdai + penaltyPotShare);
+        return availableInterest;
     }
 
     function canWithdraw(

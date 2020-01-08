@@ -26,7 +26,9 @@ const test_settings = {
         withdrawAmountOn100: ethers.utils.parseUnits("85", 18),
         penaltyAmountOn100: ethers.utils.parseUnits("15", 18),
         penaltyAmountInCdai: "710569455138470517047",
-        fee: 20
+        fee: 20,
+        interestEarned: "2244038717306567",
+        penaltyShare: "710569455138470517047"
     },
     pDaiSettings: {
         name: "pDai",

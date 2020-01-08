@@ -457,9 +457,19 @@ describe("Basic Pool Tests", async () => {
 
         it("Get interest amount for user (penalty pot portion)", async () => {
             let penaltyPot = await basicPoolInstance.penaltyPotBalance();
-            console.log(penaltyPot.toString());//0
-            let amount = await basicPoolInstance.getInterestAmount(user1.signer.address);
-            console.log(amount.toString());//0
+            let amount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
+
+            assert.equal(
+                amount.events[0].args.amount.toString(),
+                0,
+                "Interest amount is not 0 before penalty populated"
+            );
+            assert.equal(
+                penaltyPot.toString(),
+                0,
+                "Penalty pot incorrectly has balance"
+            );
+
             // User1 deposits and withdraws amount
             await pDaiInstance.from(user1).approve(
                 basicPoolInstance.contract.address,
@@ -473,7 +483,6 @@ describe("Basic Pool Tests", async () => {
             )).wait();
             // Ensuring the penalty pot has funds
             penaltyPot = await basicPoolInstance.penaltyPotBalance();
-            console.log(penaltyPot.toString());//0
             // User 2 deposits into pool to have stake on penalty pot
             await pDaiInstance.from(user2).approve(
                 basicPoolInstance.contract.address,
@@ -483,15 +492,35 @@ describe("Basic Pool Tests", async () => {
                 test_settings.basicPool.deposit
             );
             // Ensuring the second user has a share of penalty pot
-            amount = await basicPoolInstance.getInterestAmount(user2.signer.address);
-            console.log(amount.toString());
+            amount = await(await basicPoolInstance.getInterestAmount(user2.signer.address)).wait();
+
+            assert.equal( 
+                penaltyPot.toString(),
+                test_settings.basicPool.penaltyShare,
+                "Penalty pot has incorrect balance"
+            );
+            assert.equal(
+                amount.events[0].args.amount.toString(),
+                test_settings.basicPool.penaltyShare,
+                "User does not have access to ful penalty pot portion"
+            );
         });
 
         it("Get interest amount for user (interest earned)", async () => {
             let penaltyPot = await basicPoolInstance.penaltyPotBalance();
-            console.log(penaltyPot.toString());//0
             let amount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
-            console.log(amount.toString());//0
+
+            assert.equal(
+                penaltyPot.toString(),
+                0,
+                "Penalty pot incorrectly populated"
+            );
+            assert.equal(
+                amount.events[0].args.amount.toString(),
+                0,
+                "User incorrectly has interest available"
+            );
+
             // User1 deposits and withdraws amount
             await pDaiInstance.from(user1).approve(
                 basicPoolInstance.contract.address,
@@ -502,22 +531,25 @@ describe("Basic Pool Tests", async () => {
             );
             // Creating earned interest
             await cDaiInstance.from(admin).increaseExchange(test_settings.pcTokenSettings.exchangeIncrease);
-
             amount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
-            console.log(amount.events[0].args);//0
 
-            let userDetails = await basicPoolInstance.getUserInfo(user1.signer.address);
-            console.log(userDetails);
-            // balance: 473 712 970 0923136780314
-            //          473 712 745 6884419473747
-            //                  224 4038717306567
-
-            //200 511 291 194 366 455 051 927 343 
-            //200 652 451 967 724 247 176 973 897
+            assert.equal(
+                amount.events[0].args.amount.toString(),
+                test_settings.basicPool.interestEarned,
+                "User interest withdraw amount incorrect"
+            );
         });
 
         it("", async () => {
 
+        });
+
+        it("", async () => {
+            
+        });
+
+        it("", async () => {
+            
         });
     });
 });
