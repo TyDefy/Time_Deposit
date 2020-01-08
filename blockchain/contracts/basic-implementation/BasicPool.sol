@@ -73,7 +73,10 @@ contract BasicPool is WhitelistAdminRole {
         uint256 amount,
         uint256 penalty
     );
-    event WithdrawInterest();
+    event WithdrawInterest(
+        address indexed user,
+        uint256 amount
+    );
 
     constructor(
         address _admin,
@@ -170,6 +173,12 @@ contract BasicPool is WhitelistAdminRole {
         uint256 withdrawAmount;
         uint256 penaltyAmount;
         uint256 fee = 0;
+
+        // if(address(withdrawInstance_) == 0) { 
+            // withdrawAmount = _amount;
+            // penaltyAmount = 0;
+            // withdrawAllowed = true;
+        // } else {
         // Getting the correct withdraw information from the withdraw contract
         (withdrawAllowed, withdrawAmount, penaltyAmount) = withdrawInstance_.canWithdraw(
             _amount,
@@ -193,6 +202,7 @@ contract BasicPool is WhitelistAdminRole {
             users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - penaltyAmount;
             // Updates the balance of the penalty pot
             penaltyPot_ = penaltyPot_ + (penaltyAmountInCdai - fee);
+            totalCCollateral_ = totalCCollateral_ - (penaltyAmountInCdai + fee);
         } 
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
@@ -230,32 +240,33 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     function withdrawInterest() public killSwitch() {
-        // uint256 penaltyRewardInCdai  = (
-        //         (users_[msg.sender].balance*10**18)/totalCCollateral_
-        //     )/10**18*penaltyPot_; 
-            
-        // uint256 interestEarnedInCdai = users_[msg.sender].balance - ((
-        //         users_[msg.sender].collateralInvested*10**18
-        //     )/cTokenInstance_.exchangeRateCurrent()
-        // );
-        // uint256 rewardInCdai = penaltyRewardInCdai + interestEarnedInCdai;
+        // Gets the users portion of the penalty pot
+        uint256 penaltyRewardInCdai  = (
+                (users_[msg.sender].balance*10**18)/totalCCollateral_
+            )/10**18*penaltyPot_; 
+        // Works out the interest earned
+        uint256 interestEarnedInCdai = ((
+                users_[msg.sender].collateralInvested*10**28
+            )/cTokenInstance_.exchangeRateCurrent()
+        ) - users_[msg.sender].balance;
+        // Calculating total interest available
+        uint256 rewardInCdai = penaltyRewardInCdai + interestEarnedInCdai;
 
         // totalCCollateral_ -= rewardInCdai;
-        // users_[msg.sender].collateralInvested -= _amount;
         // users_[msg.sender].balance -= rewardInCdai;
         // users_[msg.sender].lastWtihdraw = now;
 
-        // uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
-        // uint256 balanceBeforeInCdai = cTokenInstance_.balanceOf(address(this));
+        uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
+        uint256 balanceBeforeInCdai = cTokenInstance_.balanceOf(address(this));
 
-        // require(
-        //     cTokenInstance_.redeem(withdrawAmount) == 0,
-        //     "Interest collateral transfer failed"
-        // );
+        require(
+            cTokenInstance_.redeem(rewardInCdai) == 0,
+            "Interest collateral transfer failed"
+        );
 
-        // uint256 balanceAfter = collateralInstance_.balanceOf(address(this));
-        // uint256 balanceAfterInCdai = cTokenInstance_.balanceOf(address(this));
-        // uint256 rewardInDai = balanceAfter - balanceBefore;
+        uint256 balanceAfter = collateralInstance_.balanceOf(address(this));
+        uint256 balanceAfterInCdai = cTokenInstance_.balanceOf(address(this));
+        uint256 rewardInDai = balanceAfter - balanceBefore;
 
         // require(
         //     collateralInstance_.transfer(
@@ -263,6 +274,11 @@ contract BasicPool is WhitelistAdminRole {
         //         rewardInDai
         //     ),
         //     "Collateral transfer failed"
+        // );
+
+        // emit WithdrawInterest(
+        //     msg.sender,
+        //     rewardInDai
         // );
     }
 
@@ -311,16 +327,26 @@ contract BasicPool is WhitelistAdminRole {
 
     // View functions
 
-    function getInterestAmount(address _user) public returns(uint256) {
-        uint256 penaltyPotReward = (
-                (users_[_user].balance*10**18)/totalCCollateral_
-            )/10**18*penaltyPot_;
-            
-        uint256 interestEarned = users_[_user].balance - ((
-                users_[_user].collateralInvested*10**18
-            )/cTokenInstance_.exchangeRateCurrent()
-        );
-        return penaltyPotReward + interestEarned;
+    function getInterestAmount(address _user) public view returns(uint256) {
+        uint256 penaltyPotShare = 0;
+        if(penaltyPot_ != 0) {
+            // Gets the users portion of the penalty pot
+            penaltyPotShare = ((
+                        (users_[_user].balance*1e18)/totalCCollateral_
+                    )*penaltyPot_
+                )/1e18;
+        }
+        
+        // uint256 penaltyRewardInCdai = ((
+        //         (users_[_user].balance*1e18)/totalCCollateral_
+        //     )*penaltyPot_)/1e18; 
+        // Works out the interest earned
+        // uint256 interestEarnedInCdai = ((
+        //         users_[_user].collateralInvested*10**28
+        //     )/cTokenInstance_.exchangeRateCurrent()
+        // ) - users_[_user].balance;
+        // Calculating total interest available
+        return penaltyPotShare;
     }
 
     function canWithdraw(

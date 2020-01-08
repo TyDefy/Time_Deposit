@@ -209,7 +209,19 @@ describe("Basic Pool Tests", async () => {
     });
 
     describe("Core Functionality", async () => {
-        it("Interest withdraw", async () => {
+        it("Interest withdraw (interest)", async () => {
+            // 2 users deposit
+            let userDaiBalanceBefore = await pDaiInstance.balanceOf(user1.signer.address);
+            let poolDaiBalanceBefore = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            let poolCdaiBalanceBefore = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            console.log("User dai balance");
+            console.log(userDaiBalanceBefore.toString());
+            console.log("pool dai balance");
+            console.log(poolDaiBalanceBefore.toString());
+            console.log("pool cdai balance");
+            console.log(poolCdaiBalanceBefore.toString());
+
             await pDaiInstance.from(user1).approve(
                 basicPoolInstance.contract.address,
                 test_settings.basicPool.deposit
@@ -217,20 +229,108 @@ describe("Basic Pool Tests", async () => {
             await basicPoolInstance.from(user1).deposit(
                 test_settings.basicPool.deposit
             );
-            console.log("0");
+
+            await cDaiInstance.increaseExchange(test_settings.pcTokenSettings.exchangeIncrease);
+
+            let interstAmount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
+            console.log(interstAmount);
+            console.log(interstAmount.toString());
+
+            await basicPoolInstance.from(user1).withdrawInterest();
+
+            let userDaiBalanceAfter = await pDaiInstance.balanceOf(user1.signer.address);
+            let poolDaiBalanceAfter = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            let poolCdaiBalanceAfter = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            console.log("User dai balance");
+            console.log(userDaiBalanceAfter.toString());
+            console.log("pool dai balance");
+            console.log(poolDaiBalanceAfter.toString());
+            console.log("pool cdai balance");
+            console.log(poolCdaiBalanceAfter.toString());
+        });
+        
+        it("Interest withdraw (penalty & interest)", async () => {
+            // 2 users deposit
+
+            //  1 user withdraws with penalty
+
+            // increase exchange rate
+
+            // user 2 withdraws interest 
+        });
+
+        it("Interest withdraw", async () => {
+            let poolDaiBalanceBefore = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            let poolCdaiBalanceBefore = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            let userDaiBalanceBefore = await pDaiInstance.balanceOf(user1.signer.address);
+            let user2DaiBalanceBefore = await pDaiInstance.balanceOf(user2.signer.address);
+
+            console.log(poolDaiBalanceBefore.toString());//0
+            console.log(poolCdaiBalanceBefore.toString());//0
+            console.log(userDaiBalanceBefore.toString());//100000000000000000000000000
+            console.log(user2DaiBalanceBefore.toString());//100000000000000000000000000
+
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
             await pDaiInstance.from(user2).approve(
                 basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
                 test_settings.basicPool.deposit
             );
             await basicPoolInstance.from(user2).deposit(
                 test_settings.basicPool.deposit
             );
-            console.log("0");
+
+            userDaiBalanceBefore = await pDaiInstance.balanceOf(user1.signer.address);
+            user2DaiBalanceBefore = await pDaiInstance.balanceOf(user2.signer.address);
+
+            console.log(userDaiBalanceBefore.toString());//100000000000000000000000000
+            console.log(user2DaiBalanceBefore.toString());//100000000000000000000000000
+
             let tx = await(await basicPoolInstance.from(user2).withdraw(
                 test_settings.basicPool.deposit
             )).wait();
-            console.log("0");
-            await basicPoolInstance.getInterestAmount(user1.signer.address);
+
+            let balanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
+            let balance2Before = await basicPoolInstance.getUserInfo(user2.signer.address);
+            let balanceInPcToken = await cDaiInstance.balanceOf(user1.signer.address);
+            let poolDaiBalanceAfterDeposit = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            let poolCdaiBalanceAfterDeposit = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            console.log("user pool balance");
+            console.log(balanceBefore.toString());
+            console.log("User 2 balance");
+            console.log(balance2Before.toString());
+            console.log("user cdai balance");
+            console.log(balanceInPcToken.toString());
+            console.log("pool dai balance");
+            console.log(poolDaiBalanceAfterDeposit.toString());
+            console.log("pool cdai balance");
+            console.log(poolCdaiBalanceAfterDeposit.toString());
+
+            await basicPoolInstance.from(user1).withdrawInterest();
+
+            let balanceAfter = await basicPoolInstance.getUserInfo(user1.signer.address);
+            let balance2After = await basicPoolInstance.getUserInfo(user2.signer.address);
+            let balanceInPcTokenAfter = await cDaiInstance.balanceOf(user1.signer.address);
+            let poolDaiBalanceAfter = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            let poolCdaiBalanceAfter = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            console.log("\n<<after interest withdra>>\n\nuser pool balance");
+            console.log(balanceAfter.toString());
+            console.log("User 2 balance");
+            console.log(balance2After.toString());
+            console.log("user cdai balance");
+            console.log(balanceInPcTokenAfter.toString());
+            console.log("pool dai balance");
+            console.log(poolDaiBalanceAfter.toString());
+            console.log("pool cdai balance");
+            console.log(poolCdaiBalanceAfter.toString());
         });
 
         it("Close pool to deposits", async () => {
@@ -355,8 +455,36 @@ describe("Basic Pool Tests", async () => {
             );
         });
 
-        it("", async () => {
-
+        it("Get interest amount for user", async () => {
+            let penaltyPot = await basicPoolInstance.penaltyPotBalance();
+            console.log(penaltyPot.toString());//0
+            let amount = await basicPoolInstance.getInterestAmount(user1.signer.address);
+            console.log(amount.toString());//0
+            // User1 deposits and withdraws amount
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+            let tx = await(await basicPoolInstance.from(user1).withdraw(
+                test_settings.basicPool.deposit
+            )).wait();
+            // Ensuring the penalty pot has funds
+            penaltyPot = await basicPoolInstance.penaltyPotBalance();
+            console.log(penaltyPot.toString());//0
+            // User 2 deposits into pool to have stake on penalty pot
+            await pDaiInstance.from(user2).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user2).deposit(
+                test_settings.basicPool.deposit
+            );
+            // Ensuring the second user has a share of penalty pot
+            amount = await basicPoolInstance.getInterestAmount(user2.signer.address);
+            console.log(amount.toString());
         });
 
         it("", async () => {

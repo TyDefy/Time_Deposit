@@ -41,7 +41,8 @@ const test_settings = {
         symbol: "cDAI",
         decimals: 18,
         mintAmount: "4737129700923136780314",
-        interestRateYearly: "17989044278774400"
+        interestRateYearly: "17989044278774400",
+        exchangeIncrease: ethers.utils.parseUnits("100", 18)
     },
     registrySettings: {
         penalty: {
