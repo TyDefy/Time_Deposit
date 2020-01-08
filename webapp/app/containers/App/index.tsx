@@ -71,6 +71,15 @@ export interface Pool {
   transactions: Array<Transaction>;
 }
 
+export interface Utility {
+  withdrawAddress: string,
+  withdrawName: string,
+  withdrawDescription: string,
+  penaltyAddress: string,
+  penaltyName: string,
+  penaltyDescription: string
+}
+
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;
 
 const NotFoundRedirect = () => <Redirect to='/404' />

@@ -1,9 +1,38 @@
 import { BlockchainContext } from "blockchainContext";
 import { getContext, call, put, spawn, take, takeEvery } from "redux-saga/effects";
 import { Log } from "ethers/providers";
-import { poolDeployed, createPool } from "./actions";
+import { poolDeployed, createPool, utilityDeployed } from "./actions";
 import { eventChannel } from "redux-saga";
 import { getType } from "typesafe-actions";
+
+export function* deployedUtilySaga() {
+  const {poolFactoryContract, provider } = yield getContext('blockchain');
+
+  const deployedUtilitiesEventFilter = {
+    ...poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null),
+    fromBlock: 0,
+    toBlock: 'latest',
+  }
+  try {
+    const deployedUtilityLogs: Log[] = yield call([provider, provider.getLogs], deployedUtilitiesEventFilter);
+    const parsedLogs = deployedUtilityLogs.map(log =>
+      poolFactoryContract.interface.parseLog(log).values);
+    for (const log of parsedLogs) {
+      yield put(
+        utilityDeployed({
+          withdrawAddress: log.withdraw,
+          withdrawName: log._withdrawName,
+          withdrawDescription: log._withdrawDescription,
+          penaltyAddress: log.penalty,
+          penaltyName: log._penaltyName,
+          penaltyDescription: log._penaltyDescription
+        })
+      );
+    };
+  } catch (error) {
+    console.log('error');
+  }
+}
 
 function* deployedPoolWatcher() {
   const { poolFactoryContract }: BlockchainContext = yield getContext('blockchain');
@@ -13,9 +42,11 @@ function* deployedPoolWatcher() {
       ...eventArgs,
     });
 
-    poolFactoryContract.on(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null), poolDeployedHandler);
+    poolFactoryContract.on(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null), 
+      poolDeployedHandler);
     return () => {
-      poolFactoryContract.off(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null), poolDeployedHandler);
+      poolFactoryContract.off(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null), 
+        poolDeployedHandler);
     };
   });
 

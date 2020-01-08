@@ -224,8 +224,6 @@ function* poolTransactionListener(poolContract: Pool) {
           time: new Date(txDate.timestamp * 1000),
           amount: Number(formatEther(newTx.withdrawAmount.add(newTx.penaltyAmount)))
         }))
-    } else {
-      console.log('duplicate or old tx detected');
     }
   }
 }
