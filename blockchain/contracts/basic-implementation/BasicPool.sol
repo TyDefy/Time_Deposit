@@ -327,8 +327,9 @@ contract BasicPool is WhitelistAdminRole {
 
     // View functions
 
-    function getInterestAmount(address _user) public view returns(uint256) {
+    function getInterestAmount(address _user) public returns(uint256) {
         uint256 penaltyPotShare = 0;
+        // If there is a penalty pot
         if(penaltyPot_ != 0) {
             // Gets the users portion of the penalty pot
             penaltyPotShare = ((
@@ -336,17 +337,13 @@ contract BasicPool is WhitelistAdminRole {
                     )*penaltyPot_
                 )/1e18;
         }
-        
-        // uint256 penaltyRewardInCdai = ((
-        //         (users_[_user].balance*1e18)/totalCCollateral_
-        //     )*penaltyPot_)/1e18; 
         // Works out the interest earned
-        // uint256 interestEarnedInCdai = ((
-        //         users_[_user].collateralInvested*10**28
-        //     )/cTokenInstance_.exchangeRateCurrent()
-        // ) - users_[_user].balance;
+        uint256 interestEarnedInCdai = users_[_user].balance - ((
+                users_[_user].collateralInvested*10**28
+            )/cTokenInstance_.exchangeRateCurrent()
+        );
         // Calculating total interest available
-        return penaltyPotShare;
+        return (interestEarnedInCdai + penaltyPotShare);
     }
 
     function canWithdraw(

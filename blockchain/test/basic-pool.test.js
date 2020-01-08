@@ -455,7 +455,7 @@ describe("Basic Pool Tests", async () => {
             );
         });
 
-        it("Get interest amount for user", async () => {
+        it("Get interest amount for user (penalty pot portion)", async () => {
             let penaltyPot = await basicPoolInstance.penaltyPotBalance();
             console.log(penaltyPot.toString());//0
             let amount = await basicPoolInstance.getInterestAmount(user1.signer.address);
@@ -487,8 +487,33 @@ describe("Basic Pool Tests", async () => {
             console.log(amount.toString());
         });
 
-        it("", async () => {
+        it("Get interest amount for user (interest earned)", async () => {
+            let penaltyPot = await basicPoolInstance.penaltyPotBalance();
+            console.log(penaltyPot.toString());//0
+            let amount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
+            console.log(amount.toString());//0
+            // User1 deposits and withdraws amount
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+            // Creating earned interest
+            await cDaiInstance.from(admin).increaseExchange(test_settings.pcTokenSettings.exchangeIncrease);
 
+            amount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
+            console.log(amount.events[0].args);//0
+
+            let userDetails = await basicPoolInstance.getUserInfo(user1.signer.address);
+            console.log(userDetails);
+            // balance: 473 712 970 0923136780314
+            //          473 712 745 6884419473747
+            //                  224 4038717306567
+
+            //200 511 291 194 366 455 051 927 343 
+            //200 652 451 967 724 247 176 973 897
         });
 
         it("", async () => {
