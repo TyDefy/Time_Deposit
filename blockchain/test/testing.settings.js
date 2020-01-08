@@ -37,13 +37,15 @@ const test_settings = {
         decimals: 18,
         mintAmount: "100000000000000000000000000",
         mintAmountMinusDeposit: "99999900000000000000000000",
-        withdrawWithPenalty: "99999985000000000000000000"
+        withdrawWithPenalty: "99999985000000000000000000",
+        withdrawInterestBalance: "99999915000000000000000000"
     },
     pcTokenSettings: {
         name: "cToken",
         symbol: "cDAI",
         decimals: 18,
         mintAmount: "4737129700923136780314",
+        mintAmountMinusInterest: "4026560245784666263267",
         interestRateYearly: "17989044278774400",
         exchangeIncrease: ethers.utils.parseUnits("100", 18)
     },

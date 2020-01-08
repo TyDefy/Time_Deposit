@@ -247,9 +247,9 @@ contract BasicPool is WhitelistAdminRole {
         // Calculating total interest available
         uint256 rewardInCdai = getInterestAmount(msg.sender);
 
-        // totalCCollateral_ -= rewardInCdai;
-        // users_[msg.sender].balance -= rewardInCdai;
-        // users_[msg.sender].lastWtihdraw = now;
+        totalCCollateral_ = totalCCollateral_ - rewardInCdai;
+        users_[msg.sender].balance = users_[msg.sender].balance - rewardInCdai;
+        // // users_[msg.sender].lastWtihdraw = now;
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
         uint256 balanceBeforeInCdai = cTokenInstance_.balanceOf(address(this));
@@ -263,18 +263,18 @@ contract BasicPool is WhitelistAdminRole {
         uint256 balanceAfterInCdai = cTokenInstance_.balanceOf(address(this));
         uint256 rewardInDai = balanceAfter - balanceBefore;
 
-        // require(
-        //     collateralInstance_.transfer(
-        //         msg.sender,
-        //         rewardInDai
-        //     ),
-        //     "Collateral transfer failed"
-        // );
+        require(
+            collateralInstance_.transfer(
+                msg.sender,
+                rewardInDai
+            ),
+            "Collateral transfer failed"
+        );
 
-        // emit WithdrawInterest(
-        //     msg.sender,
-        //     rewardInDai
-        // );
+        emit WithdrawInterest(
+            msg.sender,
+            rewardInDai
+        );
     }
 
     function finalWithdraw() public killSwitch() {

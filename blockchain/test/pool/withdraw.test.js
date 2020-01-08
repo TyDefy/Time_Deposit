@@ -616,4 +616,151 @@ describe("Pool tests - withdraw", async () => {
             //TODO no balance to withdraw
         });
     });
+
+    describe("Interest withdraw functionality", async () => {
+        
+    });
+
+    describe("interest withdraw supporting functionality", async () => {
+        it("Get interest amount for user (penalty pot portion)", async () => {
+            let penaltyPot = await basicPoolInstance.penaltyPotBalance();
+            let amount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
+
+            assert.equal(
+                amount.events[0].args.amount.toString(),
+                0,
+                "Interest amount is not 0 before penalty populated"
+            );
+            assert.equal(
+                penaltyPot.toString(),
+                0,
+                "Penalty pot incorrectly has balance"
+            );
+
+            // User1 deposits and withdraws amount
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+            let tx = await(await basicPoolInstance.from(user1).withdraw(
+                test_settings.basicPool.deposit
+            )).wait();
+            // Ensuring the penalty pot has funds
+            penaltyPot = await basicPoolInstance.penaltyPotBalance();
+            // User 2 deposits into pool to have stake on penalty pot
+            await pDaiInstance.from(user2).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user2).deposit(
+                test_settings.basicPool.deposit
+            );
+            // Ensuring the second user has a share of penalty pot
+            amount = await(await basicPoolInstance.getInterestAmount(user2.signer.address)).wait();
+
+            console.log("");
+
+            assert.equal( 
+                penaltyPot.toString(),
+                test_settings.basicPool.penaltyShare,
+                "Penalty pot has incorrect balance"
+            );
+            assert.equal(
+                amount.events[0].args.amount.toString(),
+                test_settings.basicPool.penaltyShare,
+                "User does not have access to ful penalty pot portion"
+            );
+        });
+
+        it("Get interest amount for user (interest earned)", async () => {
+            let penaltyPot = await basicPoolInstance.penaltyPotBalance();
+            let amount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
+
+            assert.equal(
+                penaltyPot.toString(),
+                0,
+                "Penalty pot incorrectly populated"
+            );
+            assert.equal(
+                amount.events[0].args.amount.toString(),
+                0,
+                "User incorrectly has interest available"
+            );
+
+            // User1 deposits and withdraws amount
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+            // Creating earned interest
+            await cDaiInstance.from(admin).increaseExchange(test_settings.pcTokenSettings.exchangeIncrease);
+            amount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
+
+            assert.equal(
+                amount.events[0].args.amount.toString(),
+                test_settings.basicPool.interestEarned,
+                "User interest withdraw amount incorrect"
+            );
+        });
+
+        it("Get interest amount for user (with penalty pot + fee)", async () => {
+            await basicPoolInstance.from(admin).init(test_settings.basicPool.fee);
+            let penaltyPot = await basicPoolInstance.penaltyPotBalance();
+            let amount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
+
+            assert.equal(
+                amount.events[0].args.amount.toString(),
+                0,
+                "Interest amount is not 0 before penalty populated"
+            );
+            assert.equal(
+                penaltyPot.toString(),
+                0,
+                "Penalty pot incorrectly has balance"
+            );
+
+            // User1 deposits and withdraws amount
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+            let tx = await(await basicPoolInstance.from(user1).withdraw(
+                test_settings.basicPool.deposit
+            )).wait();
+            // Ensuring the penalty pot has funds
+            penaltyPot = await basicPoolInstance.penaltyPotBalance();
+            // User 2 deposits into pool to have stake on penalty pot
+            await pDaiInstance.from(user2).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user2).deposit(
+                test_settings.basicPool.deposit
+            );
+            // Ensuring the second user has a share of penalty pot
+            amount = await(await basicPoolInstance.getInterestAmount(user2.signer.address)).wait();
+
+            console.log("");
+
+            assert.equal( 
+                penaltyPot.toString(),
+                test_settings.basicPool.penaltyShareMinusFee,
+                "Penalty pot has incorrect balance"
+            );
+            assert.equal(
+                amount.events[0].args.amount.toString(),
+                test_settings.basicPool.penaltyShareMinusFee,
+                "User does not have access to ful penalty pot portion"
+            );
+        });
+    });
 });
