@@ -206,7 +206,7 @@ contract BasicPool is WhitelistAdminRole {
             users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - penaltyAmount;
             // Updates the balance of the penalty pot
             penaltyPot_ = penaltyPot_ + (penaltyAmountInCdai - fee);
-            totalCCollateral_ = totalCCollateral_ - (penaltyAmountInCdai + fee);
+            totalCCollateral_ = totalCCollateral_ - penaltyAmountInCdai;
         } 
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));

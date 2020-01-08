@@ -28,7 +28,8 @@ const test_settings = {
         penaltyAmountInCdai: "710569455138470517047",
         fee: 20,
         interestEarned: "2244038717306567",
-        penaltyShare: "710569455138470517047"
+        penaltyShare: "710569455138470517047",
+        penaltyShareMinusFee: "568455564110776413638"
     },
     pDaiSettings: {
         name: "pDai",
