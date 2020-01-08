@@ -32,6 +32,30 @@ export function* deployedUtilySaga() {
   } catch (error) {
     console.log('error');
   }
+
+  const utilityDeployedChannel = eventChannel(emit => {
+    const utilityDeployedHandler = eventArgs => emit({
+      ...eventArgs,
+    })
+
+    poolFactoryContract.on(poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null),
+      utilityDeployedHandler);
+    return () => {
+      poolFactoryContract.off(poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null),
+      utilityDeployedHandler);
+    }
+  })
+  while (true) {
+    const newUtility = yield take(utilityDeployedChannel);
+    utilityDeployed({
+      withdrawAddress: newUtility.withdraw,
+      withdrawName: newUtility._withdrawName,
+      withdrawDescription: newUtility._withdrawDescription,
+      penaltyAddress: newUtility.penalty,
+      penaltyName: newUtility._penaltyName,
+      penaltyDescription: newUtility._penaltyDescription
+    })
+  }
 }
 
 function* deployedPoolWatcher() {
@@ -52,7 +76,6 @@ function* deployedPoolWatcher() {
 
   while (true) {
     const newPool = yield take(poolDeployedChannel);
-    console.log(newPool.cycleLength.toString());
     yield put(poolDeployed({
       address: newPool.pool,
       withdraw: newPool.withdraw,
