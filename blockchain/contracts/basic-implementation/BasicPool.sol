@@ -286,7 +286,8 @@ contract BasicPool is WhitelistAdminRole {
         // Withdraw full balance 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
         uint256 balanceBeforeInCdai = cTokenInstance_.balanceOf(address(this));
-        uint256 fullUserBalance = users_[msg.sender].collateralInvested; //TODO add penalty pot portion
+        uint256 fullUserBalance = users_[msg.sender].collateralInvested; 
+        //TODO add penalty pot portion
 
         require(
             cTokenInstance_.redeemUnderlying(
@@ -324,6 +325,7 @@ contract BasicPool is WhitelistAdminRole {
 
     function getInterestAmount(address _user) public returns(uint256) {
         uint256 penaltyPotShare = 0;
+        uint256 interestEarnedInCdai = 0;
         // If there is a penalty pot
         if(penaltyPot_ != 0) {
             // Gets the users portion of the penalty pot
@@ -332,11 +334,14 @@ contract BasicPool is WhitelistAdminRole {
                     )*penaltyPot_
                 )/1e18;
         }
-        // Works out the interest earned
-        uint256 interestEarnedInCdai = users_[_user].balance - ((
-                users_[_user].collateralInvested*10**28
-            )/cTokenInstance_.exchangeRateCurrent()
-        );
+        // If the user has collateral with the pool
+        if(users_[_user].collateralInvested != 0) {
+            // Works out the interest earned
+            interestEarnedInCdai = users_[_user].balance - ((
+                    users_[_user].collateralInvested*10**28
+                )/cTokenInstance_.exchangeRateCurrent()
+            );
+        }
         // Adding the two
         uint256 availableInterest = (interestEarnedInCdai + penaltyPotShare);
         // Emits the interest for the user

@@ -93,7 +93,7 @@ describe("Pool tests - deposit", async () => {
     });
 
     describe("Deposit functionality", async () => {
-        it("💵 Can deposit", async () => {
+        it("Can deposit", async () => {
             let userInfoBeforeDeposit = await basicPoolInstance.getUserInfo(user1.signer.address);
             let userBalanceDaiBeforeDeposit = await pDaiInstance.balanceOf(user1.signer.address);
             let poolBalanceCdaiBeforeDeposit = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
@@ -195,7 +195,7 @@ describe("Pool tests - deposit", async () => {
             );
         });
 
-        it("🚫 Negative testing deposit", async () => {
+        it("Negative testing deposit", async () => {
             let userInfoBeforeDeposit = await basicPoolInstance.getUserInfo(user1.signer.address);
             let userBalanceDaiBeforeDeposit = await pDaiInstance.balanceOf(user1.signer.address);
             let poolBalanceDaiBeforeDeposit = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);

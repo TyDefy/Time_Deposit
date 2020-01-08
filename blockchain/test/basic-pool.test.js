@@ -209,7 +209,8 @@ describe("Basic Pool Tests", async () => {
     });
 
     describe("Core Functionality", async () => {
-        it("Interest withdraw (penalty)", async () => {
+        it("Interest withdraw (penalty & interest)", async () => {
+            await basicPoolInstance.from(admin).init(test_settings.basicPool.fee);
             let penaltyPot = await basicPoolInstance.penaltyPotBalance();
             let amount = await(await basicPoolInstance.getInterestAmount(user2.signer.address)).wait();
             let user2DaiBalanceBefore = await pDaiInstance.balanceOf(user2.signer.address);
@@ -270,97 +271,58 @@ describe("Basic Pool Tests", async () => {
             await basicPoolInstance.from(user2).deposit(
                 test_settings.basicPool.deposit
             );
+            // Creating earned interest
+            await cDaiInstance.from(admin).increaseExchange(test_settings.pcTokenSettings.exchangeIncrease);
+
             let user2DaiBalanceAfterDeposit = await pDaiInstance.balanceOf(user2.signer.address);
             let userDetailsAfterDeposit = await basicPoolInstance.getUserInfo(user2.signer.address);
+            
             // Withdrawing the interest
             await(await basicPoolInstance.from(user2).withdrawInterest()).wait();
 
             let user2DaiBalanceAfterInterestWithdraw = await pDaiInstance.balanceOf(user2.signer.address);
             let userDetailsAfterInterestWithdraw = await basicPoolInstance.getUserInfo(user2.signer.address);
+            let cDaiBalanceBefore = new BigNumber(userDetailsAfterDeposit[1].toString());
+            let cDaiBalanceAfterInterestWithdraw = new BigNumber(userDetailsAfterInterestWithdraw[1].toString());
+            let diff = cDaiBalanceBefore.minus(cDaiBalanceAfterInterestWithdraw);
 
             console.log("");
 
             assert.equal(
-                userDetailsAfterDeposit[0].toString(),
-                test_settings.basicPool.deposit,
-                "Users dai balance incorrect after deposit"
-            );
-            assert.equal(
-                userDetailsAfterDeposit[1].toString(),
-                test_settings.pcTokenSettings.mintAmount,
-                "Users cdai balance incorrect after deposit"
-            );
-            assert.equal(
-                userDetailsAfterInterestWithdraw[0].toString(),
-                test_settings.basicPool.deposit,
-                "Users dai balance incorrectly affected by withdraw interest"
-            );
-            assert.equal(
-                userDetailsAfterInterestWithdraw[1].toString(),
-                test_settings.pcTokenSettings.mintAmountMinusInterest,
-                "Users cdai balance incorrect after deposit"
+                diff.toString(),
+                test_settings.basicPool.penaltyShareMinusFeePlusInterest.toString(),
+                "Difference between balances does not equal penalty share + interest (- fee)"
             );
             assert.equal(
                 user2DaiBalanceAfterDeposit.toString(),
-                test_settings.pDaiSettings.mintAmountMinusDeposit,
+                test_settings.pDaiSettings.mintAmountMinusDeposit.toString(),
                 "User dai balance incorrect after deposit"
             );
             assert.equal(
                 user2DaiBalanceAfterInterestWithdraw.toString(),
-                test_settings.pDaiSettings.withdrawInterestBalance,
-                "User dai balance has not been incremented with interest withdraw"
+                test_settings.pDaiSettings.withdrawInterestPusPenaltyMinusFee.toString(),
+                "User dai balance has not been incremented to include interest"
             );
-        });
-
-        it("Interest withdraw (interest)", async () => {
-            // // 2 users deposit
-            // let userDaiBalanceBefore = await pDaiInstance.balanceOf(user1.signer.address);
-            // let poolDaiBalanceBefore = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
-            // let poolCdaiBalanceBefore = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
-
-            // console.log("User dai balance");
-            // console.log(userDaiBalanceBefore.toString());
-            // console.log("pool dai balance");
-            // console.log(poolDaiBalanceBefore.toString());
-            // console.log("pool cdai balance");
-            // console.log(poolCdaiBalanceBefore.toString());
-
-            // await pDaiInstance.from(user1).approve(
-            //     basicPoolInstance.contract.address,
-            //     test_settings.basicPool.deposit
-            // );
-            // await basicPoolInstance.from(user1).deposit(
-            //     test_settings.basicPool.deposit
-            // );
-
-            // await cDaiInstance.increaseExchange(test_settings.pcTokenSettings.exchangeIncrease);
-
-            // let interstAmount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
-            // console.log(interstAmount);
-            // console.log(interstAmount.toString());
-
-            // await basicPoolInstance.from(user1).withdrawInterest();
-
-            // let userDaiBalanceAfter = await pDaiInstance.balanceOf(user1.signer.address);
-            // let poolDaiBalanceAfter = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
-            // let poolCdaiBalanceAfter = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
-
-            // console.log("User dai balance");
-            // console.log(userDaiBalanceAfter.toString());
-            // console.log("pool dai balance");
-            // console.log(poolDaiBalanceAfter.toString());
-            // console.log("pool cdai balance");
-            // console.log(poolCdaiBalanceAfter.toString());
-        });
-        
-        it("Interest withdraw (penalty & interest)", async () => {
-            // 2 users deposit
-
-            //  1 user withdraws with penalty
-
-            // increase exchange rate
-
-            // user 2 withdraws interest 
+            assert.equal(
+                userDetailsAfterDeposit[0].toString(),
+                test_settings.basicPool.deposit.toString(),
+                "User dai balance in pool incorrectly affected"
+            );
+            assert.equal(
+                userDetailsAfterDeposit[1].toString(),
+                test_settings.pcTokenSettings.mintAmount.toString(),
+                "User dai balance in pool incorrectly affected"
+            );
+            assert.equal(
+                userDetailsAfterInterestWithdraw[0].toString(),
+                test_settings.basicPool.deposit.toString(),
+                "User dai balance in pool incorrectly affected"
+            );
+            assert.equal(
+                userDetailsAfterInterestWithdraw[1].toString(),
+                test_settings.pcTokenSettings.mintAmountMinusPenaltyInterestFee.toString(),
+                "User dai balance in pool incorrectly affected"
+            );
         });
 
         it("Close pool to deposits", async () => {

@@ -29,7 +29,8 @@ const test_settings = {
         fee: 20,
         interestEarned: "2244038717306567",
         penaltyShare: "710569455138470517047",
-        penaltyShareMinusFee: "568455564110776413638"
+        penaltyShareMinusFee: "568455564110776413638",
+        penaltyShareMinusFeePlusInterest: "568457808149493720205"
     },
     pDaiSettings: {
         name: "pDai",
@@ -38,14 +39,18 @@ const test_settings = {
         mintAmount: "100000000000000000000000000",
         mintAmountMinusDeposit: "99999900000000000000000000",
         withdrawWithPenalty: "99999985000000000000000000",
-        withdrawInterestBalance: "99999915000000000000000000"
+        withdrawInterestBalancePenalty: "99999915000000000000000000",
+        withdrawInterestBalance: "99999900000047371297009232",
+        withdrawInterestPusPenaltyMinusFee: "99999912000053055852650340"
     },
     pcTokenSettings: {
         name: "cToken",
         symbol: "cDAI",
         decimals: 18,
         mintAmount: "4737129700923136780314",
-        mintAmountMinusInterest: "4026560245784666263267",
+        mintAmountMinusInterestPenalty: "4026560245784666263267",
+        mintAmountMinusInterest: "4737127456884419473747",
+        mintAmountMinusPenaltyInterestFee: "4168671892773643060109",
         interestRateYearly: "17989044278774400",
         exchangeIncrease: ethers.utils.parseUnits("100", 18)
     },
