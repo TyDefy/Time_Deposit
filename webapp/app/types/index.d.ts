@@ -27,4 +27,5 @@ export interface ApplicationRootState {
   readonly transactionModal: TransactionModalState;
   readonly createPool: never;
   readonly pools: PoolState;
+  readonly utilities: UtilityState;
 }

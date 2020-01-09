@@ -8,6 +8,7 @@ import React from 'react';
 import { Theme, createStyles, withStyles, WithStyles, Button, Typography, Container, MenuItem, Grid } from '@material-ui/core';
 import { Form, FastField } from 'formik';
 import { TextField } from 'formik-material-ui';
+import { Utility } from 'containers/App';
 
 const styles = ({spacing}: Theme) =>
   createStyles({
@@ -29,11 +30,11 @@ const styles = ({spacing}: Theme) =>
 
 interface OwnProps extends WithStyles<typeof styles> {
   poolTypes: Array<{ value: number, label: string }>,
-  periods: Array<{ value: number, label: string }>,
+  utilities: Array<Utility>,
 }
 
 const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
-  { poolTypes, periods, classes }: OwnProps,
+  { classes, poolTypes, utilities }: OwnProps,
 ) => <Container maxWidth='sm'>
     <Form>
       <Typography variant='h3' className={classes.header}>Create Pool</Typography>
@@ -64,15 +65,15 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
           ))}
         </FastField>
         <FastField
-          name='period'
+          name='utilityAddress'
           type='text'
-          label='Period'
+          label='Utility'
           select
           className={classes.label}
           component={TextField}>
-          {periods.map(option => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
+          {utilities.map(utility => (
+            <MenuItem key={utility.withdrawAddress} value={utility.withdrawAddress}>
+              {`${utility.withdrawName} - ${utility.withdrawDescription} - ${utility.penaltyName} - ${utility.penaltyDescription}`}
             </MenuItem>
           ))}
         </FastField>
