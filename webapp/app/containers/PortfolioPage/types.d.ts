@@ -3,19 +3,17 @@ import * as actions from './actions';
 import { ApplicationRootState } from 'types';
 
 /* --- STATE --- */
-interface TransactionModalState {
-  readonly open: boolean;
-  readonly txContext?: string;
-  readonly txHash?: string;
+interface PortfolioPageState {
+  readonly default: any;
 }
 
 /* --- ACTIONS --- */
-type TransactionModalActions = ActionType<typeof actions>;
+type PortfolioPageActions = ActionType<typeof actions>;
 
 /* --- EXPORTS --- */
 
 type RootState = ApplicationRootState;
-type ContainerState = TransactionModalState;
-type ContainerActions = TransactionModalActions;
+type ContainerState = PortfolioPageState;
+type ContainerActions = PortfolioPageActions;
 
 export { RootState, ContainerState, ContainerActions };

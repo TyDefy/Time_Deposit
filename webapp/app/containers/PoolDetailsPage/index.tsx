@@ -16,59 +16,47 @@ import { Dialog } from '@material-ui/core';
 import InvestModal from 'components/InvestModal';
 import WithdrawInterestModal from 'components/WithdrawInterestModal';
 import WithdrawAllModal from 'components/WithdrawAllModal';
+import { RouteComponentProps } from 'react-router-dom';
+import { RootState } from './types';
+import { deposit, withdraw, withdrawInterest } from 'containers/App/actions';
 
-interface OwnProps { }
+interface RouteParams {
+  poolAddress: string;
+}
 
-interface DispatchProps { }
+export interface OwnProps extends RouteComponentProps<RouteParams>,
+  React.Props<RouteParams> { }
+
+
+interface DispatchProps {
+  deposit(amount: number): void;
+  withdraw(amount: number): void;
+  withdrawInterest(amount: number): void;
+}
 
 export interface StateProps {
-  // pool: UserPoolDetails,
-  // daiBalance: number,
+  pool: Pool,
+  daiBalance: number,
 }
 
 export interface Transaction {
-  address: string;
+  userAddress: string;
   time: Date;
-  type: 'Contribute' | 'Withdraw';
+  type: 'Deposit' | 'Withdraw';
   amount: number;
+  txHash: string;
 }
-
-export interface UserPoolDetails extends Pool {
-  contribution: number;
-  interestAccrued: number;
-  availableInterest: number;
-  transactions: Array<Transaction>;
-}
-
-const pool: UserPoolDetails = {
-  address: '0x1',
-  withdraw: '0xWithdraw',
-  name: 'Test',
-  description: 'test description',
-  period: 3,
-  interestRate: 0.07,
-  type: 'cDAI',
-  balance: 900,
-  participants: 5,
-  availableInterest: 0,
-  interestAccrued: 10,
-  contribution: 50,
-  description: "",
-  transactions: [
-    { address: '0x2', time: new Date(), type: 'Contribute', amount: 1 },
-    { address: '0x3', time: new Date(), type: 'Contribute', amount: 1 },
-    { address: '0x4', time: new Date(), type: 'Contribute', amount: 1 },
-    { address: '0x5', time: new Date(), type: 'Contribute', amount: 1 },
-    { address: '0x6', time: new Date(), type: 'Contribute', amount: 1 },
-  ]
-}
-
-const daiBalance = 100;
 
 type Props = StateProps & DispatchProps & OwnProps;
 type ModalType = 'invest' | 'withdrawInterest' | 'withdrawAll';
 
-const PoolDetailsPage: React.FunctionComponent<Props> = (props: Props) => {
+const PoolDetailsPage: React.FunctionComponent<Props> = ({ 
+  pool, 
+  daiBalance, 
+  deposit,
+  withdrawInterest,
+  withdraw,
+}: Props) => {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<ModalType>('invest');
 
@@ -86,25 +74,25 @@ const PoolDetailsPage: React.FunctionComponent<Props> = (props: Props) => {
             return <InvestModal
               name={pool.name}
               daiBalance={daiBalance}
-              currentInterestRate={pool.interestRate}
+              currentInterestRate={pool.interestRate || 0}
               nextWithdrawlDate={new Date()}
               type={pool.type}
               onClose={() => setShowModal(false)}
-              onSubmit={(value) => console.log(value)} />;
+              onSubmit={(value) => deposit(value)} />;
           case 'withdrawInterest':
-            return <WithdrawInterestModal 
+            return <WithdrawInterestModal
               name={pool.name}
               type={pool.type}
-              availableInterest={pool.availableInterest}
-              onSubmit={(value) => console.log(value)}
+              availableInterest={pool.availableInterest || 0}
+              onSubmit={(value) => withdrawInterest(value)}
               onClose={() => setShowModal(false)} />;
           case 'withdrawAll':
-            return <WithdrawAllModal 
-            name={pool.name}
-            type={pool.type}
-            availableFunds={pool.availableInterest}
-            onSubmit={(value) => console.log(value)}
-            onClose={() => setShowModal(false)} />;
+            return <WithdrawAllModal
+              name={pool.name}
+              type={pool.type}
+              availableFunds={pool.availableInterest || 0}
+              onSubmit={(value) => withdraw(value)}
+              onClose={() => setShowModal(false)} />;
           default:
             return null;
         }
@@ -113,14 +101,16 @@ const PoolDetailsPage: React.FunctionComponent<Props> = (props: Props) => {
   </>;
 };
 
-const mapStateToProps = state => selectPoolDetailsPage(state);
+const mapStateToProps = (state: RootState, props: OwnProps) => selectPoolDetailsPage(state, props);
 
 const mapDispatchToProps = (
   dispatch: Dispatch,
   ownProps: OwnProps,
 ): DispatchProps => {
   return {
-    dispatch: dispatch,
+    deposit: (amount: number) => dispatch(deposit.request({poolAddress: ownProps.match.params.poolAddress, amount})),
+    withdraw: (amount: number) => dispatch(withdraw.request({poolAddress: ownProps.match.params.poolAddress, amount})),
+    withdrawInterest: (amount: number) => dispatch(withdrawInterest.request({poolAddress: ownProps.match.params.poolAddress, amount})),
   };
 };
 

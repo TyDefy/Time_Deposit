@@ -1,6 +1,5 @@
 import { createSelector, createStructuredSelector } from 'reselect';
-import { ApplicationRootState } from 'types';
-import { RootState } from 'containers/App/types';
+import { RootState } from './types';
 import { StateProps } from '.';
 
 /**
@@ -8,7 +7,9 @@ import { StateProps } from '.';
  */
 
 const selectTransactionModal = createStructuredSelector<RootState, StateProps>({
-  open: createSelector((state: ApplicationRootState) => state.transactionModal.open, (substate) => substate),
+  open: createSelector((state: RootState) => state.transactionModal.open, (substate) => substate),
+  txContext: createSelector((state: RootState) => state.transactionModal.txContext, (substate) => substate),
+  txHash: createSelector((state: RootState) => state.transactionModal.txHash, (substate) => substate),
 });
 
 export default selectTransactionModal;

@@ -17,12 +17,12 @@ const styles = (theme: Theme) =>
 
 interface OwnProps extends WithStyles<typeof styles> {
   pools: Array<Pool>,
-  allPoolsBalance: number,
+  poolsBalance: number,
 }
 
-const Dashboard: React.FunctionComponent<OwnProps> = ({pools, allPoolsBalance}: OwnProps) => (
+const Dashboard: React.FunctionComponent<OwnProps> = ({pools, poolsBalance}: OwnProps) => (
   <Container maxWidth='lg'>
-    <HomeHeader allPoolsBalance={allPoolsBalance} />
+    <HomeHeader poolsBalance={poolsBalance} />
     <br />
     <br />
     <br />
