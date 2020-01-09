@@ -10,11 +10,12 @@
     "deploy:rinkeby": "etherlime deploy --network=rinkeby --runs=500",
     "deploy:rinkeby:debug": "node --inspect-brk ./node_modules/etherlime/cli.js --timeout 30000 deploy --network=rinkeby --runs=50",
     "test": "etherlime test --output=none --timeout 100000 --gas-report=true --runs=999",
-    "test-one": "etherlime test test/anglo-rppVault/anglo-rppVault.test.js --output=none --timeout 100000 --gas-report=true --runs=999",
+    "test-one": "etherlime test test/basic-pool.test.js --output=none --timeout 100000 --gas-report=true --runs=999",
     "test-cov": "etherlime coverage --timeout 100000 --runs=999",
     "flat": "etherlime flatten ./basic-implementation/CyclicWithdraw.sol",
     "remixd": "remixd -s . --remix-ide https://remix.ethereum.org",
-    "generate-typings": "typechain --target=ethers --outDir contractInterfaces/ \"build/*.json\""
+    "generate-typings": "typechain --target=ethers --outDir contractInterfaces/ \"build/*.json\"",
+    "test-a": "yarn start & yarn test"
   },
   "author": "Linum Labs",
   "license": "MIT",

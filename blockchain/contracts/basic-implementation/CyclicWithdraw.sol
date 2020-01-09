@@ -45,7 +45,7 @@ contract CyclicWithdraw is IWithdraw {
         } else {
             return (true, _amount, 0);
         }
-    } 
+    }
 
     function calculateWithdraw(
         uint256 _amount,

@@ -20,6 +20,7 @@ contract pcToken is ICToken, ERC20 {
     uint256 internal totalReserves_;
     uint256 internal totalBorrows_;
     IERC20 internal collateralInstance_;
+    uint256 internal exchange_ = 211098294354306448527248519;
 
     event Approval(
         address indexed owner,
@@ -100,8 +101,12 @@ contract pcToken is ICToken, ERC20 {
     }
 
     function exchangeRateCurrent() public returns(uint) {
-        return 211098294354306448527248519;
+        return exchange_;
         // return (getCash() + totalBorrows() - totalReserves_) / totalSupply();
+    }
+
+    function increaseExchange(uint256 _increase) public {
+        exchange_ = exchange_ + _increase;
     }
 
     function supplyRatePerBlock() public view returns(uint) {
