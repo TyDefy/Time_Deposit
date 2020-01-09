@@ -176,7 +176,7 @@ contract BasicPool is WhitelistAdminRole {
             if(penaltyAmount != 0) {
                 // If there is a penalty, this applies it
                 uint256 penaltyAmountInCdai = (
-                        penaltyAmount*10**28
+                        penaltyAmount*1e28
                     )/cTokenInstance_.exchangeRateCurrent();
                 // If the fee has been set up, this executes it
                 if(feePercentage_ != 0) {
@@ -191,7 +191,7 @@ contract BasicPool is WhitelistAdminRole {
                 // Updates the balance of the penalty pot
                 penaltyPot_ = penaltyPot_ + (penaltyAmountInCdai - fee);
                 totalCCollateral_ = totalCCollateral_ - penaltyAmountInCdai;
-            } 
+            }
         }
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
@@ -236,7 +236,6 @@ contract BasicPool is WhitelistAdminRole {
         users_[msg.sender].balance = users_[msg.sender].balance - rewardInCdai;
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
-        uint256 balanceBeforeInCdai = cTokenInstance_.balanceOf(address(this));
 
         require(
             cTokenInstance_.redeem(rewardInCdai) == 0,
@@ -244,7 +243,6 @@ contract BasicPool is WhitelistAdminRole {
         );
 
         uint256 balanceAfter = collateralInstance_.balanceOf(address(this));
-        uint256 balanceAfterInCdai = cTokenInstance_.balanceOf(address(this));
         uint256 rewardInDai = balanceAfter - balanceBefore;
 
         require(
@@ -309,7 +307,7 @@ contract BasicPool is WhitelistAdminRole {
         if(users_[_user].collateralInvested != 0) {
             // Works out the interest earned
             interestEarnedInCdai = users_[_user].balance - ((
-                    users_[_user].collateralInvested*10**28
+                    users_[_user].collateralInvested*1e28
                 )/cTokenInstance_.exchangeRateCurrent()
             );
         }
