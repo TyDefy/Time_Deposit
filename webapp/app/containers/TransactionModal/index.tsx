@@ -12,22 +12,40 @@ import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 import reducer from './reducer';
 import saga from './saga';
-import { Dialog } from '@material-ui/core';
+import { Dialog, CircularProgress, Container, Paper, Typography, Link } from '@material-ui/core';
 import selectTransactionModal from './selectors';
+import { getNetwork } from 'ethers/utils';
 
-interface OwnProps {}
+interface OwnProps { }
 
-interface DispatchProps {}
+interface DispatchProps { }
 
 export interface StateProps {
   open: boolean;
+  txContext?: string;
+  txHash?: string;
 }
 
 type Props = StateProps & DispatchProps & OwnProps;
 
-const TransactionModal: React.FunctionComponent<Props> = ({open}: Props) => {
-  return <Dialog open={open}>Transaction Modal</Dialog>;
-};
+const TransactionModal: React.FunctionComponent<Props> = ({ open, txContext, txHash }: Props) => (
+  <Dialog open={open}>
+    <Paper>
+      <Container maxWidth='lg' style={{overflow: 'hidden', alignContent: 'center'}}>
+        <Typography>Transaction in progress</Typography>
+        {
+          txContext &&
+          <Typography>{txContext}</Typography>
+        }
+        <CircularProgress />
+        {
+          txHash &&
+          <Link href={`https://${getNetwork(parseInt(`${process.env.CHAIN_ID}`)).name}.etherscan.io/tx/${txHash}`}>Etherscan</Link>
+        }
+      </Container>
+    </Paper>
+  </Dialog>
+);
 
 const mapStateToProps = (state) => selectTransactionModal(state);
 

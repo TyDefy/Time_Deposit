@@ -26,7 +26,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { Pool } from 'containers/App';
 import { forwardTo } from 'utils/history';
 
-const styles = ( theme: Theme) =>
+const styles = ( {spacing, transitions}: Theme) =>
   createStyles({
     card: {
       height: '470px',
@@ -42,7 +42,7 @@ const styles = ( theme: Theme) =>
       verticalAlign: "top",
       display: "inline-block",
       float: "left",
-      padding: 8,
+      padding: spacing(1),
       textTransform: "uppercase"
     },
     divider: {
@@ -79,8 +79,8 @@ const styles = ( theme: Theme) =>
     expand: {
       transform: 'rotate(0deg)',
       marginLeft: 'auto',
-      transition: theme.transitions.create('transform', {
-        duration: theme.transitions.duration.shortest,
+      transition: transitions.create('transform', {
+        duration: transitions.duration.shortest,
       }),
     },
     expandOpen: {
@@ -88,7 +88,7 @@ const styles = ( theme: Theme) =>
     },
     description: {
       backgroundColor: '#E5E5E5',
-      padding: 8
+      padding: spacing(1),
     }
   });
 
@@ -152,7 +152,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
                   {type}
                 </Typography>
                 <Typography className={classes.topMetricValue}>
-                  {`${(interestRate*100).toFixed(2)} %`}
+                  {`${((interestRate || 0)*100).toFixed(2)} %`}
                 </Typography>
               </Paper>
             </Grid>

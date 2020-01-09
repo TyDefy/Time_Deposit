@@ -1,22 +1,30 @@
 import { createSelector, createStructuredSelector } from 'reselect';
-import { ApplicationRootState } from 'types';
 import { RootState } from './types';
 import { StateProps } from '.';
+import { selectEthAddress } from 'containers/App/selectors';
 
 /**
  * Direct selector to the homePage state domain
  */
 
+export const selectPools = createSelector((state: RootState) => state.pools, selectEthAddress, (pools, ethAddress) => 
+  Object.values(pools).map(p => {
+    return {
+    ...p,
+    balance: p.transactions?.reduce((poolBalance, t) => 
+      t.type === 'Deposit' ? poolBalance += t.amount : poolBalance -= t.amount, 0) || 0,
+    participants: new Set(p.transactions?.map(t => t.userAddress)).size,
+    contribution: ethAddress ? 
+      p.transactions?.filter(t => t.userAddress === ethAddress)
+      .reduce((contribution, t) => t.type === 'Deposit' ? contribution += t.amount : contribution -= t.amount, 0) : 0,
+  }})
+); 
+const selectPoolsBalance = createSelector(selectPools, allPools => allPools.reduce((totalBalance, pool) => totalBalance += pool.balance, 0))
+
+
 const selectHomePage = createStructuredSelector<RootState, StateProps>({
-  isMetamaskInstalled: createSelector((state: ApplicationRootState) => state.app.isMetamaskInstalled, (substate) => substate),
-  ethAddress: createSelector((state: ApplicationRootState) => state.app.ethAddress, substate => substate),
-  approvedNetwork: createSelector((state:ApplicationRootState) => state.app.approvedNetwork, substate => substate),
-  approvedChainId: createSelector((state:ApplicationRootState) => state.app.approvedChainId, substate => substate),
-  approvedNetworkName: createSelector((state:ApplicationRootState) => state.app.approvedNetworkName, substate => substate),
-  chainId: createSelector((state:ApplicationRootState) => state.app.chainId, substate => substate),
-  networkName: createSelector((state:ApplicationRootState) => state.app.networkName, substate => substate),
-  isAdmin: createSelector((state: ApplicationRootState) => state.app.isAdmin, substate => substate),
-  daiBalance: createSelector((state: ApplicationRootState) => state.app.daiBalance, substate => substate),
+  pools: selectPools,
+  poolsBalance: selectPoolsBalance,
 });
 
 

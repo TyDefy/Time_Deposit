@@ -1,5 +1,5 @@
 import { takeLatest, take, race, put } from "redux-saga/effects";
-import { setModalOpen } from "./actions";
+import { setModalOpen, setTxContext, setTxHash } from "./actions";
 
 export function* txSaga(action) {
   yield put(setModalOpen(true));
@@ -8,6 +8,8 @@ export function* txSaga(action) {
     failure: take(action.type.replace('_REQUEST', '_FAILURE'))
   })
   yield put(setModalOpen(false));
+  yield put(setTxContext(undefined));
+  yield put(setTxHash(undefined));
 }
 
 export default function* transactionModalWatcherSaga() {

@@ -379,4 +379,8 @@ contract BasicPool is WhitelistAdminRole {
             users_[_user].lastWtihdraw
         );
     }
+
+    function getInterestRatePerYear() public view returns(uint256) {
+        return (cTokenInstance_.supplyRatePerBlock()*(60/15)*60*24*365);
+    }
 }

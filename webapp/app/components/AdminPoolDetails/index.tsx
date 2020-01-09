@@ -81,7 +81,12 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
         <Grid item xs={4}><Typography variant='h3' className={classes.poolName}>{name}</Typography></Grid>
         <Grid item xs={4}><Chip className={classes.period} label={`${period} month(s)`} /></Grid>
         <Grid item xs={4}>
-          <Typography className={classes.currentInterest}>Current Interest: <strong className={classes.percentageInterest}>{`${(interestRate * 100).toFixed(2)} %`}</strong></Typography>
+          <Typography className={classes.currentInterest}>
+            Current Interest: 
+            <strong className={classes.percentageInterest}>
+              {`${((interestRate||0) * 100).toFixed(2)} %`}
+            </strong>
+          </Typography>
         </Grid>
       </Grid>
       <Grid container direction='row' className={classes.poolDetailsRow}>
@@ -121,7 +126,7 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
         </TableHead>
         <TableBody>
           {participantDetails.map(p => 
-            <TableRow>
+            <TableRow key={p.address}>
               <TableCell>{p.address}</TableCell>
               <TableCell>{dayjs(p.joined).format('YYYY-MM-DD')}</TableCell>
               <TableCell>{p.contributed.toFixed(2)}</TableCell>

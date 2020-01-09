@@ -33,7 +33,7 @@ import AdminPoolsOverviewPage from 'containers/AdminPoolsOverviewPage';
 import TransactionModal from 'containers/TransactionModal';
 import AdminPoolDetailsPage from 'containers/AdminPoolDetailsPage';
 import CreatePool from 'containers/CreatePool';
-import PoolDetailsPage from 'containers/PoolDetailsPage';
+import PoolDetailsPage, { Transaction } from 'containers/PoolDetailsPage';
 import PortfolioPage from 'containers/PortfolioPage';
 
 interface OwnProps {
@@ -63,12 +63,21 @@ export interface Pool {
   period: number;
   balance: number;
   participants: number;
-  interestRate: number;
-  description: string;
+  interestRate?: number;
   contribution?: number;
   interestAccrued?: number;
   availableInterest?: number;
   daysUntilAccess?: number;
+  transactions: Array<Transaction>;
+}
+
+export interface Utility {
+  withdrawAddress: string,
+  withdrawName: string,
+  withdrawDescription: string,
+  penaltyAddress: string,
+  penaltyName: string,
+  penaltyDescription: string
 }
 
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;
@@ -103,9 +112,9 @@ const App: React.FunctionComponent<Props> = (props: Props) => {
         <Switch>
           <ProtectedRoute exact path='/admin/pools' component={AdminPoolsOverviewPage} isAuthorized={isAdmin} />
           <ProtectedRoute exact path='/admin/pool/create' component={CreatePool} isAuthorized={isAdmin} />
-          <ProtectedRoute exact path='/admin/pool/:id' component={AdminPoolDetailsPage} isAuthorized={isAdmin} />
-          <ProtectedRoute exact path='/portfolio' component={PortfolioPage} isAuthorized={ethAddress && true}/>
-          <Route exact path='/pool/:id' component={PoolDetailsPage} />
+          <ProtectedRoute exact path='/admin/pool/:poolAddress' component={AdminPoolDetailsPage} isAuthorized={isAdmin} />
+          <ProtectedRoute exact path='/portfolio' component={PortfolioPage} isAuthorized={ethAddress}/>
+          <Route exact path='/pool/:poolAddress' component={PoolDetailsPage} />
           <Route exact path='/' component={HomePage} />
           <Route exact path='/404'>Not Found</Route>
           <Route exact path='/403'>You are not authorized to view this page</Route>

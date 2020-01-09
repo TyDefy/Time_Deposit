@@ -44,10 +44,10 @@ const styles = ({ palette }: Theme) =>
   });
 
 interface OwnProps extends WithStyles<typeof styles> {
-  allPoolsBalance: number
+  poolsBalance: number
 }
 
-const HomeHeader: React.FunctionComponent<OwnProps> = ({ allPoolsBalance, classes }: OwnProps) => (
+const HomeHeader: React.FunctionComponent<OwnProps> = ({ poolsBalance, classes }: OwnProps) => (
     <>
       <Fragment>
         <Typography variant="h2" className={classes.mainHeading}>
@@ -55,7 +55,7 @@ const HomeHeader: React.FunctionComponent<OwnProps> = ({ allPoolsBalance, classe
         </Typography>
         <br></br>
         <Typography variant="h1" className={classes.runningTotal}>
-          {`$ ${allPoolsBalance.toLocaleString(undefined, {maximumFractionDigits:2})}`}
+          {`$ ${poolsBalance.toLocaleString(undefined, {maximumFractionDigits:2})}`}
         </Typography>
         <Typography variant="subtitle1" className={classes.subtitle1}>
           Currently contributed to pools

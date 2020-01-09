@@ -43,7 +43,7 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
           type='text'
           label='Name'
           component={TextField} />
-          <FastField
+        <FastField
           name='description'
           type='text'
           multiline
