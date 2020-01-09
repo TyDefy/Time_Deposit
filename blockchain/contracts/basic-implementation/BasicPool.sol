@@ -10,6 +10,8 @@ contract BasicPool is WhitelistAdminRole {
     uint256 internal accumulativeFeeCollection_;
     // The fee as a percentage of the penality %
     uint256 internal feePercentage_ = 0;
+    // Lock for setting the fee
+    bool internal feeLock_ = false;
     // Instance of the withdraw library 
     IWithdraw internal withdrawInstance_;
     // Instance of the collateral token (DAI) that this
@@ -87,8 +89,10 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     function init(uint256 _fee) public onlyWhitelistAdmin() {
+        require(!feeLock_, "Fee has already been set");
         feePercentage_ = _fee;
-    }//TODO lock so it can only be called once
+        feeLock_ = true;
+    }
 
     function terminatePool() public onlyWhitelistAdmin() {
         isAlive_ = false;

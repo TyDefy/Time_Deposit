@@ -205,6 +205,4 @@ contract BasicRegistry is WhitelistAdminRole {
             pools_[_pool].active
         );
     }
-
-    //TODO add a way for the deployer to deactivate a util/pool
 }

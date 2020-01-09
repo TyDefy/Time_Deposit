@@ -815,7 +815,7 @@ describe("Pool tests - withdraw", async () => {
             );
         });
 
-        it("Interest withdraw (penalty & interest + fee)", async () => {
+        it("🧪 Interest withdraw (penalty & interest + fee)", async () => {
             await basicPoolInstance.from(admin).init(test_settings.basicPool.fee);
             let penaltyPot = await basicPoolInstance.penaltyPotBalance();
             let amount = await(await basicPoolInstance.getInterestAmount(user2.signer.address)).wait();
@@ -1139,5 +1139,7 @@ describe("Pool tests - withdraw", async () => {
                 "Interest earned above penalty is not correct"
             );
         });
+
+        //TODO test the final withdraw as well as closing withdraw
     });
 });
