@@ -21,4 +21,8 @@ contract BasicPenalty is IPenalty {
         uint256 penalty = (_amount*penalty_)/100;
         return (_amount - penalty, penalty);
     }
+
+    function penalty() public view returns(uint256) {
+        return penalty_;
+    }
 }

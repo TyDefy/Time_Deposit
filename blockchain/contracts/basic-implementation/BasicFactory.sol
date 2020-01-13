@@ -26,6 +26,7 @@ contract BasicFactory is WhitelistAdminRole {
     event DeployedPool(
         address indexed pool,
         address indexed withdraw,
+        uint256 penaltyPercentage,
         string name,
         string description,
         uint256 cycleLength,
@@ -82,10 +83,13 @@ contract BasicFactory is WhitelistAdminRole {
         );
 
         uint256 cycleLength = IWithdraw(_withdraw).getCycle();
+        address penaltyInstance = IWithdraw(_withdraw).getPenalty();
+        uint256 penaltyPercentage = BasicPenalty(penaltyInstance).penalty();
 
         emit DeployedPool(
             address(newPool), 
             _withdraw, 
+            penaltyPercentage,
             _poolName, 
             _poolDescription, 
             cycleLength,
