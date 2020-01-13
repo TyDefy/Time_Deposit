@@ -8,6 +8,7 @@ let penaltyAbi = require('../build/BasicPenalty.json');
 let pDaiAbi = require('../build/pDai.json');
 let cDaiAbi = require('../build/pcToken.json');
 let basicRegistryAbi = require('../build/BasicRegistry.json');
+let basicFactoryAbi = require('../build/BasicFactory.json');
 
 const test_settings = {
     cyclicWithdraw: {
@@ -56,8 +57,8 @@ const test_settings = {
     },
     registrySettings: {
         penalty: {
-            name: "Basic fixed penalty",
-            implementationType: "Fixed percentage penalty",
+            name: "15% flat penalty",
+            implementationType: "A flat rate fee of 15% of withdraw amount",
             type: 2
         },
         withdraw: {
@@ -82,5 +83,6 @@ module.exports = {
     pDaiAbi,
     cDaiAbi,
     basicRegistryAbi,
+    basicFactoryAbi,
     test_settings
 }

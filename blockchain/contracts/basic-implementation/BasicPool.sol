@@ -348,11 +348,18 @@ contract BasicPool is WhitelistAdminRole {
         bool withdrawAllowed = true;
         uint256 withdrawAmount = _amount;
         uint256 penaltyAmount = 0;
-        (withdrawAllowed, withdrawAmount, penaltyAmount) = withdrawInstance_.canWithdraw(
-            _amount,
-            users_[_user].lastWtihdraw
-        );
-            
+        
+        if(address(withdrawInstance_) == address(0)) { 
+            withdrawAmount = _amount;
+            penaltyAmount = 0;
+            withdrawAllowed = true;
+        } else {
+            (withdrawAllowed, withdrawAmount, penaltyAmount) = withdrawInstance_.canWithdraw(
+                _amount,
+                users_[_user].lastWtihdraw
+            );
+        }
+         
         return (
             withdrawAllowed, 
             withdrawAmount, 
@@ -398,5 +405,9 @@ contract BasicPool is WhitelistAdminRole {
 
     function getInterestRatePerYear() public view returns(uint256) {
         return (cTokenInstance_.supplyRatePerBlock()*(60/15)*60*24*365);
+    }
+
+    function isPoolActive() public view returns(bool) {
+        return isAlive_;
     }
 }
