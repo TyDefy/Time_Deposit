@@ -10,7 +10,7 @@ import { Form, FastField } from 'formik';
 import { TextField } from 'formik-material-ui';
 import { Utility } from 'containers/App';
 
-const styles = ({spacing}: Theme) =>
+const styles = ({ spacing }: Theme) =>
   createStyles({
     header: {
       margin: spacing(3),
@@ -35,7 +35,9 @@ interface OwnProps extends WithStyles<typeof styles> {
 
 const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
   { classes, poolTypes, utilities }: OwnProps,
-) => <Container maxWidth='sm'>
+) => {
+
+  return <Container maxWidth='sm'>
     <Form>
       <Typography variant='h3' className={classes.header}>Create Pool</Typography>
       <Grid container direction='column'>
@@ -73,20 +75,26 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
           component={TextField}>
           {utilities.map(utility => (
             <MenuItem key={utility.withdrawAddress} value={utility.withdrawAddress}>
-              {`${utility.withdrawName} - ${utility.withdrawDescription} - ${utility.penaltyName} - ${utility.penaltyDescription}`}
+              {`${utility.withdrawName} - ${utility.cycleLength} - ${utility.penaltyName} - ${utility.penaltyRate}`}
             </MenuItem>
           ))}
         </FastField>
         <FastField
-          name='feeRate'
-          type='number'
-          label='Fee'
-          component={TextField} 
-          inputProps={{
-            min: 0,
-            max: 100,
-            step: 1
-          }} />
+          name='withdrawName'
+          label='Withdraw Name'
+          component={TextField} />
+        <FastField
+          name='withdrawDescription'
+          label='Withdraw Description'
+          component={TextField} />
+        <FastField
+          name='penaltyName'
+          label='Penalty Name'
+          component={TextField} />
+        <FastField
+          name='penaltyDescription'
+          label='Penalty Description'
+          component={TextField} />
         <FastField
           name='penaltyRate'
           type='number'
@@ -97,9 +105,20 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
             max: 100,
             step: 1
           }} />
+        <FastField
+          name='feeRate'
+          type='number'
+          label='Fee'
+          component={TextField}
+          inputProps={{
+            min: 0,
+            max: 100,
+            step: 1
+          }} />
         <Button color='primary' type='submit'>Create Pool</Button>
       </Grid>
     </Form>
-  </Container>;
+  </Container>
+};
 
 export default withStyles(styles, { withTheme: true })(PoolDetailsForm);

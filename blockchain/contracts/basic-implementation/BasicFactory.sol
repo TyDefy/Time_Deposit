@@ -16,11 +16,13 @@ contract BasicFactory is WhitelistAdminRole {
 
     event DeployedUtilities(
         address indexed withdraw,
+        uint256 _cycleLength,
         string _withdrawName,
-        string _withdrawDescription,
+        // string _withdrawDescription,
         address indexed penalty,
-        string _penaltyName,
-        string _penaltyDescription
+        uint8 _penaltyRate,
+        string _penaltyName
+        // string _penaltyDescription
     );
 
     event DeployedPool(
@@ -141,11 +143,13 @@ contract BasicFactory is WhitelistAdminRole {
 
         emit DeployedUtilities(
             address(newWithdraw),
+            _cycleLength,
             _withdrawName,
-            _withdrawDescription,
+            // _withdrawDescription,
             address(newPenalty),
-            _penaltyName,
-            _penaltyDescription
+            _penaltyPercentage,
+            _penaltyName
+            // _penaltyDescription
         );
 
         return(

@@ -4,7 +4,7 @@ import { connectMetamask, setWeb3, setDaiBalance, setIsAdmin } from "./actions";
 import { getType } from "typesafe-actions";
 import { eventChannel } from "redux-saga";
 import { BigNumber, formatEther } from "ethers/utils";
-import poolFactorySaga, { deployedUtilySaga } from "./poolFactorySaga";
+import poolFactorySaga, { deployedUtilitySaga } from "./poolFactorySaga";
 import poolSaga from "./poolSaga";
 
 export function* daiBalanceListener() {
@@ -94,9 +94,8 @@ function* getUserType() {
   try {
     const isAdmin = yield call([poolRegistryContract, poolRegistryContract.isWhitelistAdmin], ethAddress);
     yield put(setIsAdmin(isAdmin));
-    debugger;
     if (isAdmin) {
-      yield fork(deployedUtilySaga);
+      yield fork(deployedUtilitySaga);
     }
   } catch (error) {
     console.log(error);

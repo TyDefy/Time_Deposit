@@ -5,14 +5,15 @@ import { poolDeployed, createPool, utilityDeployed } from "./actions";
 import { eventChannel } from "redux-saga";
 import { getType } from "typesafe-actions";
 
-export function* deployedUtilySaga() {
-  const {poolFactoryContract, provider } = yield getContext('blockchain');
+export function* deployedUtilitySaga() {
+  const {poolFactoryContract, provider }: BlockchainContext = yield getContext('blockchain');
 
   const deployedUtilitiesEventFilter = {
     ...poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null),
     fromBlock: 0,
     toBlock: 'latest',
   }
+  
   try {
     const deployedUtilityLogs: Log[] = yield call([provider, provider.getLogs], deployedUtilitiesEventFilter);
     const parsedLogs = deployedUtilityLogs.map(log =>
@@ -21,11 +22,11 @@ export function* deployedUtilySaga() {
       yield put(
         utilityDeployed({
           withdrawAddress: log.withdraw,
+          cycleLength: log._cycleLength.toNumber(),
           withdrawName: log._withdrawName,
-          withdrawDescription: log._withdrawDescription,
           penaltyAddress: log.penalty,
           penaltyName: log._penaltyName,
-          penaltyDescription: log._penaltyDescription
+          penaltyRate: log._penaltyRate,
         })
       );
     };
@@ -42,18 +43,18 @@ export function* deployedUtilySaga() {
       utilityDeployedHandler);
     return () => {
       poolFactoryContract.off(poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null),
-      utilityDeployedHandler);
+        utilityDeployedHandler);
     }
   })
   while (true) {
     const newUtility = yield take(utilityDeployedChannel);
     utilityDeployed({
       withdrawAddress: newUtility.withdraw,
+      cycleLength: newUtility._cycleLength.toNumber(),
       withdrawName: newUtility._withdrawName,
-      withdrawDescription: newUtility._withdrawDescription,
       penaltyAddress: newUtility.penalty,
       penaltyName: newUtility._penaltyName,
-      penaltyDescription: newUtility._penaltyDescription
+      penaltyRate: newUtility._penaltyRate.toNumber(),
     })
   }
 }

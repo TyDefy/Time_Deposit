@@ -74,9 +74,9 @@ export const withdraw = createAsyncAction(
 
 export const utilityDeployed = createStandardAction('UTILITY_DEPLOYED')<{
   withdrawAddress: string,
+  cycleLength: number,
   withdrawName: string,
-  withdrawDescription: string,
   penaltyAddress: string,
+  penaltyRate: number,
   penaltyName: string,
-  penaltyDescription: string
 }>();
