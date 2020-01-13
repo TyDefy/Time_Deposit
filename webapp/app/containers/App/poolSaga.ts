@@ -1,6 +1,15 @@
 import { BlockchainContext } from "blockchainContext";
-import { getContext, takeEvery, call, put, fork, take, select } from "redux-saga/effects";
-import { poolDeployed, addPoolTx, connectMetamask, deposit, withdraw, withdrawInterest } from "./actions";
+import { getContext, takeEvery, call, put, fork, take, select, delay } from "redux-saga/effects";
+import { 
+  poolDeployed, 
+  addPoolTx, 
+  connectMetamask, 
+  deposit, 
+  withdraw, 
+  withdrawInterest, 
+  setPoolInterestRate, 
+  // setPoolInterestAccrued 
+} from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
@@ -32,7 +41,7 @@ function* poolDepositListener(poolContract: Pool) {
             yield put(setTxHash(approvalTx.hash));
             yield call([approvalTx, approvalTx.wait]);
             yield put(enqueueSnackbar({
-              message: 'Successfuly increased allowance'
+              message: 'Successfully increased allowance'
             }))
           }
           yield put(setTxContext('Depositing funds'));
@@ -213,11 +222,31 @@ function* poolTransactionListener(poolContract: Pool) {
           type: 'Withdraw',
           txHash: newTx.transactionHash || '0x',
           time: new Date(txDate.timestamp * 1000),
-          amount: Number(formatEther(newTx.amount.add(newTx.penalty)))
+          amount: Number(formatEther(newTx.withdrawAmount.add(newTx.penaltyAmount)))
         }))
-    } else {
-      console.log('duplicate or old tx detected');
     }
+  }
+}
+
+function* poolInterestListener(poolContract: Pool) {
+  while (true) {
+    // const { ethAddress }: BlockchainContext = yield getContext('blockchain');
+
+    const poolInterestRate: BigNumber = yield call([poolContract, poolContract.getInterestRatePerYear]);
+    yield put(setPoolInterestRate({
+      poolAddress: poolContract.address, 
+      interestRate: Number(formatEther(poolInterestRate))
+    }));
+  
+    // if (ethAddress) {
+    //   const poolInterestAccrued: BigNumber = yield call([poolContract, poolContract.getInterestAmount], ethAddress);
+    //   yield put(setPoolInterestAccrued({
+    //     poolAddress: poolContract.address,
+    //     interestAccrued: Number(formatEther(poolInterestAccrued))}
+    //   ))
+    // }
+
+    yield delay(15000);
   }
 }
 
@@ -226,7 +255,6 @@ function* poolWatcherSaga(action) {
 
   const poolContract: Pool = new Contract(action.payload.address, PoolContractAbi, signer || provider)
 
-  // TODO: Get current pool interest rate
   try {
     const depositLogs: Log[] = yield call([provider, provider.getLogs], {
       ...poolContract.filters.Deposit(null, null, null),
@@ -263,7 +291,7 @@ function* poolWatcherSaga(action) {
           type: 'Withdraw',
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
-          amount: Number(formatEther(parsedWithdraw.amount.add(parsedWithdraw.penalty)))
+          amount: Number(formatEther(parsedWithdraw.withdrawAmount.add(parsedWithdraw.penaltyAmount)))
         })
       }));
 
@@ -277,6 +305,7 @@ function* poolWatcherSaga(action) {
     console.log(error);
   }
 
+  yield fork(poolInterestListener, poolContract);
   yield fork(poolTransactionListener, poolContract);
   yield fork(poolDepositListener, poolContract);
   yield fork(poolWithdrawListener, poolContract);

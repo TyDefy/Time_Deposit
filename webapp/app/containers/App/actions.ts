@@ -44,6 +44,16 @@ export const addPoolTx = createStandardAction('ADD_POOL_TX')<{
   txHash: string;
 }>()
 
+export const setPoolInterestRate = createStandardAction('SET_POOL_INTEREST_RATE')<{
+  poolAddress: string;
+  interestRate: number;
+}>()
+
+export const setPoolInterestAccrued = createStandardAction('SET_POOL_INTEREST_ACCRUED')<{
+  poolAddress: string;
+  interestAccrued: number;
+}>()
+
 export const deposit = createAsyncAction(
   '@TX_REQUEST/POOL_DEPOSIT',
   '@TX_SUCCESS/POOL_DEPOSIT',
@@ -61,3 +71,12 @@ export const withdraw = createAsyncAction(
   '@TX_SUCCESS/WITHDRAW',
   '@TX_FAILURE/WITHDRAW',
 )<{poolAddress: string, amount: number}, undefined, string>();
+
+export const utilityDeployed = createStandardAction('UTILITY_DEPLOYED')<{
+  withdrawAddress: string,
+  cycleLength: number,
+  withdrawName: string,
+  penaltyAddress: string,
+  penaltyRate: number,
+  penaltyName: string,
+}>();

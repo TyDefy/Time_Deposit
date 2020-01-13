@@ -1,9 +1,63 @@
 import { BlockchainContext } from "blockchainContext";
 import { getContext, call, put, spawn, take, takeEvery } from "redux-saga/effects";
 import { Log } from "ethers/providers";
-import { poolDeployed, createPool } from "./actions";
+import { poolDeployed, createPool, utilityDeployed } from "./actions";
 import { eventChannel } from "redux-saga";
 import { getType } from "typesafe-actions";
+
+export function* deployedUtilitySaga() {
+  const {poolFactoryContract, provider }: BlockchainContext = yield getContext('blockchain');
+
+  const deployedUtilitiesEventFilter = {
+    ...poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null),
+    fromBlock: 0,
+    toBlock: 'latest',
+  }
+  
+  try {
+    const deployedUtilityLogs: Log[] = yield call([provider, provider.getLogs], deployedUtilitiesEventFilter);
+    const parsedLogs = deployedUtilityLogs.map(log =>
+      poolFactoryContract.interface.parseLog(log).values);
+    for (const log of parsedLogs) {
+      yield put(
+        utilityDeployed({
+          withdrawAddress: log.withdraw,
+          cycleLength: log._cycleLength.toNumber(),
+          withdrawName: log._withdrawName,
+          penaltyAddress: log.penalty,
+          penaltyName: log._penaltyName,
+          penaltyRate: log._penaltyRate,
+        })
+      );
+    };
+  } catch (error) {
+    console.log('error');
+  }
+
+  const utilityDeployedChannel = eventChannel(emit => {
+    const utilityDeployedHandler = eventArgs => emit({
+      ...eventArgs,
+    })
+
+    poolFactoryContract.on(poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null),
+      utilityDeployedHandler);
+    return () => {
+      poolFactoryContract.off(poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null),
+        utilityDeployedHandler);
+    }
+  })
+  while (true) {
+    const newUtility = yield take(utilityDeployedChannel);
+    utilityDeployed({
+      withdrawAddress: newUtility.withdraw,
+      cycleLength: newUtility._cycleLength.toNumber(),
+      withdrawName: newUtility._withdrawName,
+      penaltyAddress: newUtility.penalty,
+      penaltyName: newUtility._penaltyName,
+      penaltyRate: newUtility._penaltyRate.toNumber(),
+    })
+  }
+}
 
 function* deployedPoolWatcher() {
   const { poolFactoryContract }: BlockchainContext = yield getContext('blockchain');
@@ -13,15 +67,16 @@ function* deployedPoolWatcher() {
       ...eventArgs,
     });
 
-    poolFactoryContract.on(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null), poolDeployedHandler);
+    poolFactoryContract.on(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null), 
+      poolDeployedHandler);
     return () => {
-      poolFactoryContract.off(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null), poolDeployedHandler);
+      poolFactoryContract.off(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null), 
+        poolDeployedHandler);
     };
   });
 
   while (true) {
     const newPool = yield take(poolDeployedChannel);
-    console.log(newPool.cycleLength.toString());
     yield put(poolDeployed({
       address: newPool.pool,
       withdraw: newPool.withdraw,

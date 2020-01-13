@@ -126,7 +126,7 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
         </TableHead>
         <TableBody>
           {participantDetails.map(p => 
-            <TableRow>
+            <TableRow key={p.address}>
               <TableCell>{p.address}</TableCell>
               <TableCell>{dayjs(p.joined).format('YYYY-MM-DD')}</TableCell>
               <TableCell>{p.contributed.toFixed(2)}</TableCell>

@@ -14,7 +14,9 @@ export const selectPool = createSelector(
   selectSelectedPoolAddress, 
   (allPools, ethAddress, selectedPool) => {
     const pool = allPools.filter(p => p.address === selectedPool)[0];
-    pool.transactions = pool.transactions?.filter(t => t.userAddress === ethAddress);
+    pool.transactions = pool.transactions?.filter(t => t.userAddress.toLowerCase() === ethAddress);
+    pool.contribution = pool.transactions?.reduce((total, transaction) => 
+      (transaction.type === 'Deposit') ? total += transaction.amount : total -= transaction.amount, 0);
     return pool;
   })
 
