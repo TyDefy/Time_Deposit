@@ -348,11 +348,18 @@ contract BasicPool is WhitelistAdminRole {
         bool withdrawAllowed = true;
         uint256 withdrawAmount = _amount;
         uint256 penaltyAmount = 0;
-        (withdrawAllowed, withdrawAmount, penaltyAmount) = withdrawInstance_.canWithdraw(
-            _amount,
-            users_[_user].lastWtihdraw
-        );
-            
+        
+        if(address(withdrawInstance_) == address(0)) { 
+            withdrawAmount = _amount;
+            penaltyAmount = 0;
+            withdrawAllowed = true;
+        } else {
+            (withdrawAllowed, withdrawAmount, penaltyAmount) = withdrawInstance_.canWithdraw(
+                _amount,
+                users_[_user].lastWtihdraw
+            );
+        }
+         
         return (
             withdrawAllowed, 
             withdrawAmount, 
