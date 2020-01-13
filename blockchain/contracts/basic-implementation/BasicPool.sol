@@ -399,4 +399,8 @@ contract BasicPool is WhitelistAdminRole {
     function getInterestRatePerYear() public view returns(uint256) {
         return (cTokenInstance_.supplyRatePerBlock()*(60/15)*60*24*365);
     }
+
+    function isPoolActive() public view returns(bool) {
+        return isAlive_;
+    }
 }
