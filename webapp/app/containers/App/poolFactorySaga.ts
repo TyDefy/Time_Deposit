@@ -4,6 +4,8 @@ import { Log } from "ethers/providers";
 import { poolDeployed, createPool, utilityDeployed } from "./actions";
 import { eventChannel } from "redux-saga";
 import { getType } from "typesafe-actions";
+import { setTxContext, setTxHash } from "containers/TransactionModal/actions";
+import { ContractTransaction } from "ethers";
 
 export function* deployedUtilitySaga() {
   const {poolFactoryContract, provider }: BlockchainContext = yield getContext('blockchain');
@@ -92,7 +94,28 @@ function* createPoolSaga(action) {
   const { poolFactoryContract }: BlockchainContext = yield getContext('blockchain');
   try {
     // TODO Figure out how to populate the withdraw address, what to do with the user's period, fee and other parameters
-    yield call([poolFactoryContract, poolFactoryContract.deployBasicPool], '0xed266174978Cc3ec95Ae6C28F4e5Dd378B9036b9', 'test', 'test')
+    if (action.payload.utilityAddress === 'new') {
+      yield put(setTxContext('Deploying utilities'));
+      const deployUtilitiesTx: ContractTransaction = yield call(
+        [poolFactoryContract, poolFactoryContract.deployUtility], 
+        action.payload.penaltyRate,
+        action.payload.cycleLength,
+        action.payload.penaltyName,
+        action.payload.penaltyDescription,
+        action.payload.withdrawName,
+        action.payload.withdrawDescription)
+      
+      yield put(setTxHash(deployUtilitiesTx.hash));
+      debugger;
+      const result = yield call([deployUtilitiesTx, deployUtilitiesTx.wait]);
+    }
+    const deployPoolTx: ContractTransaction = yield call(
+      [poolFactoryContract, poolFactoryContract.deployBasicPool], 
+      '0xed266174978Cc3ec95Ae6C28F4e5Dd378B9036b9', //TODO Get this from result or action payload 
+      action.payload.name, 
+      action.payload.description);
+    yield put(setTxHash(deployPoolTx.hash));
+    yield call([deployPoolTx, deployPoolTx.wait]);
     yield put(createPool.success());
   } catch (error) {
     yield put(createPool.failure(error.message));
