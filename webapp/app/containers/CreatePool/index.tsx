@@ -10,17 +10,30 @@ import { compose, Dispatch } from 'redux';
 import { Formik } from 'formik';
 
 import injectSaga from 'utils/injectSaga';
-import injectReducer from 'utils/injectReducer';
 import selectCreatePool from './selectors';
-import reducer from './reducer';
 import saga from './saga';
 // import * as Yup from 'yup';
 import PoolDetailsForm from 'components/PoolDetailsForm';
 import { Utility } from 'containers/App';
+import { createPool } from 'containers/App/actions';
 
 interface OwnProps { }
 
-interface DispatchProps { }
+interface DispatchProps {
+  createPool({
+    name,
+    description,
+    type,
+    utilityAddress,
+    cycleLength,
+    withdrawName,
+    withdrawDescription,
+    penaltyAddress,
+    penaltyDescription,
+    penaltyName,
+    penaltyRate,
+    feeRate}): void
+}
 
 export interface StateProps {
   utilities: Array<Utility>;
@@ -28,8 +41,7 @@ export interface StateProps {
 
 type Props = StateProps & DispatchProps & OwnProps;
 
-
-const CreatePool: React.FunctionComponent<Props> = ({ utilities }: Props) => {
+const CreatePool: React.FunctionComponent<Props> = ({ utilities, createPool }: Props) => {
   // const CreatePoolSchema = Yup.object().shape({
   //   name: Yup.string().max(120, 'Name is too long').required('Name is required'),
   //   description: Yup.string().max(180, 'Description is too long').required('Description is required'),
@@ -59,7 +71,7 @@ const CreatePool: React.FunctionComponent<Props> = ({ utilities }: Props) => {
       }}
       // validationSchema={CreatePoolSchema}
       onSubmit={(values, actions) => {
-        console.log(values)
+        createPool(values)
       }}
       render={({values, setFieldValue}) =>
         <PoolDetailsForm
@@ -90,7 +102,7 @@ const mapDispatchToProps = (
   ownProps: OwnProps,
 ): DispatchProps => {
   return {
-    dispatch: dispatch,
+    createPool: (poolDetails) => dispatch(createPool.request(poolDetails)),
   };
 };
 
@@ -99,17 +111,11 @@ const withConnect = connect(
   mapDispatchToProps,
 );
 
-// Remember to add the key to ./app/types/index.d.ts ApplicationRootState
-// <OwnProps> restricts access to the HOC's other props. This component must not do anything with reducer hoc
-const withReducer = injectReducer<OwnProps>({
-  key: 'createPool',
-  reducer: reducer,
-});
+
 // <OwnProps> restricts access to the HOC's other props. This component must not do anything with saga hoc
 const withSaga = injectSaga<OwnProps>({ key: 'createPool', saga: saga });
 
 export default compose(
-  withReducer,
   withSaga,
   withConnect,
 )(CreatePool);

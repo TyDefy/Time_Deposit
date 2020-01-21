@@ -81,11 +81,13 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
           }}>
           {utilities.map(utility => (
             <MenuItem key={utility.withdrawAddress} value={utility.withdrawAddress}>
-              {utility.withdrawAddress === 'new' ? 'New' : `${utility.withdrawName} - ${utility.cycleLength} months - ${utility.penaltyName} - ${utility.penaltyRate} %`}
+              {utility.withdrawAddress === 'new' ? 
+                'New' : 
+                `${utility.withdrawName} - ${utility.cycleLength} months - ${utility.penaltyName} - ${utility.penaltyRate} %`}
             </MenuItem>
           ))}
         </Field>
-        {isNewUtility &&
+        { isNewUtility &&
           <>
             <Field
               name='withdrawName'
@@ -123,7 +125,8 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
                 step: 1
               }}
               disabled={!isNewUtility} />
-          </>}
+          </>
+        }
         <FastField
           name='feeRate'
           type='number'
