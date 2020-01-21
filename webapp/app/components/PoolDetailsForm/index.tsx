@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Theme, createStyles, withStyles, WithStyles, Button, Typography, Container, MenuItem, Grid } from '@material-ui/core';
-import { Form, FastField } from 'formik';
+import { Form, FastField, Field } from 'formik';
 import { TextField } from 'formik-material-ui';
 import { Utility } from 'containers/App';
 
@@ -31,12 +31,13 @@ const styles = ({ spacing }: Theme) =>
 interface OwnProps extends WithStyles<typeof styles> {
   poolTypes: Array<{ value: number, label: string }>,
   utilities: Array<Utility>,
+  values: any,
 }
 
 const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
-  { classes, poolTypes, utilities }: OwnProps,
+  { classes, poolTypes, utilities, values }: OwnProps,
 ) => {
-
+  const isNewUtility = values.utilityAddress === 'new';
   return <Container maxWidth='sm'>
     <Form>
       <Typography variant='h3' className={classes.header}>Create Pool</Typography>
@@ -79,23 +80,32 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
             </MenuItem>
           ))}
         </FastField>
-        <FastField
+        <Field
           name='withdrawName'
           label='Withdraw Name'
-          component={TextField} />
-        <FastField
+          component={TextField}
+          disabled={!isNewUtility} />
+        <Field
           name='withdrawDescription'
           label='Withdraw Description'
-          component={TextField} />
-        <FastField
+          component={TextField}
+          disabled={!isNewUtility} />
+        <Field
+          name='cycleLength'
+          label='Cycle Length'
+          component={TextField}
+          disabled={!isNewUtility} />
+        <Field
           name='penaltyName'
           label='Penalty Name'
-          component={TextField} />
-        <FastField
+          component={TextField}
+          disabled={!isNewUtility} />
+        <Field
           name='penaltyDescription'
           label='Penalty Description'
-          component={TextField} />
-        <FastField
+          component={TextField}
+          disabled={!isNewUtility} />
+        <Field
           name='penaltyRate'
           type='number'
           label='Penalty'
@@ -104,7 +114,8 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
             min: 0,
             max: 100,
             step: 1
-          }} />
+          }}
+          disabled={!isNewUtility} />
         <FastField
           name='feeRate'
           type='number'

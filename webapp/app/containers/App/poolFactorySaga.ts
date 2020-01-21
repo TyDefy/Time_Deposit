@@ -67,10 +67,10 @@ function* deployedPoolWatcher() {
       ...eventArgs,
     });
 
-    poolFactoryContract.on(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null), 
+    poolFactoryContract.on(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null, null), 
       poolDeployedHandler);
     return () => {
-      poolFactoryContract.off(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null), 
+      poolFactoryContract.off(poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null, null), 
         poolDeployedHandler);
     };
   });
@@ -103,7 +103,7 @@ export default function* poolFactorySaga() {
   const { poolFactoryContract, provider }: BlockchainContext = yield getContext('blockchain')
 
   const deployedPoolEventFilter = {
-    ...poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null),
+    ...poolFactoryContract.filters.DeployedPool(null, null, null, null, null, null, null, null),
     fromBlock: 0,
     toBlock: 'latest',
   }

@@ -14,7 +14,7 @@ import injectReducer from 'utils/injectReducer';
 import selectCreatePool from './selectors';
 import reducer from './reducer';
 import saga from './saga';
-import * as Yup from 'yup';
+// import * as Yup from 'yup';
 import PoolDetailsForm from 'components/PoolDetailsForm';
 import { Utility } from 'containers/App';
 
@@ -30,14 +30,14 @@ type Props = StateProps & DispatchProps & OwnProps;
 
 
 const CreatePool: React.FunctionComponent<Props> = ({ utilities }: Props) => {
-  const CreatePoolSchema = Yup.object().shape({
-    name: Yup.string().max(120, 'Name is too long').required('Name is required'),
-    description: Yup.string().max(180, 'Description is too long').required('Description is required'),
-    type: Yup.number().required(),
-    utilityAddress: Yup.string().required(),
-    feeRate: Yup.number().min(0).max(100).required(),
-    penaltyRate: Yup.number().min(0).max(100).required(),
-  });
+  // const CreatePoolSchema = Yup.object().shape({
+  //   name: Yup.string().max(120, 'Name is too long').required('Name is required'),
+  //   description: Yup.string().max(180, 'Description is too long').required('Description is required'),
+  //   type: Yup.number().required(),
+  //   utilityAddress: Yup.string().required(),
+  //   feeRate: Yup.number().min(0).max(100).required(),
+  //   penaltyRate: Yup.number().min(0).max(100).required(),
+  // });
   const poolTypes = [{ value: 0, label: 'cDAI' }]
 
 
@@ -57,11 +57,11 @@ const CreatePool: React.FunctionComponent<Props> = ({ utilities }: Props) => {
         penaltyRate: 0,
         feeRate: 0,
       }}
-      validationSchema={CreatePoolSchema}
+      // validationSchema={CreatePoolSchema}
       onSubmit={(values, actions) => {
         console.log(values)
       }}
-      render={() =>
+      render={({values}) =>
         <PoolDetailsForm
           utilities={[{
             withdrawAddress: 'new',
@@ -75,6 +75,7 @@ const CreatePool: React.FunctionComponent<Props> = ({ utilities }: Props) => {
           },
           ...utilities]}
           poolTypes={poolTypes}
+          values={values}
         />
       }
     />
