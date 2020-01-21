@@ -40,17 +40,6 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
 ) => {
   const isNewUtility = values.utilityAddress === 'new';
 
-  // const updateUtilityDetails = (withdrawAddress: string) => {
-  //   debugger;
-  //   const utility = utilities.filter(u => u.withdrawAddress === withdrawAddress)[0];
-  //   setFieldValue('withdrawName', utility.withdrawName);
-  //   setFieldValue('withdrawDescription', utility.withdrawDescription);
-  //   setFieldValue('cycleLength', utility.cycleLength)
-  //   setFieldValue('penaltyName', utility.penaltyName)
-  //   setFieldValue('penaltyDescription', utility.penaltyDescription)
-  //   setFieldValue('penaltyRate', utility.penaltyRate)
-  // } 
-
   return <Container maxWidth='sm'>
     <Form>
       <Typography variant='h3' className={classes.header}>Create Pool</Typography>
@@ -92,7 +81,7 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
           }}>
           {utilities.map(utility => (
             <MenuItem key={utility.withdrawAddress} value={utility.withdrawAddress}>
-              {`${utility.withdrawName} - ${utility.cycleLength} months - ${utility.penaltyName} - ${utility.penaltyRate} %`}
+              {utility.withdrawAddress === 'new' ? 'New' : `${utility.withdrawName} - ${utility.cycleLength} months - ${utility.penaltyName} - ${utility.penaltyRate} %`}
             </MenuItem>
           ))}
         </Field>
