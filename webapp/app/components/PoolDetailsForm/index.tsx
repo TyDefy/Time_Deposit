@@ -32,12 +32,25 @@ interface OwnProps extends WithStyles<typeof styles> {
   poolTypes: Array<{ value: number, label: string }>,
   utilities: Array<Utility>,
   values: any,
+  setFieldValue(field: string, value: any): void,
 }
 
 const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
-  { classes, poolTypes, utilities, values }: OwnProps,
+  { classes, poolTypes, utilities, values, setFieldValue }: OwnProps,
 ) => {
   const isNewUtility = values.utilityAddress === 'new';
+
+  // const updateUtilityDetails = (withdrawAddress: string) => {
+  //   debugger;
+  //   const utility = utilities.filter(u => u.withdrawAddress === withdrawAddress)[0];
+  //   setFieldValue('withdrawName', utility.withdrawName);
+  //   setFieldValue('withdrawDescription', utility.withdrawDescription);
+  //   setFieldValue('cycleLength', utility.cycleLength)
+  //   setFieldValue('penaltyName', utility.penaltyName)
+  //   setFieldValue('penaltyDescription', utility.penaltyDescription)
+  //   setFieldValue('penaltyRate', utility.penaltyRate)
+  // } 
+
   return <Container maxWidth='sm'>
     <Form>
       <Typography variant='h3' className={classes.header}>Create Pool</Typography>
@@ -67,55 +80,61 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
             </MenuItem>
           ))}
         </FastField>
-        <FastField
+        <Field
           name='utilityAddress'
           type='text'
           label='Utility'
           select
           className={classes.label}
-          component={TextField}>
+          component={TextField}
+          onChange={(value) => {
+            console.log(value)
+          }}>
           {utilities.map(utility => (
             <MenuItem key={utility.withdrawAddress} value={utility.withdrawAddress}>
-              {`${utility.withdrawName} - ${utility.cycleLength} - ${utility.penaltyName} - ${utility.penaltyRate}`}
+              {`${utility.withdrawName} - ${utility.cycleLength} months - ${utility.penaltyName} - ${utility.penaltyRate} %`}
             </MenuItem>
           ))}
-        </FastField>
-        <Field
-          name='withdrawName'
-          label='Withdraw Name'
-          component={TextField}
-          disabled={!isNewUtility} />
-        <Field
-          name='withdrawDescription'
-          label='Withdraw Description'
-          component={TextField}
-          disabled={!isNewUtility} />
-        <Field
-          name='cycleLength'
-          label='Cycle Length'
-          component={TextField}
-          disabled={!isNewUtility} />
-        <Field
-          name='penaltyName'
-          label='Penalty Name'
-          component={TextField}
-          disabled={!isNewUtility} />
-        <Field
-          name='penaltyDescription'
-          label='Penalty Description'
-          component={TextField}
-          disabled={!isNewUtility} />
-        <Field
-          name='penaltyRate'
-          type='number'
-          label='Penalty'
-          component={TextField}
-          inputProps={{
-            min: 0,
-            max: 100,
-            step: 1
-          }}
-          disabled={!isNewUtility} />
+        </Field>
+        {isNewUtility &&
+          <>
+            <Field
+              name='withdrawName'
+              label='Withdraw Name'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='withdrawDescription'
+              label='Withdraw Description'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='cycleLength'
+              label='Cycle Length'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='penaltyName'
+              label='Penalty Name'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='penaltyDescription'
+              label='Penalty Description'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='penaltyRate'
+              type='number'
+              label='Penalty'
+              component={TextField}
+              inputProps={{
+                min: 0,
+                max: 100,
+                step: 1
+              }}
+              disabled={!isNewUtility} />
+          </>}
         <FastField
           name='feeRate'
           type='number'

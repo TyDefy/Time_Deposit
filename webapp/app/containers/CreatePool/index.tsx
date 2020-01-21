@@ -61,7 +61,7 @@ const CreatePool: React.FunctionComponent<Props> = ({ utilities }: Props) => {
       onSubmit={(values, actions) => {
         console.log(values)
       }}
-      render={({values}) =>
+      render={({values, setFieldValue}) =>
         <PoolDetailsForm
           utilities={[{
             withdrawAddress: 'new',
@@ -76,6 +76,7 @@ const CreatePool: React.FunctionComponent<Props> = ({ utilities }: Props) => {
           ...utilities]}
           poolTypes={poolTypes}
           values={values}
+          setFieldValue={setFieldValue}
         />
       }
     />
