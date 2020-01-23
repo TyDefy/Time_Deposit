@@ -5,7 +5,9 @@ import { poolDeployed, createPool, utilityDeployed } from "./actions";
 import { eventChannel } from "redux-saga";
 import { getType } from "typesafe-actions";
 import { setTxContext, setTxHash } from "containers/TransactionModal/actions";
-import { ContractTransaction } from "ethers";
+import { ContractTransaction, Contract } from "ethers";
+import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/BasicPool';
+import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
 
 export function* deployedUtilityWatcher() {
   const { poolFactoryContract, provider }: BlockchainContext = yield getContext('blockchain');
@@ -124,7 +126,7 @@ function* deployedPoolWatcher() {
 }
 
 function* createPoolSaga(action) {
-  const { poolFactoryContract }: BlockchainContext = yield getContext('blockchain');
+  const { poolFactoryContract, signer, provider }: BlockchainContext = yield getContext('blockchain');
   try {
     // TODO Figure out how to populate the withdraw address, what to do with the user's period, fee and other parameters
     let utilityAddress = action.payload.utilityAddress;
@@ -142,9 +144,9 @@ function* createPoolSaga(action) {
       yield put(setTxHash(deployUtilitiesTx.hash));
       yield call([deployUtilitiesTx, deployUtilitiesTx.wait]);
       const newUtilityAction = yield take(utilityDeployed);
-      debugger;
       utilityAddress = newUtilityAction.payload.withdrawAddress;
     }
+    yield put(setTxContext('Deploying pool'));
     const deployPoolTx: ContractTransaction = yield call(
       [poolFactoryContract, poolFactoryContract.deployBasicPool],
       utilityAddress,
@@ -152,6 +154,12 @@ function* createPoolSaga(action) {
       action.payload.description);
     yield put(setTxHash(deployPoolTx.hash));
     yield call([deployPoolTx, deployPoolTx.wait]);
+    const newPoolAction = yield take(poolDeployed);
+    const poolContract: Pool = new Contract(newPoolAction.payload.address, PoolContractAbi, signer || provider)
+    yield put(setTxContext('Initialising pool'));
+    const initTx: ContractTransaction = yield call([poolContract, poolContract.init], action.payload.feeRate);
+    yield put(setTxHash(initTx.hash));
+    yield call([initTx, initTx.wait]);
     yield put(createPool.success());
   } catch (error) {
     yield put(createPool.failure(error.message));
