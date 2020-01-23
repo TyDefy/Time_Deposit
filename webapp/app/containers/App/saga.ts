@@ -1,10 +1,10 @@
-import { getContext, put, call, take, fork } from "redux-saga/effects";
+import { getContext, put, call, take, fork, spawn } from "redux-saga/effects";
 import { BlockchainContext } from "blockchainContext";
 import { connectMetamask, setWeb3, setDaiBalance, setIsAdmin } from "./actions";
 import { getType } from "typesafe-actions";
 import { eventChannel } from "redux-saga";
 import { BigNumber, formatEther } from "ethers/utils";
-import poolFactorySaga, { deployedUtilitySaga } from "./poolFactorySaga";
+import poolFactorySaga, { deployedUtilityWatcher } from "./poolFactorySaga";
 import poolSaga from "./poolSaga";
 
 export function* daiBalanceListener() {
@@ -95,7 +95,7 @@ function* getUserType() {
     const isAdmin = yield call([poolRegistryContract, poolRegistryContract.isWhitelistAdmin], ethAddress);
     yield put(setIsAdmin(isAdmin));
     if (isAdmin) {
-      yield fork(deployedUtilitySaga);
+      yield spawn(deployedUtilityWatcher);
     }
   } catch (error) {
     console.log(error);

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Theme, createStyles, withStyles, WithStyles, Button, Typography, Container, MenuItem, Grid } from '@material-ui/core';
-import { Form, FastField } from 'formik';
+import { Form, FastField, Field } from 'formik';
 import { TextField } from 'formik-material-ui';
 import { Utility } from 'containers/App';
 
@@ -31,11 +31,14 @@ const styles = ({ spacing }: Theme) =>
 interface OwnProps extends WithStyles<typeof styles> {
   poolTypes: Array<{ value: number, label: string }>,
   utilities: Array<Utility>,
+  values: any,
+  setFieldValue(field: string, value: any): void,
 }
 
 const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
-  { classes, poolTypes, utilities }: OwnProps,
+  { classes, poolTypes, utilities, values, setFieldValue }: OwnProps,
 ) => {
+  const isNewUtility = values.utilityAddress === 'new';
 
   return <Container maxWidth='sm'>
     <Form>
@@ -66,45 +69,64 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
             </MenuItem>
           ))}
         </FastField>
-        <FastField
+        <Field
           name='utilityAddress'
           type='text'
           label='Utility'
           select
           className={classes.label}
-          component={TextField}>
+          component={TextField}
+          onChange={(value) => {
+            console.log(value)
+          }}>
           {utilities.map(utility => (
             <MenuItem key={utility.withdrawAddress} value={utility.withdrawAddress}>
-              {`${utility.withdrawName} - ${utility.cycleLength} - ${utility.penaltyName} - ${utility.penaltyRate}`}
+              {utility.withdrawAddress === 'new' ? 
+                'New' : 
+                `${utility.withdrawName} - ${utility.cycleLength} months - ${utility.penaltyName} - ${utility.penaltyRate} %`}
             </MenuItem>
           ))}
-        </FastField>
-        <FastField
-          name='withdrawName'
-          label='Withdraw Name'
-          component={TextField} />
-        <FastField
-          name='withdrawDescription'
-          label='Withdraw Description'
-          component={TextField} />
-        <FastField
-          name='penaltyName'
-          label='Penalty Name'
-          component={TextField} />
-        <FastField
-          name='penaltyDescription'
-          label='Penalty Description'
-          component={TextField} />
-        <FastField
-          name='penaltyRate'
-          type='number'
-          label='Penalty'
-          component={TextField}
-          inputProps={{
-            min: 0,
-            max: 100,
-            step: 1
-          }} />
+        </Field>
+        { isNewUtility &&
+          <>
+            <Field
+              name='withdrawName'
+              label='Withdraw Name'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='withdrawDescription'
+              label='Withdraw Description'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='cycleLength'
+              label='Cycle Length'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='penaltyName'
+              label='Penalty Name'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='penaltyDescription'
+              label='Penalty Description'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='penaltyRate'
+              type='number'
+              label='Penalty'
+              component={TextField}
+              inputProps={{
+                min: 0,
+                max: 100,
+                step: 1
+              }}
+              disabled={!isNewUtility} />
+          </>
+        }
         <FastField
           name='feeRate'
           type='number'
