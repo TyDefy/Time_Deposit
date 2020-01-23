@@ -17,7 +17,7 @@ Array.prototype.asyncForEach = async function (callback, thisArg) {
 }
 
 const defaultConfigs = {
-	chainId: 4,
+	// chainId: 4,
 	etherscanApiKey: process.env.ETHERSCAN_API_KEY,
 };
 
@@ -108,7 +108,62 @@ const deploy = async (network, secret) => {
 		}
 
 	} else if (network === 'rinkeby') {
+		const deployer = new etherlime.InfuraPrivateKeyDeployer(secret, network, process.env.INFURA_API_KEY_RINKEBY, defaultConfigs)
 
+		const deploy = (...args) => deployer.deployAndVerify(...args);
+
+		const pDaiInstance = await deploy(
+			pDaiABI,
+			false,
+			"PseudoDai",
+			"pDAI",
+			18
+		);
+
+		const pcDaiInstance = await deploy(
+			pcDaiABI,
+			false,
+			"pcToken",
+			"pcDai",
+			18,
+			pDaiInstance.contract.address
+		);
+
+		const poolRegistryInstance = await deploy(
+			poolRegistryABI,
+			false,
+			ADMIN_ADDRESS
+		);
+
+		const poolFactoryInstance = await deploy(
+			BasicFactoryABI,
+			false,
+			ADMIN_ADDRESS,
+			poolRegistryInstance.contract.address,
+			pDaiInstance.contract.address,
+			"DAI",
+			pcDaiInstance.contract.address,
+			"cDai"
+		);
+
+		await poolRegistryInstance.registerDeployer(
+			poolFactoryInstance.contract.address,
+			true
+		);
+
+		const CONTRACT_ADDRESSES = `
+			DAI_ADDRESS=${pDaiInstance.contract.address}
+			POOL_REGISTRY_ADDRESS=${poolRegistryInstance.contract.address}
+			POOL_FACTORY_ADDRESS=${poolFactoryInstance.contract.address}
+		`;
+		console.log(CONTRACT_ADDRESSES);
+
+		const addresses = (process.env.ADDESSES_TO_MINT).split(',');
+
+		for (const address of addresses) {
+			await (await pDaiInstance.mintTo(address));
+			console.log(`successfully minted to ${address}`);
+		}
 	}
 };
 
