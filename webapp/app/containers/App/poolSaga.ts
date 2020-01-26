@@ -7,7 +7,8 @@ import {
   deposit, 
   withdraw, 
   withdrawInterest, 
-  setPoolInterestRate, 
+  setPoolInterestRate,
+  terminatePool, 
   // setPoolInterestAccrued 
 } from "./actions";
 import { getType } from "typesafe-actions";
@@ -20,6 +21,48 @@ import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
 import { setTxContext, setTxHash } from "containers/TransactionModal/actions";
+
+function* poolTerminateListener(poolContract: Pool) {
+  while (true) {
+    const action = yield take(getType(terminatePool.request));
+    const { signer }: BlockchainContext = yield getContext('blockchain');
+    if (signer) {
+      //@ts-ignore
+      const writeableContract = poolContract.connect(signer);
+      if (action.payload.poolAddress === poolContract.address) {
+        try {
+          yield put(setTxContext('Terminating pool'));
+          const tx: ContractTransaction = yield call(
+            //@ts-ignore
+            [writeableContract, writeableContract.terminatePool]);
+          yield put(setTxHash(tx.hash));
+          yield call([tx, tx.wait]);
+          yield put(terminatePool.success());
+          yield put(enqueueSnackbar({
+            message: 'Pool terminated successfully'
+          }))
+        } catch (error) {
+          yield put(terminatePool.failure(error.message));
+          yield put(enqueueSnackbar({
+            message: 'Something went wrong processing the transaction',
+            options: {
+              variant: 'error',
+            }
+          }))
+        }
+      }
+    } else {
+      yield put(enqueueSnackbar({
+        message: 'Please connect with metamask to continue',
+        options: {
+          variant: 'error'
+        }
+      }))
+      yield put(deposit.failure('Please connect with metamask'));
+      yield take(getType(connectMetamask.success));
+    }
+  }
+}
 
 function* poolDepositListener(poolContract: Pool) {
   while (true) {
