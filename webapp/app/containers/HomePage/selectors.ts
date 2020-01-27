@@ -1,7 +1,7 @@
 import { createSelector, createStructuredSelector } from 'reselect';
 import { RootState } from './types';
 import { StateProps } from '.';
-import { selectEthAddress } from 'containers/App/selectors';
+import { selectEthAddress, selectExchangeRate, selectInterestRate } from 'containers/App/selectors';
 
 /**
  * Direct selector to the homePage state domain
@@ -25,6 +25,8 @@ const selectPoolsBalance = createSelector(selectPools, allPools => allPools.redu
 const selectHomePage = createStructuredSelector<RootState, StateProps>({
   pools: selectPools,
   poolsBalance: selectPoolsBalance,
+  interestRate: selectInterestRate,
+  exchangeRate: selectExchangeRate
 });
 
 
