@@ -266,7 +266,7 @@ function* poolTransactionListener(poolContract: Pool) {
           txHash: newTx.transactionHash || '0x',
           time: new Date(txDate.timestamp * 1000),
           amount: Number(formatEther(newTx.withdrawAmount.add(newTx.penaltyAmount))),
-          cdaiAmount: Number(formatEther(newTx.cdaiAmount)),
+          cdaiAmount: Number(formatEther(newTx.cDaiAmount)),
         }))
     }
   }
