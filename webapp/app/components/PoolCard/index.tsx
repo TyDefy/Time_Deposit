@@ -105,8 +105,8 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
   interestRate,
   description,
   balance,
-  contribution = 0,
-  interestAccrued = 0,
+  contribution,
+  interestAccrued,
   availableInterest = 0,
   daysUntilAccess=0,
 }: OwnProps) => {

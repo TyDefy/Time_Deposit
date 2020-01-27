@@ -71,6 +71,7 @@ export interface Pool {
   availableInterest?: number;
   daysUntilAccess?: number;
   transactions: Array<Transaction>;
+  cdaiBalance: number;
 }
 
 export interface Utility {
