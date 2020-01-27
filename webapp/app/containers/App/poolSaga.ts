@@ -296,12 +296,11 @@ function* poolInterestListener(poolContract: Pool) {
 function* getUserInfoListener(poolContract: Pool) {
   while (true) {
     const { ethAddress }: BlockchainContext = yield getContext('blockchain');
-
-    const userInfo: Promise = yield call([poolContract, poolContract.getUserInfo], ethAddress);
-   
   
-    // if (ethAddress) {
-    //   const poolInterestAccrued: BigNumber = yield call([poolContract, poolContract.getInterestAmount], ethAddress);
+    if (ethAddress) {
+      const userInfo = yield call([poolContract, poolContract.getUserInfo], ethAddress);
+
+      //   const poolInterestAccrued: BigNumber = yield call([poolContract, poolContract.getInterestAmount], ethAddress);
     //   yield put(setPoolInterestAccrued({
     //     poolAddress: poolContract.address,
     //     interestAccrued: Number(formatEther(poolInterestAccrued))}
