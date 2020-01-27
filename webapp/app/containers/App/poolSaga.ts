@@ -272,6 +272,45 @@ function* poolTransactionListener(poolContract: Pool) {
   }
 }
 
+function* poolInterestListener(poolContract: Pool) {
+  while (true) {
+    // const { ethAddress }: BlockchainContext = yield getContext('blockchain');
+
+    const poolInterestRate: BigNumber = yield call([poolContract, poolContract.getInterestRatePerYear]);
+    yield put(setPoolInterestRate({
+      poolAddress: poolContract.address, 
+      interestRate: Number(formatEther(poolInterestRate))
+    }));
+  
+    // if (ethAddress) {
+    //   const poolInterestAccrued: BigNumber = yield call([poolContract, poolContract.getInterestAmount], ethAddress);
+    //   yield put(setPoolInterestAccrued({
+    //     poolAddress: poolContract.address,
+    //     interestAccrued: Number(formatEther(poolInterestAccrued))}
+    //   ))
+    // }
+
+    yield delay(15000);
+  }
+}
+
+function* getUserInfoListener(poolContract: Pool) {
+  while (true) {
+    const { ethAddress }: BlockchainContext = yield getContext('blockchain');
+  
+    if (ethAddress) {
+      const userInfo = yield call([poolContract, poolContract.getUserInfo], ethAddress);
+
+      //   const poolInterestAccrued: BigNumber = yield call([poolContract, poolContract.getInterestAmount], ethAddress);
+    //   yield put(setPoolInterestAccrued({
+    //     poolAddress: poolContract.address,
+    //     interestAccrued: Number(formatEther(poolInterestAccrued))}
+    //   ))
+    // }
+    yield delay(15000);
+  }
+}
+
 function* poolWatcherSaga(action) {
   const { provider, signer }: BlockchainContext = yield getContext('blockchain');
 
