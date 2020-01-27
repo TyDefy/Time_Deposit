@@ -62,7 +62,8 @@ contract BasicPool is WhitelistAdminRole {
     );
     event Withdraw(
         address indexed user,
-        uint256 amount,
+        uint256 amountInDai,
+        uint256 amountIncDai,
         uint256 penalty
     );
     event WithdrawInterest(
@@ -228,6 +229,7 @@ contract BasicPool is WhitelistAdminRole {
         emit Withdraw(
             msg.sender,
             withdrawAmount,
+            cDaiBurnt,
             penaltyAmount
         );
     }
@@ -268,12 +270,6 @@ contract BasicPool is WhitelistAdminRole {
         // Withdraw full balance 
         withdrawInterest();
         withdraw(fullUserBalance);
-
-        emit Withdraw(
-            msg.sender,
-            fullUserBalance,
-            0
-        );
     }
 
     function finalWithdraw() public {
@@ -285,13 +281,7 @@ contract BasicPool is WhitelistAdminRole {
         );
         // Withdraw full balance 
         withdrawInterest();
-        withdraw(users_[msg.sender].collateralInvested);
-
-        emit Withdraw(
-            msg.sender,
-            fullUserBalance,
-            0
-        );
+        withdraw(fullUserBalance);
     }
 
     // View functions
