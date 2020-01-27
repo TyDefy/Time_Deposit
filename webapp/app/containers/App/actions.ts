@@ -52,6 +52,7 @@ export const addPoolTx = createStandardAction('ADD_POOL_TX')<{
   time: Date;
   type: 'Deposit' | 'Withdraw';
   amount: number;
+  cdaiAmount: number;
   txHash: string;
 }>()
 

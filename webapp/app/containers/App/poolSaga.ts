@@ -1,5 +1,5 @@
 import { BlockchainContext } from "blockchainContext";
-import { getContext, takeEvery, call, put, fork, take, select, delay } from "redux-saga/effects";
+import { getContext, takeEvery, call, put, fork, take, select } from "redux-saga/effects";
 import { 
   poolDeployed, 
   addPoolTx, 
@@ -7,9 +7,7 @@ import {
   deposit, 
   withdraw, 
   withdrawInterest, 
-  setPoolInterestRate,
   terminatePool, 
-  // setPoolInterestAccrued 
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
@@ -227,7 +225,7 @@ function* poolTransactionListener(poolContract: Pool) {
         transactionHash: tx.transactionHash,
       })
     };
-    const withdrawHandler = (address, withdrawAmount, penaltyAmount, tx) => {
+    const withdrawHandler = (address, withdrawAmount, cdaiAmount, penaltyAmount, tx) => {
       emit({
         type: 'Withdraw',
         address,
@@ -238,10 +236,10 @@ function* poolTransactionListener(poolContract: Pool) {
       })
     };
     poolContract.on(poolContract.filters.Deposit(null, null, null), depositHandler);
-    poolContract.on(poolContract.filters.Withdraw(null, null, null), withdrawHandler);
+    poolContract.on(poolContract.filters.Withdraw(null, null, null, null), withdrawHandler);
     return () => {
       poolContract.off(poolContract.filters.Deposit(null, null, null), depositHandler);
-      poolContract.off(poolContract.filters.Withdraw(null, null, null), withdrawHandler);
+      poolContract.off(poolContract.filters.Withdraw(null, null, null, null), withdrawHandler);
     };
   });
 
@@ -258,6 +256,7 @@ function* poolTransactionListener(poolContract: Pool) {
           txHash: newTx.transactionHash || '0x',
           time: new Date(txDate.timestamp * 1000),
           amount: Number(formatEther(newTx.daiAmount)),
+          cdaiAmount: Number(formatEther(newTx.cDaiAmount))
         })) :
         yield put(addPoolTx({
           poolAddress: poolContract.address,
@@ -265,31 +264,10 @@ function* poolTransactionListener(poolContract: Pool) {
           type: 'Withdraw',
           txHash: newTx.transactionHash || '0x',
           time: new Date(txDate.timestamp * 1000),
-          amount: Number(formatEther(newTx.withdrawAmount.add(newTx.penaltyAmount)))
+          amount: Number(formatEther(newTx.withdrawAmount.add(newTx.penaltyAmount))),
+          cdaiAmount: Number(formatEther(newTx.cdaiAmount)),
         }))
     }
-  }
-}
-
-function* poolInterestListener(poolContract: Pool) {
-  while (true) {
-    // const { ethAddress }: BlockchainContext = yield getContext('blockchain');
-
-    const poolInterestRate: BigNumber = yield call([poolContract, poolContract.getInterestRatePerYear]);
-    yield put(setPoolInterestRate({
-      poolAddress: poolContract.address, 
-      interestRate: Number(formatEther(poolInterestRate))
-    }));
-  
-    // if (ethAddress) {
-    //   const poolInterestAccrued: BigNumber = yield call([poolContract, poolContract.getInterestAmount], ethAddress);
-    //   yield put(setPoolInterestAccrued({
-    //     poolAddress: poolContract.address,
-    //     interestAccrued: Number(formatEther(poolInterestAccrued))}
-    //   ))
-    // }
-
-    yield delay(15000);
   }
 }
 
@@ -316,11 +294,12 @@ function* poolWatcherSaga(action) {
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
           amount: Number(formatEther(parsedDeposit.amountInCollateral)),
+          cdaiAmount: Number(formatEther(parsedDeposit.amountInInterestEarning))
         })
       }));
 
     const withdrawLogs: Log[] = yield call([provider, provider.getLogs], {
-      ...poolContract.filters.Withdraw(null, null, null),
+      ...poolContract.filters.Withdraw(null, null, null, null),
       fromBlock: 0,
       toBlock: 'latest',
     })
@@ -335,7 +314,8 @@ function* poolWatcherSaga(action) {
           type: 'Withdraw',
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
-          amount: Number(formatEther(parsedWithdraw.withdrawAmount.add(parsedWithdraw.penaltyAmount)))
+          amount: Number(formatEther(parsedWithdraw.withdrawAmount.add(parsedWithdraw.penaltyAmount))),
+          cdaiAmount: Number(formatEther(parsedWithdraw.amountIncDai))
         })
       }));
 
@@ -349,7 +329,6 @@ function* poolWatcherSaga(action) {
     console.log(error);
   }
 
-  yield fork(poolInterestListener, poolContract);
   yield fork(poolTransactionListener, poolContract);
   yield fork(poolDepositListener, poolContract);
   yield fork(poolWithdrawListener, poolContract);
