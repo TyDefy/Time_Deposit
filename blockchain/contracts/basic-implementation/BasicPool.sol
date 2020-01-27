@@ -270,12 +270,6 @@ contract BasicPool is WhitelistAdminRole {
         // Withdraw full balance 
         withdrawInterest();
         withdraw(fullUserBalance);
-
-        // emit Withdraw(
-        //     msg.sender,
-        //     fullUserBalance,
-        //     0
-        // );
     }
 
     function finalWithdraw() public {
@@ -288,12 +282,6 @@ contract BasicPool is WhitelistAdminRole {
         // Withdraw full balance 
         withdrawInterest();
         withdraw(fullUserBalance);
-
-        // emit Withdraw(
-        //     msg.sender,
-        //     fullUserBalance,
-        //     0
-        // );
     }
 
     // View functions
