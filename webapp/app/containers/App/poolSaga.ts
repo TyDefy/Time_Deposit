@@ -306,7 +306,6 @@ function* getUserInfoListener(poolContract: Pool) {
     //     interestAccrued: Number(formatEther(poolInterestAccrued))}
     //   ))
     // }
-
     yield delay(15000);
   }
 }
