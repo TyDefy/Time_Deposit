@@ -1,4 +1,4 @@
-import { getContext, put, call, take, fork, spawn } from "redux-saga/effects";
+import { getContext, put, call, take, fork, spawn, delay } from "redux-saga/effects";
 import { BlockchainContext } from "blockchainContext";
 import { connectMetamask, setWeb3, setDaiBalance, setIsAdmin, setCDaiRates } from "./actions";
 import { getType } from "typesafe-actions";
@@ -90,18 +90,24 @@ function* connectMetamaskSaga() {
 }
 
 function* getCDaiRates() {
-  try {
-    const response = yield call(fetch, 'https://api.compound.finance/api/v2/ctoken?addresses[]=0x5d3a536e4d6dbd6114cc1ead35777bab948e3643');
-    var responseBody = yield response.json();
-   
-  } catch (e) {
-    yield put(setCDaiRates.failure(e.message));
-    return;
+  while(true) {
+
+    try {
+      const response = yield call(fetch, 'https://api.compound.finance/api/v2/ctoken?addresses[]=0x5d3a536e4d6dbd6114cc1ead35777bab948e3643');
+      var responseBody = yield response.json();
+     
+    } catch (e) {
+      yield put(setCDaiRates.failure(e.message));
+      return;
+    }
+
+    yield put(setCDaiRates.success({
+      exchangeRate: responseBody.cToken[0].exchange_rate.value,
+      interestRate: responseBody.cToken[0].supply_rate.value,
+    }));
+
+    yield delay(15000);
   }
-  yield put(setCDaiRates.success({
-    exchangeRate: responseBody.cToken[0].exchange_rate.value,
-    interestRate: responseBody.cToken[0].supply_rate.value,
-  }));
 }
 
 function* getUserType() {

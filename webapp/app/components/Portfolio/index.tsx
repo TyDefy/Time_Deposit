@@ -70,8 +70,6 @@ interface OwnProps extends WithStyles<typeof styles> {
   interestAccrued: number;
   interestAvailable: number;
   pools: Array<Pool>;
-  interestRate: number;
-  exchangeRate: number;
 }
 
 const Portfolio: React.FC<OwnProps> = ({
@@ -82,8 +80,6 @@ const Portfolio: React.FC<OwnProps> = ({
   interestAccrued,
   interestAvailable,
   pools,
-  interestRate,
-  exchangeRate
 }: OwnProps) => <Container maxWidth='lg'>
     <Typography className={classes.header} variant='h4'>Overview</Typography>
     <Typography className={classes.subHeading} variant='subtitle2'>Your Portfolio Summary</Typography>
@@ -109,7 +105,7 @@ const Portfolio: React.FC<OwnProps> = ({
       </Grid>
     </Paper>
     <br />
-    <PoolCardList listLabel='Your Pools' pools={pools} interestRate={interestRate} exchangeRate={exchangeRate} />
+    <PoolCardList listLabel='Your Pools' pools={pools}/>
   </Container>;
 
 export default withStyles(styles, { withTheme: true })(Portfolio);

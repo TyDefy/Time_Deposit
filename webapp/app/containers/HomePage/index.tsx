@@ -20,15 +20,13 @@ interface DispatchProps {
 
 export interface StateProps {
   pools: Array<Pool>,
-  poolsBalance: number,
-  interestRate: number,
-  exchangeRate: number
+  poolsBalance: number
 }
 
 type Props = StateProps & DispatchProps & OwnProps;
 
-const HomePage: React.FunctionComponent<Props> = ({ pools, poolsBalance, interestRate, exchangeRate }: Props) => (
-  <Dashboard pools={pools} poolsBalance={poolsBalance} interestRate={interestRate}  exchangeRate={exchangeRate}/>
+const HomePage: React.FunctionComponent<Props> = ({ pools, poolsBalance}: Props) => (
+  <Dashboard pools={pools} poolsBalance={poolsBalance}/>
 );
 
 const mapStateToProps = state => selectHomePage(state);

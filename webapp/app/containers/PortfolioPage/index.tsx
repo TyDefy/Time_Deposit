@@ -23,8 +23,6 @@ export interface StateProps {
   contributed: number,
   interestAccrued: number,
   interestAvailable: number,
-  interestRate: number,
-  exchangeRate: number
 }
 
 type Props = StateProps & DispatchProps & OwnProps;

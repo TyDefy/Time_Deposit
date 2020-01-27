@@ -37,16 +37,12 @@ const styles = ({ palette, spacing }: Theme) =>
 interface OwnProps extends WithStyles<typeof styles> {
   listLabel: string;
   pools: Array<Pool>;
-  interestRate: number;
-  exchangeRate: number;
 }
 
 const PoolCardList: React.FunctionComponent<OwnProps> = ({
   classes,
   listLabel,
   pools,
-  interestRate,
-  exchangeRate
 }: OwnProps) => (
     <>
       <Paper elevation={5} className={classes.poolPaper}>
@@ -54,7 +50,7 @@ const PoolCardList: React.FunctionComponent<OwnProps> = ({
           {listLabel}
         </Typography>
         <Grid container spacing={1} direction="row" justify='space-around' className={classes.poolGrid}>
-          {pools.map(p => <PoolCard key={p.address} {...p} baseInterestRate={interestRate} exchangeRate={exchangeRate} />)}
+          {pools.map(p => <PoolCard key={p.address} {...p} />)}
         </Grid>
       </Paper>
     </>

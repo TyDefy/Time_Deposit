@@ -94,8 +94,6 @@ const styles = ( {spacing, transitions}: Theme) =>
   });
 
 interface OwnProps extends Pool, WithStyles<typeof styles> {
-  baseInterestRate: number;
-  exchangeRate: number;
 }
 
 const PoolCard: React.FunctionComponent<OwnProps> = ({
@@ -111,8 +109,6 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
   interestAccrued = 0,
   availableInterest = 0,
   daysUntilAccess=0,
-  exchangeRate,
-  baseInterestRate
 }: OwnProps) => {
 
   const [expanded, setExpanded] = React.useState(false);
@@ -156,7 +152,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
                   {type}
                 </Typography>
                 <Typography className={classes.topMetricValue}>
-                  {`${((baseInterestRate || 0)*100).toFixed(2)} %`}
+                  {`${((interestRate || 0)*100).toFixed(2)} %`}
                 </Typography>
               </Paper>
             </Grid>

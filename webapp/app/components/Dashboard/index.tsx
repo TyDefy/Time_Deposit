@@ -18,17 +18,15 @@ const styles = (theme: Theme) =>
 interface OwnProps extends WithStyles<typeof styles> {
   pools: Array<Pool>,
   poolsBalance: number,
-  interestRate: number,
-  exchangeRate: number
 }
 
-const Dashboard: React.FunctionComponent<OwnProps> = ({pools, poolsBalance, interestRate, exchangeRate}: OwnProps) => (
+const Dashboard: React.FunctionComponent<OwnProps> = ({pools, poolsBalance}: OwnProps) => (
   <Container maxWidth='lg'>
     <HomeHeader poolsBalance={poolsBalance} />
     <br />
     <br />
     <br />
-    <PoolCardList interestRate={interestRate} exchangeRate={exchangeRate} pools={pools} listLabel='AvailablePools' />
+    <PoolCardList pools={pools} listLabel='AvailablePools' />
   </Container>
 );
 
