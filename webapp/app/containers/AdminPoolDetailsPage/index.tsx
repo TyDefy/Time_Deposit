@@ -21,7 +21,9 @@ interface RouteParams {
 export interface OwnProps extends RouteComponentProps<RouteParams>,
   React.Props<RouteParams> { }
 
-interface DispatchProps {}
+interface DispatchProps {
+  terminatePool(): void;
+}
 
 export interface StateProps {
   pool: PoolDetails,
@@ -43,8 +45,8 @@ export interface PoolDetails extends Pool {
 
 type Props = StateProps & DispatchProps & OwnProps;
 
-const AdminPoolDetailsPage: React.FunctionComponent<Props> = ({pool}: Props) => {
-  return <AdminPoolDetails {...pool} />
+const AdminPoolDetailsPage: React.FunctionComponent<Props> = ({pool, terminatePool}: Props) => {
+  return <AdminPoolDetails {...pool} terminatePool={terminatePool} />
 };
 
 const mapStateToProps = (state, props) => selectAdminPoolDetailsPage(state, props);

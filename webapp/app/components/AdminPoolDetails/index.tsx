@@ -5,11 +5,11 @@
  */
 
 import React from 'react';
-import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, Chip, TableHead, TableRow, TableCell, Table, TableBody } from '@material-ui/core';
+import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, Chip, TableHead, TableRow, TableCell, Table, TableBody, Button } from '@material-ui/core';
 import { PoolDetails } from 'containers/AdminPoolDetailsPage';
 import dayjs from 'dayjs';
 
-const styles = ({spacing, palette}: Theme) =>
+const styles = ({ spacing, palette }: Theme) =>
   createStyles({
     poolDetailsHeaderRow: {
       justifyContent: 'space-around',
@@ -40,7 +40,7 @@ const styles = ({spacing, palette}: Theme) =>
     },
     currentInterest: {
       verticalAlign: "top",
-      
+
       display: "inline-block",
       float: "right",
       margin: "25px 20px 0 20px"
@@ -48,7 +48,7 @@ const styles = ({spacing, palette}: Theme) =>
     percentageInterest: {
 
     },
-    label:{
+    label: {
       fontSize: '1em',
       opacity: '75%',
       margin: "12px 8px 0px 12px"
@@ -60,7 +60,7 @@ const styles = ({spacing, palette}: Theme) =>
   });
 
 interface OwnProps extends WithStyles<typeof styles>, PoolDetails {
-
+  terminatePool(): void;
 }
 
 const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
@@ -75,16 +75,17 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
   feeRate,
   pentalyRate,
   participantDetails,
+  terminatePool
 }: OwnProps) => (
     <Container maxWidth='lg'>
-       <Grid container direction='row' className={classes.poolDetailsHeaderRow}>
+      <Grid container direction='row' className={classes.poolDetailsHeaderRow}>
         <Grid item xs={4}><Typography variant='h3' className={classes.poolName}>{name}</Typography></Grid>
         <Grid item xs={4}><Chip className={classes.period} label={`${period} month(s)`} /></Grid>
         <Grid item xs={4}>
           <Typography className={classes.currentInterest}>
-            Current Interest: 
+            Current Interest:
             <strong className={classes.percentageInterest}>
-              {`${((interestRate||0) * 100).toFixed(2)} %`}
+              {`${((interestRate || 0) * 100).toFixed(2)} %`}
             </strong>
           </Typography>
         </Grid>
@@ -115,6 +116,9 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
           <Typography className={classes.value}>{`${(pentalyRate * 100).toFixed(2)} %`}</Typography>
         </Grid>
       </Grid>
+      <Grid container direction="row">
+        <Button onClick={terminatePool}>Terminate Pool</Button>
+      </Grid>
       <Table>
         <TableHead className={classes.tableHeader}>
           <TableRow>
@@ -125,7 +129,7 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
           </TableRow>
         </TableHead>
         <TableBody>
-          {participantDetails.map(p => 
+          {participantDetails.map(p =>
             <TableRow key={p.address}>
               <TableCell>{p.address}</TableCell>
               <TableCell>{dayjs(p.joined).format('YYYY-MM-DD')}</TableCell>
