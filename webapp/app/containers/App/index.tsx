@@ -48,6 +48,8 @@ export interface StateProps {
   approvedNetworkName: string,
   isAdmin: boolean,
   daiBalance?: number,
+  exchangeRate: number,
+  interestRate: number
 }
 
 export interface DispatchProps {

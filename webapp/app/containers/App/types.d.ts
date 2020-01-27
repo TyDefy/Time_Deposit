@@ -13,6 +13,8 @@ interface AppState {
   chainId?: number,
   isAdmin: boolean,
   daiBalance: number,
+  exchangeRate: number,
+  interestRate: number
 }
 
 /* --- ACTIONS --- */

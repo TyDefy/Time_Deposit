@@ -21,7 +21,7 @@ const selectAdminPoolDetails = createSelector(
           address: participant,
           joined: userTransactions?.reduce((minDate, transaction) => minDate < transaction.time ? minDate : transaction.time, new Date()) || new Date(),
           contributed: userContribution,
-          interest: 0, // TODO: Wire this up
+          interest: pool.interestRate,
         }
       });
     return {

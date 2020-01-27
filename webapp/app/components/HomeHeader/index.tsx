@@ -51,7 +51,7 @@ const HomeHeader: React.FunctionComponent<OwnProps> = ({ poolsBalance, classes }
     <>
       <Fragment>
         <Typography variant="h2" className={classes.mainHeading}>
-          WELCOME TO TIME DEPOSIT
+          TIME DEPOSIT
         </Typography>
         <br></br>
         <Typography variant="h1" className={classes.runningTotal}>
@@ -61,10 +61,11 @@ const HomeHeader: React.FunctionComponent<OwnProps> = ({ poolsBalance, classes }
           Currently contributed to pools
         </Typography>
         <Typography variant="h5" className={classes.slogan}>
-          Slogan
+        Choose the time. Choose the return. Watch it grow.
         </Typography>
-        <Typography variant="body1" className={classes.description}>
-          Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus.
+        <Typography variant="h5" className={classes.description}>
+        Time Deposit allows you to earn interest on your crypto. Choose your time frame and return and watch your deposit grow. 
+        Patience is a virtue - wait until the full term of your deposit has passed and be rewarded. Withdraw early and be penalised. Those who stay invested get rewarded by those who withdraw early! Simple. 
         </Typography>
       </Fragment>
       <br></br>

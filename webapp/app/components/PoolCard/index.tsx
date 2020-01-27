@@ -74,7 +74,8 @@ const styles = ( {spacing, transitions}: Theme) =>
       float: "right",
       padding: 8,
       textTransform: "uppercase",
-      fontWeight: "bold"
+      fontWeight: "bold",
+      color: "green"
     },
     expand: {
       transform: 'rotate(0deg)',
@@ -93,7 +94,6 @@ const styles = ( {spacing, transitions}: Theme) =>
   });
 
 interface OwnProps extends Pool, WithStyles<typeof styles> {
-
 }
 
 const PoolCard: React.FunctionComponent<OwnProps> = ({
@@ -108,7 +108,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
   contribution = 0,
   interestAccrued = 0,
   availableInterest = 0,
-  daysUntilAccess=0
+  daysUntilAccess=0,
 }: OwnProps) => {
 
   const [expanded, setExpanded] = React.useState(false);

@@ -105,7 +105,7 @@ const Portfolio: React.FC<OwnProps> = ({
       </Grid>
     </Paper>
     <br />
-    <PoolCardList listLabel='Your Pools' pools={pools} />
+    <PoolCardList listLabel='Your Pools' pools={pools}/>
   </Container>;
 
 export default withStyles(styles, { withTheme: true })(Portfolio);
