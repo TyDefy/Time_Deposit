@@ -56,6 +56,9 @@ const styles = ({ spacing, palette }: Theme) =>
     value: {
       fontSize: '1.5em',
       margin: "8px 8px 0px 12px"
+    },
+    terminateButton: {
+      backgroundColor: 'red'
     }
   });
 
@@ -117,7 +120,7 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
         </Grid>
       </Grid>
       <Grid container direction="row">
-        <Button onClick={terminatePool}>Terminate Pool</Button>
+        <Button onClick={terminatePool} className={classes.terminateButton}>Terminate Pool</Button>
       </Grid>
       <Table>
         <TableHead className={classes.tableHeader}>
