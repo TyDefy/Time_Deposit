@@ -42,10 +42,12 @@ const styles = ({ spacing , palette }: Theme) =>
       
       display: "inline-block",
       float: "right",
-      margin: "25px 20px 0 20px"
+      margin: "25px 20px 0 20px",
+      fontSize: '1.5em'
     },
     percentageInterest: {
-
+      color: 'green',
+      marginLeft: "8px"
     },
     label:{
       fontSize: '1em',
@@ -89,7 +91,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         <Grid item xs={4}><Chip className={classes.period} label={`${period} month(s)`} /></Grid>
         <Grid item xs={4}>
           <Typography className={classes.currentInterest}>
-            Current Interest: 
+            Current Interest:  
             <strong className={classes.percentageInterest}>
               {`${((interestRate || 0) * 100).toFixed(2)} %`}
             </strong>

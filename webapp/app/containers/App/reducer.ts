@@ -18,6 +18,8 @@ export const initialState: ContainerState = {
   chainId: 0,
   isAdmin: false,
   daiBalance: 0,
+  exchangeRate: 0,
+  interestRate: 0
 };
 
 function appReducer(state: ContainerState = initialState, action: ContainerActions ) {
@@ -44,6 +46,13 @@ function appReducer(state: ContainerState = initialState, action: ContainerActio
       return {
         ...state,
         daiBalance: action.payload,
+      }
+    }
+    case getType(AppActions.setCDaiRates.success): {
+      return {
+        ...state,
+        interestRate: action.payload.interestRate,
+        exchangeRate: action.payload.exchangeRate,
       }
     }
     default:

@@ -1,6 +1,6 @@
 import { getContext, put, call, take, fork } from "redux-saga/effects";
 import { BlockchainContext } from "blockchainContext";
-import { connectMetamask, setWeb3, setDaiBalance, setIsAdmin } from "./actions";
+import { connectMetamask, setWeb3, setDaiBalance, setIsAdmin, setCDaiRates } from "./actions";
 import { getType } from "typesafe-actions";
 import { eventChannel } from "redux-saga";
 import { BigNumber, formatEther } from "ethers/utils";
@@ -89,12 +89,26 @@ function* connectMetamaskSaga() {
   }
 }
 
+function* getCDaiRates() {
+  try {
+    const response = yield call(fetch, 'https://api.compound.finance/api/v2/ctoken?addresses[]=0x5d3a536e4d6dbd6114cc1ead35777bab948e3643');
+    var responseBody = yield response.json();
+   
+  } catch (e) {
+    yield put(setCDaiRates.failure(e.message));
+    return;
+  }
+  yield put(setCDaiRates.success({
+    exchangeRate: responseBody.cToken[0].exchange_rate.value,
+    interestRate: responseBody.cToken[0].supply_rate.value,
+  }));
+}
+
 function* getUserType() {
   const { poolRegistryContract, ethAddress = '' }: BlockchainContext = yield getContext('blockchain');
   try {
     const isAdmin = yield call([poolRegistryContract, poolRegistryContract.isWhitelistAdmin], ethAddress);
     yield put(setIsAdmin(isAdmin));
-    debugger;
     if (isAdmin) {
       yield fork(deployedUtilySaga);
     }
@@ -123,4 +137,5 @@ export default function* root() {
   yield fork(blockchain);
   yield fork(poolFactorySaga);
   yield fork(poolSaga);
+  yield fork(getCDaiRates);
 }

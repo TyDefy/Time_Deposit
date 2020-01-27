@@ -43,10 +43,12 @@ const styles = ({spacing, palette}: Theme) =>
       
       display: "inline-block",
       float: "right",
-      margin: "25px 20px 0 20px"
+      margin: "25px 20px 0 20px",
+      fontSize: '1.5em'
     },
     percentageInterest: {
-
+      color: 'green',
+      marginLeft: "8px"
     },
     label:{
       fontSize: '1em',

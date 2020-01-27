@@ -12,9 +12,9 @@ import injectSaga from 'utils/injectSaga';
 import injectReducer from 'utils/injectReducer';
 import reducer from './reducer';
 import saga from './saga';
-import { Dialog, CircularProgress, Container, Paper, Typography, Link } from '@material-ui/core';
+import { Dialog} from '@material-ui/core';
 import selectTransactionModal from './selectors';
-import { getNetwork } from 'ethers/utils';
+import TransactionPopup from 'components/TransactionPopup';
 
 interface OwnProps { }
 
@@ -30,20 +30,7 @@ type Props = StateProps & DispatchProps & OwnProps;
 
 const TransactionModal: React.FunctionComponent<Props> = ({ open, txContext, txHash }: Props) => (
   <Dialog open={open}>
-    <Paper>
-      <Container maxWidth='lg' style={{overflow: 'hidden', alignContent: 'center'}}>
-        <Typography>Transaction in progress</Typography>
-        {
-          txContext &&
-          <Typography>{txContext}</Typography>
-        }
-        <CircularProgress />
-        {
-          txHash &&
-          <Link href={`https://${getNetwork(parseInt(`${process.env.CHAIN_ID}`)).name}.etherscan.io/tx/${txHash}`}>Etherscan</Link>
-        }
-      </Container>
-    </Paper>
+   <TransactionPopup txContext={txContext} txHash={txHash}></TransactionPopup>
   </Dialog>
 );
 

@@ -74,7 +74,8 @@ const styles = ( {spacing, transitions}: Theme) =>
       float: "right",
       padding: 8,
       textTransform: "uppercase",
-      fontWeight: "bold"
+      fontWeight: "bold",
+      color: "green"
     },
     expand: {
       transform: 'rotate(0deg)',

@@ -30,6 +30,17 @@ export const poolDeployed = createStandardAction('POOL_DEPLOYED')<{
   period: number,
 }>();
 
+export const setCDaiRates = createAsyncAction(
+'REQUEST/SET_CDAI_RATES', 
+'SUCCESS/SET_CDAI_RATES', 
+'FAILURE/SET_CDAI_RATES')
+<undefined, 
+{
+  exchangeRate: number,
+  interestRate: number
+},
+string>();
+
 export const createPool = createAsyncAction(
   '@TX_REQUEST/CREATE_POOL',
   '@TX_SUCCESS/CREATE_POOL',
