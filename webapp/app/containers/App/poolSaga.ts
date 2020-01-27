@@ -225,11 +225,12 @@ function* poolTransactionListener(poolContract: Pool) {
         transactionHash: tx.transactionHash,
       })
     };
-    const withdrawHandler = (address, withdrawAmount, cdaiAmount, penaltyAmount, tx) => {
+    const withdrawHandler = (address, withdrawAmount, cDaiAmount, penaltyAmount, tx) => {
       emit({
         type: 'Withdraw',
         address,
         withdrawAmount,
+        cDaiAmount,
         penaltyAmount,
         blockNumber: tx.blockNumber,
         transactionHash: tx.transactionHash,
