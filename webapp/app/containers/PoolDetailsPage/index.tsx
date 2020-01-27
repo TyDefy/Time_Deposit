@@ -45,6 +45,7 @@ export interface Transaction {
   time: Date;
   type: 'Deposit' | 'Withdraw';
   amount: number;
+  cdaiAmount: number;
   txHash: string;
 }
 

@@ -91,7 +91,6 @@ function* connectMetamaskSaga() {
 
 function* getCDaiRates() {
   while(true) {
-
     try {
       const response = yield call(fetch, 'https://api.compound.finance/api/v2/ctoken?addresses[]=0x5d3a536e4d6dbd6114cc1ead35777bab948e3643');
       var responseBody = yield response.json();
