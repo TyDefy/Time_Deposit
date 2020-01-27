@@ -14,7 +14,7 @@ import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
 import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/BasicPool';
 import { Log } from "ethers/providers";
-import { formatEther, parseEther, BigNumber, formatUnits,  } from "ethers/utils";
+import { formatEther, parseEther, BigNumber  } from "ethers/utils";
 import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
