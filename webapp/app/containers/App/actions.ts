@@ -80,3 +80,9 @@ export const utilityDeployed = createStandardAction('UTILITY_DEPLOYED')<{
   penaltyRate: number,
   penaltyName: string,
 }>();
+
+export const terminatePool = createAsyncAction(
+  '@TX_REQUEST/TERMINATE_POOL',
+  '@TX_SUCCESS/TERMINATE_POOL',
+  '@TX_FAILURE/TERMINATE_POOL',
+)<{poolAddress: string}, undefined, string>();

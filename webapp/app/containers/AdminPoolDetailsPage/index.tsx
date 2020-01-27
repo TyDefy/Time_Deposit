@@ -11,10 +11,19 @@ import { compose, Dispatch } from 'redux';
 import selectAdminPoolDetailsPage from './selectors';
 import AdminPoolDetails from 'components/AdminPoolDetails';
 import { Pool } from 'containers/App';
+import { terminatePool } from 'containers/App/actions';
+import { RouteComponentProps } from 'react-router-dom';
 
-interface OwnProps {}
+interface RouteParams {
+  poolAddress: string;
+}
 
-interface DispatchProps {}
+export interface OwnProps extends RouteComponentProps<RouteParams>,
+  React.Props<RouteParams> { }
+
+interface DispatchProps {
+  terminatePool(): void;
+}
 
 export interface StateProps {
   pool: PoolDetails,
@@ -36,8 +45,8 @@ export interface PoolDetails extends Pool {
 
 type Props = StateProps & DispatchProps & OwnProps;
 
-const AdminPoolDetailsPage: React.FunctionComponent<Props> = ({pool}: Props) => {
-  return <AdminPoolDetails {...pool} />
+const AdminPoolDetailsPage: React.FunctionComponent<Props> = ({pool, terminatePool}: Props) => {
+  return <AdminPoolDetails {...pool} terminatePool={terminatePool} />
 };
 
 const mapStateToProps = (state, props) => selectAdminPoolDetailsPage(state, props);
@@ -47,7 +56,7 @@ const mapDispatchToProps = (
   ownProps: OwnProps,
 ): DispatchProps => {
   return {
-    dispatch: dispatch,
+    terminatePool: () => dispatch(terminatePool.request({poolAddress: ownProps.match.params.poolAddress})),
   };
 };
 
