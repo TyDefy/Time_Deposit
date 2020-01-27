@@ -6,10 +6,11 @@
 
 import React from 'react';
 import { Theme, createStyles, withStyles, WithStyles, Button, Typography, Container, MenuItem, Grid } from '@material-ui/core';
-import { Form, FastField } from 'formik';
+import { Form, FastField, Field } from 'formik';
 import { TextField } from 'formik-material-ui';
+import { Utility } from 'containers/App';
 
-const styles = ({spacing}: Theme) =>
+const styles = ({ spacing }: Theme) =>
   createStyles({
     header: {
       margin: spacing(3),
@@ -29,12 +30,17 @@ const styles = ({spacing}: Theme) =>
 
 interface OwnProps extends WithStyles<typeof styles> {
   poolTypes: Array<{ value: number, label: string }>,
-  periods: Array<{ value: number, label: string }>,
+  utilities: Array<Utility>,
+  values: any,
+  setFieldValue(field: string, value: any): void,
 }
 
 const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
-  { poolTypes, periods, classes }: OwnProps,
-) => <Container maxWidth='sm'>
+  { classes, poolTypes, utilities, values, setFieldValue }: OwnProps,
+) => {
+  const isNewUtility = values.utilityAddress === 'new';
+
+  return <Container maxWidth='sm'>
     <Form>
       <Typography variant='h3' className={classes.header}>Create Pool</Typography>
       <Grid container direction='column'>
@@ -63,33 +69,68 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
             </MenuItem>
           ))}
         </FastField>
-        <FastField
-          name='period'
+        <Field
+          name='utilityAddress'
           type='text'
-          label='Period'
+          label='Utility'
           select
           className={classes.label}
-          component={TextField}>
-          {periods.map(option => (
-            <MenuItem key={option.value} value={option.value}>
-              {option.label}
+          component={TextField}
+          onChange={(value) => {
+            console.log(value)
+          }}>
+          {utilities.map(utility => (
+            <MenuItem key={utility.withdrawAddress} value={utility.withdrawAddress}>
+              {utility.withdrawAddress === 'new' ? 
+                'New' : 
+                `${utility.withdrawName} - ${utility.cycleLength} months - ${utility.penaltyName} - ${utility.penaltyRate} %`}
             </MenuItem>
           ))}
-        </FastField>
+        </Field>
+        { isNewUtility &&
+          <>
+            <Field
+              name='withdrawName'
+              label='Withdraw Name'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='withdrawDescription'
+              label='Withdraw Description'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='cycleLength'
+              label='Cycle Length'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='penaltyName'
+              label='Penalty Name'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='penaltyDescription'
+              label='Penalty Description'
+              component={TextField}
+              disabled={!isNewUtility} />
+            <Field
+              name='penaltyRate'
+              type='number'
+              label='Penalty'
+              component={TextField}
+              inputProps={{
+                min: 0,
+                max: 100,
+                step: 1
+              }}
+              disabled={!isNewUtility} />
+          </>
+        }
         <FastField
           name='feeRate'
           type='number'
           label='Fee'
-          component={TextField} 
-          inputProps={{
-            min: 0,
-            max: 100,
-            step: 1
-          }} />
-        <FastField
-          name='penaltyRate'
-          type='number'
-          label='Penalty'
           component={TextField}
           inputProps={{
             min: 0,
@@ -99,6 +140,7 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
         <Button color='primary' type='submit'>Create Pool</Button>
       </Grid>
     </Form>
-  </Container>;
+  </Container>
+};
 
 export default withStyles(styles, { withTheme: true })(PoolDetailsForm);

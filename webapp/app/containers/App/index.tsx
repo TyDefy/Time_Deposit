@@ -75,11 +75,13 @@ export interface Pool {
 
 export interface Utility {
   withdrawAddress: string,
+  cycleLength: number,
   withdrawName: string,
-  withdrawDescription: string,
+  withdrawDescription?: string,
   penaltyAddress: string,
+  penaltyRate: number,
   penaltyName: string,
-  penaltyDescription: string
+  penaltyDescription?: string
 }
 
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;

@@ -16,16 +16,19 @@ contract BasicFactory is WhitelistAdminRole {
 
     event DeployedUtilities(
         address indexed withdraw,
+        uint256 _cycleLength,
         string _withdrawName,
-        string _withdrawDescription,
+        // string _withdrawDescription,
         address indexed penalty,
-        string _penaltyName,
-        string _penaltyDescription
+        uint8 _penaltyRate,
+        string _penaltyName
+        // string _penaltyDescription
     );
 
     event DeployedPool(
         address indexed pool,
         address indexed withdraw,
+        uint256 penaltyPercentage,
         string name,
         string description,
         uint256 cycleLength,
@@ -81,11 +84,20 @@ contract BasicFactory is WhitelistAdminRole {
             "Pool registration falied"
         );
 
-        uint256 cycleLength = IWithdraw(_withdraw).getCycle();
+        uint256 cycleLength = 0;
+        address penaltyInstance = address(0);
+        uint256 penaltyPercentage = 0;
+
+        if(_withdraw != address(0)) {
+            cycleLength = IWithdraw(_withdraw).getCycle();
+            penaltyInstance = IWithdraw(_withdraw).getPenalty();
+            penaltyPercentage = BasicPenalty(penaltyInstance).penalty();
+        }
 
         emit DeployedPool(
             address(newPool), 
             _withdraw, 
+            penaltyPercentage,
             _poolName, 
             _poolDescription, 
             cycleLength,
@@ -141,11 +153,13 @@ contract BasicFactory is WhitelistAdminRole {
 
         emit DeployedUtilities(
             address(newWithdraw),
+            _cycleLength,
             _withdrawName,
-            _withdrawDescription,
+            // _withdrawDescription,
             address(newPenalty),
-            _penaltyName,
-            _penaltyDescription
+            _penaltyPercentage,
+            _penaltyName
+            // _penaltyDescription
         );
 
         return(

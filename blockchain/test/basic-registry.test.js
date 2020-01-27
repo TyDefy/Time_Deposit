@@ -16,7 +16,8 @@ describe("Basic Registry Tests", async () => {
     let admin = accounts[2];
     let registeredDeployer = accounts[3];
     let user1 = accounts[4];
-    let deployer;
+    let user2 = accounts[5];
+    let deployer = new etherlime.EtherlimeGanacheDeployer(deployerInsecure.secretKey);
     
     let basicPoolInstance, 
         cyclicWithdrawInstance, 
@@ -26,8 +27,6 @@ describe("Basic Registry Tests", async () => {
         basicRegistryInstance;
 
     beforeEach('', async () => {
-        deployer = new etherlime.EtherlimeGanacheDeployer(deployerInsecure.secretKey);
-
         pDaiInstance = await deployer.deploy(
             pDaiAbi,
             false,
@@ -74,22 +73,43 @@ describe("Basic Registry Tests", async () => {
             admin.signer.address
         );
 
-        await basicRegistryInstance.registerDeployer(
+        await basicRegistryInstance.from(admin).registerDeployer(
             registeredDeployer.signer.address,
             true
         );
 
+        // Minting admin Dai
         await pDaiInstance.from(admin).mint();
-        await pDaiInstance.from(admin).transfer(
-            cDaiInstance.contract.address,
-            10000
-        );
+        // Minting user 1 dai
         await pDaiInstance.from(user1).mint();
+        // Approving cDai as a spender
+        await pDaiInstance.from(user1).approve(
+            cDaiInstance.contract.address,
+            test_settings.basicPool.deposit
+        );
+        // Approving dai as a spender
+        await cDaiInstance.from(user1).approve(
+            pDaiInstance.contract.address,
+            test_settings.basicPool.deposit
+        );
+        // Minting dai for user 2
+        await pDaiInstance.from(user2).mint();
+        // Approving cDai as a spender
+        await pDaiInstance.from(user2).approve(
+            cDaiInstance.contract.address,
+            test_settings.basicPool.deposit
+        );
+        // Approving dai as a spender
+        await cDaiInstance.from(user2).approve(
+            pDaiInstance.contract.address,
+            test_settings.basicPool.deposit
+        );
     });
 
     describe("Core Functionality", async () => {
         it("Registers a utility", async () => {
             await basicRegistryInstance.from(registeredDeployer).registerUtility(
+                admin.signer.address,
                 penaltyInstance.contract.address,
                 test_settings.registrySettings.penalty.name,
                 test_settings.registrySettings.penalty.implementationType,
@@ -124,6 +144,7 @@ describe("Basic Registry Tests", async () => {
 
         it("Registers a pool", async () => {
             await basicRegistryInstance.from(registeredDeployer).registerUtility(
+                admin.signer.address,
                 penaltyInstance.contract.address,
                 test_settings.registrySettings.penalty.name,
                 test_settings.registrySettings.penalty.implementationType,
@@ -131,6 +152,7 @@ describe("Basic Registry Tests", async () => {
             );
 
             await basicRegistryInstance.from(registeredDeployer).registerUtility(
+                admin.signer.address,
                 cyclicWithdrawInstance.contract.address,
                 test_settings.registrySettings.withdraw.name,
                 test_settings.registrySettings.withdraw.implementationType,
@@ -138,10 +160,11 @@ describe("Basic Registry Tests", async () => {
             );
 
             await basicRegistryInstance.from(registeredDeployer).registerPool(
+                admin.signer.address,
                 basicPoolInstance.contract.address,
                 cyclicWithdrawInstance.contract.address,
-                penaltyInstance.contract.address,
-                test_settings.registrySettings.pool.name
+                test_settings.registrySettings.pool.name,
+                test_settings.registrySettings.pool.description
             );
 
             let details = await basicRegistryInstance.poolDetails(
@@ -165,31 +188,9 @@ describe("Basic Registry Tests", async () => {
             );
         });
 
-        it("Negative test Registers a pool (penalty)", async () => {
-            await basicRegistryInstance.from(registeredDeployer).registerUtility(
-                cyclicWithdrawInstance.contract.address,
-                test_settings.registrySettings.withdraw.name,
-                test_settings.registrySettings.withdraw.implementationType,
-                test_settings.registrySettings.withdraw.type
-            );
-
-            await assert.revert(basicRegistryInstance.from(registeredDeployer).registerPool(
-                basicPoolInstance.contract.address,
-                cyclicWithdrawInstance.contract.address,
-                penaltyInstance.contract.address,
-                test_settings.registrySettings.pool.name
-            ));
-
-            await assert.revert(basicRegistryInstance.from(admin).registerPool(
-                basicPoolInstance.contract.address,
-                cyclicWithdrawInstance.contract.address,
-                penaltyInstance.contract.address,
-                test_settings.registrySettings.pool.name
-            ));
-        });
-
         it("Negative test Registers a pool (withdraw)", async () => {
             await basicRegistryInstance.from(registeredDeployer).registerUtility(
+                admin.signer.address,
                 penaltyInstance.contract.address,
                 test_settings.registrySettings.penalty.name,
                 test_settings.registrySettings.penalty.implementationType,
@@ -197,17 +198,19 @@ describe("Basic Registry Tests", async () => {
             );
 
             await assert.revert(basicRegistryInstance.from(registeredDeployer).registerPool(
+                admin.signer.address,
                 basicPoolInstance.contract.address,
                 cyclicWithdrawInstance.contract.address,
-                penaltyInstance.contract.address,
-                test_settings.registrySettings.pool.name
+                test_settings.registrySettings.pool.name,
+                test_settings.registrySettings.pool.description
             ));
 
             await assert.revert(basicRegistryInstance.from(admin).registerPool(
+                admin.signer.address,
                 basicPoolInstance.contract.address,
                 cyclicWithdrawInstance.contract.address,
-                penaltyInstance.contract.address,
-                test_settings.registrySettings.pool.name
+                test_settings.registrySettings.pool.name,
+                test_settings.registrySettings.pool.description
             ));
         });
     });
@@ -215,6 +218,7 @@ describe("Basic Registry Tests", async () => {
     describe("Supporting Functionality", async () => {
         it("Utility details", async () => {
             await basicRegistryInstance.from(registeredDeployer).registerUtility(
+                admin.signer.address,
                 penaltyInstance.contract.address,
                 test_settings.registrySettings.penalty.name,
                 test_settings.registrySettings.penalty.implementationType,
@@ -247,6 +251,7 @@ describe("Basic Registry Tests", async () => {
             );
 
             await basicRegistryInstance.from(registeredDeployer).registerUtility(
+                admin.signer.address,
                 cyclicWithdrawInstance.contract.address,
                 test_settings.registrySettings.withdraw.name,
                 test_settings.registrySettings.withdraw.implementationType,
@@ -333,6 +338,7 @@ describe("Basic Registry Tests", async () => {
 
         it("Pool details", async () => {
             await basicRegistryInstance.from(registeredDeployer).registerUtility(
+                admin.signer.address,
                 penaltyInstance.contract.address,
                 test_settings.registrySettings.penalty.name,
                 test_settings.registrySettings.penalty.implementationType,
@@ -340,6 +346,7 @@ describe("Basic Registry Tests", async () => {
             );
 
             await basicRegistryInstance.from(registeredDeployer).registerUtility(
+                admin.signer.address,
                 cyclicWithdrawInstance.contract.address,
                 test_settings.registrySettings.withdraw.name,
                 test_settings.registrySettings.withdraw.implementationType,
@@ -347,10 +354,11 @@ describe("Basic Registry Tests", async () => {
             );
 
             await basicRegistryInstance.from(registeredDeployer).registerPool(
+                admin.signer.address,
                 basicPoolInstance.contract.address,
                 cyclicWithdrawInstance.contract.address,
-                penaltyInstance.contract.address,
-                test_settings.registrySettings.pool.name
+                test_settings.registrySettings.pool.name,
+                test_settings.registrySettings.pool.description
             );
 
             let details = await basicRegistryInstance.poolDetails(

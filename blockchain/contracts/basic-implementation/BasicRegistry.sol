@@ -97,13 +97,18 @@ contract BasicRegistry is WhitelistAdminRole {
         pools_[_pool].poolName = _poolName;
         pools_[_pool].active = true;
 
-        require(
-            contractLibraries_[_withdraw].contractType == ContractType.WITHDRAW,
-            "Please register withdraw utility"
-        );  
+        if(_withdraw != address(0)) {
+            require(
+                contractLibraries_[_withdraw].contractType == ContractType.WITHDRAW,
+                "Please register withdraw utility"
+            );
 
-        pools_[_pool].withdraw = _withdraw;
-        pools_[_pool].penalty = IWithdraw(_withdraw).getPenalty();
+            pools_[_pool].withdraw = _withdraw;
+            pools_[_pool].penalty = IWithdraw(_withdraw).getPenalty();
+        } else {
+            pools_[_pool].withdraw = _withdraw;
+            pools_[_pool].penalty = address(0);
+        }
 
         emit PoolRegistration(
             _admin, 
@@ -205,6 +210,4 @@ contract BasicRegistry is WhitelistAdminRole {
             pools_[_pool].active
         );
     }
-
-    //TODO add a way for the deployer to deactivate a util/pool
 }

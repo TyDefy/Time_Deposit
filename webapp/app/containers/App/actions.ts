@@ -44,7 +44,7 @@ string>();
 export const createPool = createAsyncAction(
   '@TX_REQUEST/CREATE_POOL',
   '@TX_SUCCESS/CREATE_POOL',
-  '@TX_FAILURE/CREATE_POOL')<number, undefined, string>();
+  '@TX_FAILURE/CREATE_POOL')<any, undefined, string>();
 
 export const addPoolTx = createStandardAction('ADD_POOL_TX')<{
   poolAddress: string,
@@ -85,9 +85,9 @@ export const withdraw = createAsyncAction(
 
 export const utilityDeployed = createStandardAction('UTILITY_DEPLOYED')<{
   withdrawAddress: string,
+  cycleLength: number,
   withdrawName: string,
-  withdrawDescription: string,
   penaltyAddress: string,
+  penaltyRate: number,
   penaltyName: string,
-  penaltyDescription: string
 }>();
