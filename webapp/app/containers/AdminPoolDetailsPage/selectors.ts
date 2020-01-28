@@ -13,7 +13,7 @@ const selectAdminPoolDetails = createSelector(
   selectUtilities,
   (pool, utilities) => {
     const participants = new Set(pool.transactions?.map(p => p.userAddress))
-    const penaltyRate = utilities[pool.withdraw].penaltyRate;
+    const penaltyRate = utilities[pool.withdraw]?.penaltyRate || 0;
     const poolParticipants = [...participants]
       .map(participant => {
         const userTransactions = pool.transactions?.filter(t => t.userAddress === participant);
