@@ -7,14 +7,15 @@ import {
   deposit, 
   withdraw, 
   withdrawInterest, 
-  terminatePool, 
+  terminatePool,
+  setUserInfo, 
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
 import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/BasicPool';
 import { Log } from "ethers/providers";
-import { formatEther, parseEther, BigNumber, formatUnits,  } from "ethers/utils";
+import { formatEther, parseEther, BigNumber} from "ethers/utils";
 import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
@@ -276,19 +277,27 @@ function* poolTransactionListener(poolContract: Pool) {
 function* getUserInfoListener(poolContract: Pool) {
   while (true) {
     const { ethAddress }: BlockchainContext = yield getContext('blockchain');
-
+    var lastDeposit, lastWithdraw;
+    
     if (ethAddress) {
+      try{
+
       const userInfo = yield call([poolContract, poolContract.getUserInfo], ethAddress);
-      var contribution  =  Number(formatEther(userInfo[0]));
-      var cDaiAmount =  Number(formatEther(userInfo[1]));
-      var lastDeposit  =  new Date(parseInt(formatEther(userInfo[2]).substr(10, 20)) *1000);
-      var lastWithdraw  =  new Date(parseInt(formatEther(userInfo[3]).substr(10, 20)) *1000);
-      //   const poolInterestAccrued: BigNumber = yield call([poolContract, poolContract.getInterestAmount], ethAddress);
-    //   yield put(setPoolInterestAccrued({
-    //     poolAddress: poolContract.address,
-    //     interestAccrued: Number(formatEther(poolInterestAccrued))}
-    //   ))
-    // }
+      lastDeposit  =  new Date(parseInt(formatEther(userInfo[2]).substr(10, 20)) *1000);
+      lastWithdraw  =  new Date(parseInt(formatEther(userInfo[3]).substr(10, 20)) *1000);
+
+      } catch (e){
+        console.log('There was an error getting the user info');
+        console.log(e);
+        return;
+      }
+
+      yield put(setUserInfo({
+        lastDepositDate: lastDeposit,
+        lastWithdrawDate: lastWithdraw,
+        poolAddress: poolContract.address
+      }));
+    
     yield delay(15000);
   }
 }
