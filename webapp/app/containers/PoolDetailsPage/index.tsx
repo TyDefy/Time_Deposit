@@ -37,6 +37,7 @@ interface DispatchProps {
 export interface StateProps {
   pool: Pool,
   daiBalance: number,
+  penaltyRate: number
 }
 
 export interface Transaction {
@@ -57,6 +58,7 @@ const PoolDetailsPage: React.FunctionComponent<Props> = ({
   deposit,
   withdrawInterest,
   withdraw,
+  penaltyRate
 }: Props) => {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<ModalType>('invest');
@@ -91,7 +93,8 @@ const PoolDetailsPage: React.FunctionComponent<Props> = ({
             return <WithdrawAllModal
               name={pool.name}
               type={pool.type}
-              availableFunds={pool.availableInterest || 0}
+              penaltyRate={penaltyRate}
+              availableFunds={(pool.balance + (pool.availableInterest || 0) || 0)}
               onSubmit={(value) => withdraw(value)}
               onClose={() => setShowModal(false)} />;
           default:
