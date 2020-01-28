@@ -155,6 +155,7 @@ function* createPoolSaga(action) {
     yield put(setTxHash(deployPoolTx.hash));
     yield call([deployPoolTx, deployPoolTx.wait]);
     const newPoolAction = yield take(poolDeployed);
+    //@ts-ignore
     const poolContract: Pool = new Contract(newPoolAction.payload.address, PoolContractAbi, signer || provider)
     yield put(setTxContext('Initialising pool'));
     const initTx: ContractTransaction = yield call([poolContract, poolContract.init], action.payload.feeRate);

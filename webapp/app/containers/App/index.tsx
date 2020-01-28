@@ -72,6 +72,10 @@ export interface Pool {
   daysUntilAccess?: number;
   transactions: Array<Transaction>;
   cdaiBalance: number;
+  userContribution?: number,
+  usercDaiAmount?: number,
+  userLastDepositDate?: Date,
+  userLastWithdrawDate?: Date,
 }
 
 export interface Utility {
