@@ -118,7 +118,7 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
         </Grid>
         <Grid item xs={2}>
           <Typography className={classes.label}>Penalty</Typography>
-          <Typography className={classes.value}>{`${(pentalyRate * 100).toFixed(2)} %`}</Typography>
+          <Typography className={classes.value}>{`${(pentalyRate).toFixed(2)} %`}</Typography>
         </Grid>
       </Grid>
       <Grid container direction="row">

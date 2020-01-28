@@ -1,6 +1,7 @@
 import { Reducer, Store } from 'redux';
 import { ContainerState as AppState } from '../containers/App/types';
 import { ContainerState as TransactionModalState } from '../containers/TransactionModal/types';
+import { UtilityState } from '../containers/PoolDetailsPage/types';
 import { PoolState } from 'containers/App/poolsReducer';
 
 export interface LifeStore extends Store<ApplicationRootState> {

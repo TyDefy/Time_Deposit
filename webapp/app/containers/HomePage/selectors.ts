@@ -9,17 +9,29 @@ import { selectEthAddress, selectExchangeRate, selectInterestRate } from 'contai
 
 export const selectPools = createSelector((state: RootState) => state.pools, selectEthAddress, selectExchangeRate, selectInterestRate, (pools, ethAddress, exchangeRate, interestRate) =>
   Object.values(pools).map(p => {
+    const cdaiBalance = p.transactions.reduce((poolCdaiBalance, t) =>
+    t.type === 'Deposit' ? poolCdaiBalance += t.cdaiAmount : poolCdaiBalance -= t.cdaiAmount, 0) || 0;
+    
+    const contribution =  ethAddress ?
+    p.transactions?.filter(t => t.userAddress === ethAddress)
+      .reduce((contribution, t) => t.type === 'Deposit' ? contribution += t.amount : contribution -= t.amount, 0) : 0;
+
+    const cdaiByUser =  ethAddress ?
+      p.transactions?.filter(t => t.userAddress === ethAddress)
+        .reduce((cdaiByUser, t) => t.type === 'Deposit' ? cdaiByUser += t.cdaiAmount : cdaiByUser -= t.cdaiAmount, 0) : 0;
+
+    const balance = p.transactions?.reduce((poolBalance, t) =>
+    t.type === 'Deposit' ? poolBalance += t.amount : poolBalance -= t.amount, 0) || 0;
+
     return {
       ...p,
       interestRate: interestRate,
-      balance: p.transactions?.reduce((poolBalance, t) =>
-        t.type === 'Deposit' ? poolBalance += t.amount : poolBalance -= t.amount, 0) || 0,
-      cdaiBalance: p.transactions.reduce((poolCdaiBalance, t) =>
-        t.type === 'Deposit' ? poolCdaiBalance += t.cdaiAmount : poolCdaiBalance -= t.cdaiAmount, 0) || 0,
+      balance: balance,
+      cdaiBalance: cdaiBalance,
       participants: new Set(p.transactions?.map(t => t.userAddress)).size,
-      contribution: ethAddress ?
-        p.transactions?.filter(t => t.userAddress === ethAddress)
-          .reduce((contribution, t) => t.type === 'Deposit' ? contribution += t.amount : contribution -= t.amount, 0) : 0,
+      contribution: contribution,
+      interestAccrued: (cdaiBalance * exchangeRate) - balance,
+      availableInterest: p.period === 0 ? (cdaiByUser * exchangeRate) - contribution : 0
     }
   })
 );
