@@ -59,6 +59,15 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         }
       }
     }
+    case getType(AppActions.terminatePool.success): {
+      return {
+        ...state,
+        [action.payload.poolAddress]: {
+          ...state[action.payload.poolAddress],
+          active: false,
+        }
+      }
+    }
     default:
       return state;
   }
