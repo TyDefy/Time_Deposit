@@ -35,7 +35,7 @@ function* poolTerminateListener(poolContract: Pool) {
             [writeableContract, writeableContract.terminatePool]);
           yield put(setTxHash(tx.hash));
           yield call([tx, tx.wait]);
-          yield put(terminatePool.success());
+          yield put(terminatePool.success({poolAddress: poolContract.address}));
           yield put(enqueueSnackbar({
             message: 'Pool terminated successfully'
           }))
@@ -330,6 +330,15 @@ function* poolWatcherSaga(action) {
     console.log(error);
   }
 
+  const terminateLogs: Log[] = yield call([provider, provider.getLogs], {
+    ...poolContract.filters.PoolTerminated(null),
+    fromBlock: 0,
+    toBlock: 'latest',
+  });
+
+  if (terminateLogs){
+    yield put(terminatePool.success({poolAddress: poolContract.address}));
+  }
   yield fork(poolTransactionListener, poolContract);
   yield fork(poolDepositListener, poolContract);
   yield fork(poolWithdrawListener, poolContract);

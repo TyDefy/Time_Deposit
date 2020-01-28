@@ -57,6 +57,7 @@ export interface DispatchProps {
 }
 
 export interface Pool {
+  active: boolean;
   address: string;
   withdraw: string;
   name: string;
