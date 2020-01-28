@@ -31,7 +31,7 @@ export const selectPoolPenalty = createSelector(
     selectUtilities,
     (pool, utilities) => {
       const utility = utilities[pool.withdraw];
-      return utility.penaltyRate;
+      return utility?.penaltyRate || 0;
     })
 
 const selectPoolDetailsPage = createStructuredSelector<RootState, OwnProps, StateProps>({
