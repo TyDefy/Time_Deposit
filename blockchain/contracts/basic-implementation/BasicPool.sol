@@ -316,6 +316,22 @@ contract BasicPool is WhitelistAdminRole {
         return availableInterest;
     }
 
+    function getTotalBalance(address _user) public view returns(uint256) {
+        uint256 penaltyPotShare = 0;
+
+        if(penaltyPot_ != 0 && users_[_user].balance != 0) {
+            // Gets the users portion of the penalty pot
+            penaltyPotShare = ((
+                        (users_[_user].balance*1e18)/totalCCollateral_
+                    )*penaltyPot_
+                )/1e18;
+        }
+
+        return (
+            users_[_user].balance + penaltyPotShare
+        );
+    }
+
     function canWithdraw(
         address _user,
         uint256 _amount
