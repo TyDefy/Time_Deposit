@@ -18,8 +18,6 @@ contract BasicPool is WhitelistAdminRole {
     IERC20 internal collateralInstance_;
     // Instance of the interest earning token (cDAI)
     ICToken internal cTokenInstance_;
-    // Mutex variable
-    bool internal lock_;
     // The total amount of collateral in this pool
     uint256 internal totalCCollateral_;
     // The amount of cToken allocated to the penalty pool
@@ -36,16 +34,6 @@ contract BasicPool is WhitelistAdminRole {
     }
     // A mapping of all active suers
     mapping(address => UserInfo) internal users_;
-
-    modifier mutex() {
-        require(
-            lock_,
-            "Contract locked, please try again"
-        );
-        lock_ = false;
-        _;
-        lock_ = true;
-    }
 
     modifier killSwitch() {
         require(
