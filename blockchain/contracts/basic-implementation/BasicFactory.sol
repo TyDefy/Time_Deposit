@@ -3,6 +3,7 @@ pragma solidity 0.5.10;
 import { BasicRegistry } from "./BasicRegistry.sol";
 import { BasicPool } from "./BasicPool.sol";
 import { CyclicWithdraw } from "./CyclicWithdraw.sol";
+import { RollingWithdraw } from "./RollingWithdraw.sol";
 import { IWithdraw } from "../interfaces/IWithdraw.sol";
 import { BasicPenalty } from "./BasicPenalty.sol";
 import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
@@ -125,6 +126,66 @@ contract BasicFactory is WhitelistAdminRole {
         );
 
         CyclicWithdraw newWithdraw = new CyclicWithdraw(
+            address(newPenalty),
+            _cycleLength,
+            true
+        );
+
+        require(
+            registryInstance_.registerUtility(
+                msg.sender,
+                address(newPenalty),
+                _penaltyName,
+                _penaltyDescription,
+                2
+            ),
+            "Penalty registration failed"
+        );
+        require(
+            registryInstance_.registerUtility(
+                msg.sender,
+                address(newWithdraw),
+                _withdrawName,
+                _withdrawDescription,
+                1
+            ),
+            "Penalty registration failed"
+        );
+
+        emit DeployedUtilities(
+            address(newWithdraw),
+            _cycleLength,
+            _withdrawName,
+            // _withdrawDescription,
+            address(newPenalty),
+            _penaltyPercentage,
+            _penaltyName
+            // _penaltyDescription
+        );
+
+        return(
+            address(newWithdraw),
+            address(newPenalty)
+        );
+    }
+
+    function deployRollingUtility(
+        uint8 _penaltyPercentage,
+        uint256 _cycleLength,
+        string memory _penaltyName,
+        string memory _penaltyDescription,
+        string memory _withdrawName,
+        string memory _withdrawDescription
+    )
+        public
+        onlyWhitelistAdmin()
+        returns(address, address)
+    {
+        BasicPenalty newPenalty = new BasicPenalty(
+            _penaltyPercentage
+        );
+
+        RollingWithdraw newWithdraw = new RollingWithdraw(
             address(newPenalty),
             _cycleLength,
             true
