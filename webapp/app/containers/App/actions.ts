@@ -28,6 +28,7 @@ export const poolDeployed = createStandardAction('POOL_DEPLOYED')<{
   description: string,
   type: string,
   period: number,
+  active: boolean,
 }>();
 
 export const setCDaiRates = createAsyncAction(
@@ -103,4 +104,4 @@ export const terminatePool = createAsyncAction(
   '@TX_REQUEST/TERMINATE_POOL',
   '@TX_SUCCESS/TERMINATE_POOL',
   '@TX_FAILURE/TERMINATE_POOL',
-)<{poolAddress: string}, undefined, string>();
+)<{poolAddress: string}, {poolAddress: string}, string>();
