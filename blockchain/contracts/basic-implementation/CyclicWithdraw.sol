@@ -4,7 +4,7 @@ import { IWithdraw } from "../interfaces/IWithdraw.sol";
 import { IPenalty } from "../interfaces/IPenalty.sol";
 
 contract CyclicWithdraw is IWithdraw {
-    // How long each user must wait to withdraw leggaly again.
+    // How long each user must wait to withdraw legally again.
     uint256 internal cycleLength_;
     // Withdraw control for pool
     bool internal violationWithdraw_;
