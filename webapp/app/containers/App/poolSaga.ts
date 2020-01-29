@@ -278,27 +278,31 @@ function* getUserInfoListener(poolContract: Pool) {
   while (true) {
     const { ethAddress }: BlockchainContext = yield getContext('blockchain');
     var lastDeposit, lastWithdraw;
-    
+
     if (ethAddress) {
       try{
 
       const userInfo = yield call([poolContract, poolContract.getUserInfo], ethAddress);
-      lastDeposit  =  new Date(parseInt(formatEther(userInfo[2]).substr(10, 20)) *1000);
-      lastWithdraw  =  new Date(parseInt(formatEther(userInfo[3]).substr(10, 20)) *1000);
+      lastDeposit  =  formatEther(userInfo[2]);
+      lastWithdraw  =  formatEther(userInfo[3]);
+      
+      if(lastDeposit === "0.0" && lastWithdraw === "0.0"){
+        return;
+      }
 
       } catch (e){
         console.log('There was an error getting the user info');
         console.log(e);
         return;
       }
-
+      
       yield put(setUserInfo({
-        lastDepositDate: lastDeposit,
-        lastWithdrawDate: lastWithdraw,
+        lastDepositDate: new Date(parseInt(lastDeposit.substr(10, 20)) *1000),
+        lastWithdrawDate: new Date(parseInt(lastWithdraw.substr(10, 20)) *1000),
         poolAddress: poolContract.address
       }));
     
-    yield delay(15000);
+    yield delay(100000);
   }
 }
 }

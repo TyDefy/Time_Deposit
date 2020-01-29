@@ -33,6 +33,7 @@ const styles = ( {spacing, transitions}: Theme) =>
     },
     cardHeader: {
       backgroundColor: '#E5E5E5',
+      letterSpacing: "2px"
     },
     chip: {
       marginTop: 10,
@@ -49,7 +50,8 @@ const styles = ( {spacing, transitions}: Theme) =>
       margin: '16px 8px',
     },
     cardMetric: {
-      textAlign: "center"
+      textAlign: "center",
+      letterSpacing: "2px"
     },
     value: {
       verticalAlign: "top",
@@ -57,7 +59,19 @@ const styles = ( {spacing, transitions}: Theme) =>
       float: "right",
       padding: 8,
       textTransform: "uppercase",
-      fontWeight: "bold"
+      fontWeight: "bold",
+      letterSpacing: "2px"
+    },
+    daysUntil: {
+      verticalAlign: "top",
+      display: "inline-block",
+      float: "right",
+      padding: 8,
+      paddingBottom: 16,
+      textTransform: "uppercase",
+      fontWeight: "bold",
+      letterSpacing: "4px",
+      fontSize: "23px"
     },
     topMetricLabel: {
       fontSize: "25px",
@@ -75,7 +89,8 @@ const styles = ( {spacing, transitions}: Theme) =>
       padding: 8,
       textTransform: "uppercase",
       fontWeight: "bold",
-      color: "green"
+      color: "green",
+      letterSpacing: "2px"
     },
     expand: {
       transform: 'rotate(0deg)',
@@ -108,7 +123,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
   contribution = 0,
   interestAccrued = 0,
   availableInterest = 0,
-  daysUntilAccess=0,
+  daysUntilAccess = '0',
 }: OwnProps) => {
 
   const [expanded, setExpanded] = React.useState(false);
@@ -204,8 +219,8 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
                 <Typography className={classes.label}>
                   Days until access
                 </Typography>
-                <Typography className={classes.value}>
-                  {`${daysUntilAccess?.toFixed(2)}`}
+                <Typography className={classes.daysUntil}>
+                  {daysUntilAccess}
                 </Typography>
               </Paper>
             </Grid>
