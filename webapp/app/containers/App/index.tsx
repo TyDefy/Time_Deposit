@@ -74,6 +74,7 @@ export interface Pool {
   cdaiBalance: number;
   userLastDepositDate?: Date,
   userLastWithdrawDate?: Date,
+  nextWithdrawDate?: Date,
 }
 
 export interface Utility {
