@@ -28,7 +28,7 @@ contract IPenalty {
       */
     function penalize(uint256 _amount) public view returns(uint256, uint256);
 
-    function penalty() public view returns(uint256);
+    function penalty() public view returns(uint8);
 }
 
 // has a function called calculate penality takes in amounts, returns penalty amount and how

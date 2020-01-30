@@ -230,6 +230,15 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     function withdrawInterest() public killSwitch() {
+        if(address(withdrawInstance_) != address(0)) { 
+            require(
+                withdrawInstance_.canWithdrawInterest(
+                    users_[msg.sender].lastWtihdraw
+                ),
+                "Cannot withdraw interest in violation"
+            );
+        }
+        
         // Calculating total interest available
         uint256 rewardInCdai = getInterestAmount(msg.sender);
 

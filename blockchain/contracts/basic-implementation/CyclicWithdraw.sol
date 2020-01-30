@@ -5,16 +5,19 @@ import { IPenalty } from "../interfaces/IPenalty.sol";
 
 contract CyclicWithdraw is IWithdraw {
     // How long each user must wait to withdraw legally again.
-    uint256 internal cycleLength_;
+    uint8 internal cycleLength_;
     // Withdraw control for pool
     bool internal violationWithdraw_;
     // Instance of penalty contract
     IPenalty internal penaltyInstance_;
+    // A switch that can block the withdrawing of interest
+    bool internal interestViolationWithdraw_;
 
     constructor(
         address _penalty,
-        uint256 _cycleLength,
-        bool _canWithdrawInViolation
+        uint8 _cycleLength,
+        bool _canWithdrawInViolation,
+        bool _canWithdrawInterestInViolation
     )
         public
     {
@@ -23,6 +26,13 @@ contract CyclicWithdraw is IWithdraw {
         // If true, a user can withdraw in violation, but pay a fee.
         // if false, a user cannot withdraw in violation.
         violationWithdraw_ = _canWithdrawInViolation;
+        interestViolationWithdraw_ = _canWithdrawInterestInViolation;
+    }
+
+    function canWithdrawInterest(uint256 _lastWithdraw) public view returns(bool) {
+        if(_lastWithdraw + cycleLength_ > now) {
+            return interestViolationWithdraw_;
+        }
     }
 
     function canWithdraw(
@@ -77,7 +87,11 @@ contract CyclicWithdraw is IWithdraw {
         return violationWithdraw_;
     }
 
-    function getCycle() public view returns(uint256) {
+    function cantWithdrawInterestInViolation() public view returns(bool) {
+        return interestViolationWithdraw_;
+    }
+
+    function getCycle() public view returns(uint8) {
         return cycleLength_;
     } 
 
