@@ -48,6 +48,12 @@ export const setUserTotalBalanceAmount = createStandardAction(
     totalBalance: number
   }>();
 
+export const setUserInfo = createStandardAction('SET_USER_INFO')<{
+    lastDepositDate: Date;
+    lastWithdrawDate: Date;
+    poolAddress: string;
+  }>();
+
 export const createPool = createAsyncAction(
   '@TX_REQUEST/CREATE_POOL',
   '@TX_SUCCESS/CREATE_POOL',

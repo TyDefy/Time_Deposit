@@ -38,6 +38,16 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         }
       }
     }
+    case getType(AppActions.setUserInfo): {
+      return {
+        ...state,
+        [action.payload.poolAddress]: {
+          ...state[action.payload.poolAddress],
+          userLastDepositDate: action.payload.lastDepositDate,
+          userLastWithdrawDate: action.payload.lastWithdrawDate,
+        }
+      }
+    }
     case getType(AppActions.setPoolInterestAccrued): {
       return {
         ...state,

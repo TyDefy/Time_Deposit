@@ -35,6 +35,7 @@ interface OwnProps extends WithStyles<typeof styles> {
   name: string;
   type: string;
   availableFunds: number;
+  penaltyRate: number;
   onClose(): void;
   onSubmit(amount: number): void;
 }
@@ -43,6 +44,7 @@ const WithdrawAllModal: React.FC<OwnProps> = ({
   name,
   type,
   availableFunds,
+  penaltyRate,
   onClose,
   onSubmit,
   classes
@@ -53,7 +55,7 @@ const WithdrawAllModal: React.FC<OwnProps> = ({
   useEffect(() => {
     let cancelled = false;
     const fetchData = async () => {
-      const penaltyAmount = value * 0.05 //TODO: fetch this from the contract
+      const penaltyAmount = value * (penaltyRate/100);
       if (!cancelled) {
         setPenaltyAmount(penaltyAmount);
       }
