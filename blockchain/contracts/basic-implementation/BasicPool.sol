@@ -9,7 +9,7 @@ contract BasicPool is WhitelistAdminRole {
     // Tracks fee collection
     uint256 internal accumulativeFeeCollection_;
     // The fee as a percentage of the penality %
-    uint256 internal feePercentage_ = 0;
+    uint8 internal feePercentage_ = 0;
     // Lock for setting the fee
     bool internal feeLock_ = false;
     // Instance of the withdraw library 
@@ -65,6 +65,9 @@ contract BasicPool is WhitelistAdminRole {
     event PoolTerminated(
         address indexed terminator
     );
+    event FeeSet(
+        uint8 feePercentage
+    );
 
     constructor(
         address _admin,
@@ -80,10 +83,14 @@ contract BasicPool is WhitelistAdminRole {
         cTokenInstance_ = ICToken(_cToken);
     }
 
-    function init(uint256 _fee) public onlyWhitelistAdmin() {
+    function init(uint8 _fee) public onlyWhitelistAdmin() {
         require(!feeLock_, "Fee has already been set");
         feePercentage_ = _fee;
         feeLock_ = true;
+
+        emit FeeSet(
+            _fee
+        );
     }
 
     function terminatePool() public onlyWhitelistAdmin() {

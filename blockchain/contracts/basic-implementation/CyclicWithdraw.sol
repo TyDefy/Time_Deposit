@@ -7,11 +7,11 @@ contract CyclicWithdraw is IWithdraw {
     // How long each user must wait to withdraw legally again.
     uint8 internal cycleLength_;
     // Withdraw control for pool
-    bool internal violationWithdraw_;
+    bool internal canWithdrawInViolation_;
     // Instance of penalty contract
     IPenalty internal penaltyInstance_;
     // A switch that can block the withdrawing of interest
-    bool internal interestViolationWithdraw_;
+    bool internal canWithdrawInterestInViolation_;
 
     constructor(
         address _penalty,
@@ -25,13 +25,17 @@ contract CyclicWithdraw is IWithdraw {
         cycleLength_ = _cycleLength;
         // If true, a user can withdraw in violation, but pay a fee.
         // if false, a user cannot withdraw in violation.
-        violationWithdraw_ = _canWithdrawInViolation;
-        interestViolationWithdraw_ = _canWithdrawInterestInViolation;
+        canWithdrawInViolation_ = _canWithdrawInViolation;
+        canWithdrawInterestInViolation_ = _canWithdrawInterestInViolation;
     }
 
     function canWithdrawInterest(uint256 _lastWithdraw) public view returns(bool) {
-        if(_lastWithdraw + cycleLength_ > now) {
-            return interestViolationWithdraw_;
+        if(!canWithdrawInterestInViolation_) {
+            if(_lastWithdraw + cycleLength_ > now) {
+                return false;
+            } 
+        } else {
+            return true;
         }
     }
 
@@ -44,7 +48,7 @@ contract CyclicWithdraw is IWithdraw {
         returns(bool, uint256, uint256) 
     {
         if(_lastWithdraw + cycleLength_ > now) {
-            if(violationWithdraw_) {
+            if(canWithdrawInViolation_) {
                 uint256 penalty = 0;
                 uint256 withdraw = _amount;
                 (withdraw, penalty) = penaltyInstance_.penalize(_amount);
@@ -69,7 +73,7 @@ contract CyclicWithdraw is IWithdraw {
         if(_lastWithdraw + cycleLength_ < now) {
             // User is within penalty time
             require(
-                violationWithdraw_,
+                canWithdrawInViolation_,
                 "User cannot withdraw in violation"
             );
             uint256 penalty;
@@ -84,11 +88,11 @@ contract CyclicWithdraw is IWithdraw {
     }
 
     function cantWithdrawInViolation() public view returns(bool) {
-        return violationWithdraw_;
+        return canWithdrawInViolation_;
     }
 
     function cantWithdrawInterestInViolation() public view returns(bool) {
-        return interestViolationWithdraw_;
+        return canWithdrawInterestInViolation_;
     }
 
     function getCycle() public view returns(uint8) {

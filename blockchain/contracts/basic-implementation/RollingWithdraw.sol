@@ -4,8 +4,6 @@ import { IWithdraw } from "../interfaces/IWithdraw.sol";
 import { IPenalty } from "../interfaces/IPenalty.sol";
 
 contract RollingWithdraw is IWithdraw {
-    // How long each user must wait to withdraw leggaly again.
-    uint8 internal cycleLength_;
     // Withdraw control for pool
     bool internal violationWithdraw_;
     // Instance of penalty contract
@@ -25,7 +23,6 @@ contract RollingWithdraw is IWithdraw {
         public
     {
         penaltyInstance_ = IPenalty(_penalty);
-        cycleLength_ = 0;
         // If true, a user can withdraw in violation, but pay a fee.
         // if false, a user cannot withdraw in violation.
         violationWithdraw_ = _canWithdrawInViolation;
@@ -78,7 +75,7 @@ contract RollingWithdraw is IWithdraw {
     }
 
     function getCycle() public view returns(uint8) {
-        return cycleLength_;
+        return 0;
     } 
 
     function getPenalty() public view returns(address) {

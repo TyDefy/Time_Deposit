@@ -52,7 +52,8 @@ describe("Pool tests - withdraw", async () => {
             false, 
             penaltyInstance.contract.address,
             test_settings.cyclicWithdraw.cycleLength,
-            test_settings.cyclicWithdraw.withdrawViolation
+            test_settings.cyclicWithdraw.withdrawViolation,
+            test_settings.cyclicWithdraw.interestWithdrawViolation
         );
 
         basicPoolInstance = await deployer.deploy(
