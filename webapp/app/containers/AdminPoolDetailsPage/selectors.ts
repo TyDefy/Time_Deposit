@@ -20,7 +20,6 @@ const selectAdminPoolDetails = createSelector(
         const userContribution = userTransactions?.reduce((userContributed, transaction) => 
           transaction.type === 'Deposit' ? userContributed += transaction.amount : userContributed -= transaction.amount, 0) || 0;
         
-        debugger;  
         return {
           address: participant,
           joined: userTransactions?.reduce((minDate, transaction) => minDate < transaction.time ? minDate : transaction.time, new Date()) || new Date(),
