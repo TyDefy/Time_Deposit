@@ -285,7 +285,7 @@ function* getUserInfoListener(poolContract: Pool) {
       const userInfo = yield call([poolContract, poolContract.getUserInfo], ethAddress);
       lastDeposit  =  formatEther(userInfo[2]);
       lastWithdraw  =  formatEther(userInfo[3]);
-      
+
       if(lastDeposit === "0.0" && lastWithdraw === "0.0"){
         return;
       }
@@ -295,7 +295,7 @@ function* getUserInfoListener(poolContract: Pool) {
         console.log(e);
         return;
       }
-      
+
       yield put(setUserInfo({
         lastDepositDate: new Date(parseInt(lastDeposit.substr(10, 20)) *1000),
         lastWithdrawDate: new Date(parseInt(lastWithdraw.substr(10, 20)) *1000),
