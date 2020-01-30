@@ -18,8 +18,6 @@ contract BasicPool is WhitelistAdminRole {
     IERC20 internal collateralInstance_;
     // Instance of the interest earning token (cDAI)
     ICToken internal cTokenInstance_;
-    // Mutex variable
-    bool internal lock_;
     // The total amount of collateral in this pool
     uint256 internal totalCCollateral_;
     // The amount of cToken allocated to the penalty pool
@@ -36,16 +34,6 @@ contract BasicPool is WhitelistAdminRole {
     }
     // A mapping of all active suers
     mapping(address => UserInfo) internal users_;
-
-    modifier mutex() {
-        require(
-            lock_,
-            "Contract locked, please try again"
-        );
-        lock_ = false;
-        _;
-        lock_ = true;
-    }
 
     modifier killSwitch() {
         require(
@@ -74,6 +62,9 @@ contract BasicPool is WhitelistAdminRole {
         address indexed user,
         uint256 amount
     );
+    event PoolTerminated(
+        address indexed terminator
+    );
 
     constructor(
         address _admin,
@@ -97,6 +88,10 @@ contract BasicPool is WhitelistAdminRole {
 
     function terminatePool() public onlyWhitelistAdmin() {
         isAlive_ = false;
+
+        emit PoolTerminated(
+            msg.sender
+        );
     }
 
     /**
@@ -314,6 +309,22 @@ contract BasicPool is WhitelistAdminRole {
         );
         // Calculating total interest available
         return availableInterest;
+    }
+
+    function getTotalBalance(address _user) public view returns(uint256) {
+        uint256 penaltyPotShare = 0;
+
+        if(penaltyPot_ != 0 && users_[_user].balance != 0) {
+            // Gets the users portion of the penalty pot
+            penaltyPotShare = ((
+                        (users_[_user].balance*1e18)/totalCCollateral_
+                    )*penaltyPot_
+                )/1e18;
+        }
+
+        return (
+            users_[_user].balance + penaltyPotShare
+        );
     }
 
     function canWithdraw(
