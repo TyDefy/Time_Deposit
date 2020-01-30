@@ -71,6 +71,7 @@ export interface Pool {
   availableInterest?: number;
   daysUntilAccess?: number;
   transactions: Array<Transaction>;
+  userTotalBalanceAndPenaltiesCDai?: number;
 }
 
 export interface Utility {

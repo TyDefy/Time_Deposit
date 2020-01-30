@@ -1,5 +1,5 @@
 import { BlockchainContext } from "blockchainContext";
-import { getContext, takeEvery, call, put, fork, take, select } from "redux-saga/effects";
+import { getContext, takeEvery, call, put, fork, take, select, delay } from "redux-saga/effects";
 import { 
   poolDeployed, 
   addPoolTx, 
@@ -7,7 +7,8 @@ import {
   deposit, 
   withdraw, 
   withdrawInterest, 
-  terminatePool, 
+  terminatePool,
+  setUserTotalBalanceAmount, 
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
@@ -210,7 +211,32 @@ function* poolWithdrawInterestListener(poolContract: Pool) {
     }
   }
 }
+// Total Balance + Penalties
+function* getUserTotalBalanceListener(poolContract: Pool) {
+  while (true) {
+    const { ethAddress }: BlockchainContext = yield getContext('blockchain');
+    var totalBalanceValue;
+    if (ethAddress) {
+      try{
+      const totalBalance = yield call([poolContract, poolContract.getTotalBalance], ethAddress);
+      totalBalanceValue  =  Number(formatEther(totalBalance));
+       
+      } catch (e){
+        console.log('There was an error getting the user interest amount');
+      }
 
+      yield put(setUserTotalBalanceAmount({
+        poolAddress: poolContract.address,
+        totalBalance: totalBalanceValue
+      }));
+    }
+
+    yield delay(30000);
+  }
+}
+
+
+ 
 function* poolTransactionListener(poolContract: Pool) {
   const { provider }: BlockchainContext = yield getContext('blockchain');
 
@@ -335,6 +361,7 @@ function* poolWatcherSaga(action) {
   yield fork(poolWithdrawListener, poolContract);
   yield fork(poolWithdrawInterestListener, poolContract);
   yield fork(poolTerminateListener, poolContract);
+  yield fork(getUserTotalBalanceListener, poolContract);
 }
 
 export default function* poolSaga() {
