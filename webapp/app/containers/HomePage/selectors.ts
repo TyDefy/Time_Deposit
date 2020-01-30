@@ -20,16 +20,14 @@ export const selectPools = createSelector(
         t.type === 'Deposit' ? poolCdaiBalance += t.cdaiAmount : poolCdaiBalance -= t.cdaiAmount, 0) || 0;
 
       const contribution = ethAddress ?
-        p.transactions?.filter(t => t.userAddress === ethAddress)
+        p.transactions?.filter(t => t.userAddress.toLowerCase() === ethAddress.toLowerCase())
           .reduce((contribution, t) => t.type === 'Deposit' ? contribution += t.amount : contribution -= t.amount, 0) : 0;
-
       const cdaiByUser = ethAddress ?
-        p.transactions?.filter(t => t.userAddress === ethAddress)
+        p.transactions?.filter(t => t.userAddress.toLowerCase() === ethAddress.toLowerCase())
           .reduce((cdaiByUser, t) => t.type === 'Deposit' ? cdaiByUser += t.cdaiAmount : cdaiByUser -= t.cdaiAmount, 0) : 0;
 
       const balance = p.transactions?.reduce((poolBalance, t) =>
         t.type === 'Deposit' ? poolBalance += t.amount : poolBalance -= t.amount, 0) || 0;
-
 
       var lastWithdrawDate = p.userLastWithdrawDate;
       var withdrawDate;
