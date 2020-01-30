@@ -8,14 +8,14 @@ import {
   withdraw,
   withdrawInterest,
   terminatePool,
-  setUserInfo, 
+  setUserInfo,
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
 import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/BasicPool';
 import { Log } from "ethers/providers";
-import { formatEther, parseEther, BigNumber} from "ethers/utils";
+import { formatEther, parseEther, BigNumber } from "ethers/utils";
 import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
@@ -297,29 +297,30 @@ function* getUserInfoListener(poolContract: Pool) {
   while (true) {
     const { ethAddress }: BlockchainContext = yield getContext('blockchain');
     var lastDeposit, lastWithdraw;
-    
+
     if (ethAddress) {
-      try{
+      try {
+        const userInfo = yield call([poolContract, poolContract.getUserInfo], ethAddress);
+        lastDeposit = formatEther(userInfo[2]);
+        lastWithdraw = formatEther(userInfo[3]);
 
-      const userInfo = yield call([poolContract, poolContract.getUserInfo], ethAddress);
-      lastDeposit  =  new Date(parseInt(formatEther(userInfo[2]).substr(10, 20)) *1000);
-      lastWithdraw  =  new Date(parseInt(formatEther(userInfo[3]).substr(10, 20)) *1000);
-
-      } catch (e){
+        if (lastDeposit !== "0.0" && lastWithdraw !== "0.0") {
+          yield put(setUserInfo({
+            lastDepositDate: new Date(parseInt(lastDeposit.substr(10, 20)) * 1000),
+            lastWithdrawDate: new Date(parseInt(lastWithdraw.substr(10, 20)) * 1000),
+            poolAddress: poolContract.address
+          }));
+        }
+      } catch (e) {
         console.log('There was an error getting the user info');
         console.log(e);
-        return;
       }
-
-      yield put(setUserInfo({
-        lastDepositDate: lastDeposit,
-        lastWithdrawDate: lastWithdraw,
-        poolAddress: poolContract.address
-      }));
-    
-    yield delay(15000);
+      yield delay(15000);
+    } else {
+      console.log('waiting for user to connect')
+      yield take(connectMetamask.success);
+    }
   }
-}
 }
 
 function* poolWatcherSaga(action) {
