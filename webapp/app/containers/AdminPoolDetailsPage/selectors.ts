@@ -19,17 +19,19 @@ const selectAdminPoolDetails = createSelector(
         const userTransactions = pool.transactions?.filter(t => t.userAddress === participant);
         const userContribution = userTransactions?.reduce((userContributed, transaction) => 
           transaction.type === 'Deposit' ? userContributed += transaction.amount : userContributed -= transaction.amount, 0) || 0;
+        
+        debugger;  
         return {
           address: participant,
           joined: userTransactions?.reduce((minDate, transaction) => minDate < transaction.time ? minDate : transaction.time, new Date()) || new Date(),
           contributed: userContribution,
-          interest: pool.interestRate,
+          interest: 0, // To be wired up once individual user interest earned can be calculated
         }
       });
     return {
       ...pool,
       participantDetails: poolParticipants,
-      totalInterest: 0, 
+      totalInterest: poolParticipants.reduce((totalInterest, participant) => totalInterest += participant.interest, 0), 
       feeRate: 0, 
       pentalyRate: penaltyRate
     }

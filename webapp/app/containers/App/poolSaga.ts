@@ -386,7 +386,8 @@ function* poolWatcherSaga(action) {
     toBlock: 'latest',
   });
 
-  if (terminateLogs) {
+  debugger;
+  if (terminateLogs.length === 1) {
     yield put(terminatePool.success({ poolAddress: poolContract.address }));
   }
   yield fork(poolTransactionListener, poolContract);
