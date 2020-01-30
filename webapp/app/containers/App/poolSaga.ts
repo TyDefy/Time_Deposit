@@ -77,7 +77,7 @@ function* poolTerminatedListener(poolContract: Pool) {
   });
 
   while (true) {
-    const terminatePool = yield take(poolTerminatedChannel);
+    yield take(poolTerminatedChannel);
     yield put(terminatePool.success({ poolAddress: poolContract.address }));
   }
 }
@@ -386,8 +386,7 @@ function* poolWatcherSaga(action) {
     toBlock: 'latest',
   });
 
-  debugger;
-  if (terminateLogs.length === 1) {
+  if (terminateLogs.length > 0) {
     yield put(terminatePool.success({ poolAddress: poolContract.address }));
   }
   yield fork(poolTransactionListener, poolContract);

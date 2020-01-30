@@ -35,11 +35,13 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
     }
   })
 );
+
+const selectActivePools = createSelector(selectPools, allPools => allPools.filter(p => p.active));
 const selectPoolsBalance = createSelector(selectPools, allPools => allPools.reduce((totalBalance, pool) => totalBalance += pool.balance, 0))
 
 
 const selectHomePage = createStructuredSelector<RootState, StateProps>({
-  pools: selectPools,
+  pools: selectActivePools,
   poolsBalance: selectPoolsBalance
 });
 
