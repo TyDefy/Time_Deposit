@@ -55,7 +55,6 @@ const styles = ({ spacing , palette }: Theme) =>
     },
     currentInterest: {
       verticalAlign: "top",
-      
       display: "inline-block",
       float: "right",
       margin: "25px 20px 0 20px",
