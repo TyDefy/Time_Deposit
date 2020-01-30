@@ -24,7 +24,15 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
     const balance = p.transactions?.reduce((poolBalance, t) =>
     t.type === 'Deposit' ? poolBalance += t.amount : poolBalance -= t.amount, 0) || 0;
 
-    const daysUntilAccess = p.userLastWithdrawDate && p.period !== 0 ? Math.abs(dayjs(p.userLastWithdrawDate.setMonth(p.userLastWithdrawDate.getMonth() + p.period)).diff(Date.now(), 'day')).toString(): '-';
+
+    var lastWithdrawDate = p.userLastWithdrawDate;
+    var withdrawDate;
+    if(p.period !== 0 && lastWithdrawDate){
+        let getMonths = lastWithdrawDate.getMonth() + p.period;
+       withdrawDate = lastWithdrawDate.setMonth(getMonths);
+    }
+  
+    const daysUntilAccess = lastWithdrawDate && p.period !== 0 ? Math.abs(dayjs(withdrawDate).diff(Date.now(), 'day')).toString(): '-';
 
     return {
       ...p,

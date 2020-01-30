@@ -281,7 +281,7 @@ function* getUserInfoListener(poolContract: Pool) {
 
     if (ethAddress) {
       try{
-
+        //debugger;
       const userInfo = yield call([poolContract, poolContract.getUserInfo], ethAddress);
       lastDeposit  =  formatEther(userInfo[2]);
       lastWithdraw  =  formatEther(userInfo[3]);
@@ -302,7 +302,7 @@ function* getUserInfoListener(poolContract: Pool) {
         poolAddress: poolContract.address
       }));
     
-    yield delay(100000);
+    yield delay(15000);
   }
 }
 }
