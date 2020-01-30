@@ -22,7 +22,7 @@ export const selectPool = createSelector(
     pool.interestRate = interestRate;
     pool.contribution = pool.transactions?.reduce((total, transaction) => 
       (transaction.type === 'Deposit') ? total += transaction.amount : total -= transaction.amount, 0);
-    debugger;
+
     if(pool.contribution > 0 && pool.period !== 0){
       pool.nextWithdrawDate = pool.userLastWithdrawDate; 
     
@@ -31,7 +31,7 @@ export const selectPool = createSelector(
       periodMonthsFromNow.setMonth(periodMonthsFromNow.getMonth() + pool.period);
       pool.nextWithdrawDate = periodMonthsFromNow
     }
-    
+
     return pool;
   })
 
