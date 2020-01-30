@@ -1,12 +1,12 @@
 import { BlockchainContext } from "blockchainContext";
 import { getContext, takeEvery, call, put, fork, take, select, delay } from "redux-saga/effects";
-import { 
-  poolDeployed, 
-  addPoolTx, 
-  connectMetamask, 
-  deposit, 
-  withdraw, 
-  withdrawInterest, 
+import {
+  poolDeployed,
+  addPoolTx,
+  connectMetamask,
+  deposit,
+  withdraw,
+  withdrawInterest,
   terminatePool,
   setUserInfo, 
 } from "./actions";
@@ -21,7 +21,7 @@ import { selectLatestPoolTxTime } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
 import { setTxContext, setTxHash } from "containers/TransactionModal/actions";
 
-function* poolTerminateListener(poolContract: Pool) {
+function* terminatePoolListener(poolContract: Pool) {
   while (true) {
     const action = yield take(getType(terminatePool.request));
     const { signer }: BlockchainContext = yield getContext('blockchain');
@@ -36,7 +36,7 @@ function* poolTerminateListener(poolContract: Pool) {
             [writeableContract, writeableContract.terminatePool]);
           yield put(setTxHash(tx.hash));
           yield call([tx, tx.wait]);
-          yield put(terminatePool.success());
+          yield put(terminatePool.success({ poolAddress: poolContract.address }));
           yield put(enqueueSnackbar({
             message: 'Pool terminated successfully'
           }))
@@ -60,6 +60,25 @@ function* poolTerminateListener(poolContract: Pool) {
       yield put(deposit.failure('Please connect with metamask'));
       yield take(getType(connectMetamask.success));
     }
+  }
+}
+
+function* poolTerminatedListener(poolContract: Pool) {
+  const poolTerminatedChannel = eventChannel(emit => {
+    const terminateHandler = () => {
+      emit({
+        poolTerminated: 'pool terminated',
+      });
+    };
+    poolContract.on(poolContract.filters.PoolTerminated(null), terminateHandler);
+    return () => {
+      poolContract.off(poolContract.filters.PoolTerminated(null), terminateHandler);
+    };
+  });
+
+  while (true) {
+    yield take(poolTerminatedChannel);
+    yield put(terminatePool.success({ poolAddress: poolContract.address }));
   }
 }
 
@@ -361,11 +380,21 @@ function* poolWatcherSaga(action) {
     console.log(error);
   }
 
+  const terminateLogs: Log[] = yield call([provider, provider.getLogs], {
+    ...poolContract.filters.PoolTerminated(null),
+    fromBlock: 0,
+    toBlock: 'latest',
+  });
+
+  if (terminateLogs.length > 0) {
+    yield put(terminatePool.success({ poolAddress: poolContract.address }));
+  }
   yield fork(poolTransactionListener, poolContract);
   yield fork(poolDepositListener, poolContract);
   yield fork(poolWithdrawListener, poolContract);
   yield fork(poolWithdrawInterestListener, poolContract);
-  yield fork(poolTerminateListener, poolContract);
+  yield fork(terminatePoolListener, poolContract);
+  yield fork(poolTerminatedListener, poolContract);
   yield fork(getUserInfoListener, poolContract);
 }
 

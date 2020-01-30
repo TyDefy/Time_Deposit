@@ -121,6 +121,7 @@ function* deployedPoolWatcher() {
       description: newPool.description,
       type: newPool.tokenSymbol,
       period: newPool.period.toNumber(),
+      active: true,
     }));
   }
 }
@@ -189,6 +190,7 @@ export default function* poolFactorySaga() {
           description: log.description,
           type: log.tokenSymbol,
           period: log.cycleLength.toNumber(),
+          active: true,
         })
       );
     };

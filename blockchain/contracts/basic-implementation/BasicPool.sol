@@ -74,6 +74,9 @@ contract BasicPool is WhitelistAdminRole {
         address indexed user,
         uint256 amount
     );
+    event PoolTerminated(
+        address indexed terminator
+    );
 
     constructor(
         address _admin,
@@ -97,6 +100,10 @@ contract BasicPool is WhitelistAdminRole {
 
     function terminatePool() public onlyWhitelistAdmin() {
         isAlive_ = false;
+
+        emit PoolTerminated(
+            msg.sender
+        );
     }
 
     /**
