@@ -286,7 +286,7 @@ function* poolTransactionListener(poolContract: Pool) {
           type: 'Withdraw',
           txHash: newTx.transactionHash || '0x',
           time: new Date(txDate.timestamp * 1000),
-          amount: Number(formatEther(newTx.amountInDai.add(newTx.penaltyAmount))),
+          amount: Number(formatEther(newTx.withdrawAmount.add(newTx.penaltyAmount))),
           cdaiAmount: Number(formatEther(newTx.cDaiAmount)),
         }))
     }
