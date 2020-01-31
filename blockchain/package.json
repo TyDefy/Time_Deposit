@@ -12,7 +12,7 @@
     "test": "etherlime test --output=none --timeout 100000 --gas-report=true --runs=999",
     "test-one": "etherlime test test/pool/cycle.test.js --output=none --timeout 100000 --gas-report=true --runs=999",
     "test-cov": "etherlime coverage --timeout 100000 --runs=999",
-    "flat": "etherlime flatten ./basic-implementation/CyclicWithdraw.sol",
+    "flat": "etherlime flatten ./basic-implementation/BasicPool.sol",
     "remixd": "remixd -s . --remix-ide https://remix.ethereum.org",
     "generate-typings": "typechain --target=ethers --outDir contractInterfaces/ \"build/*.json\"",
     "test-a": "yarn start & yarn test"

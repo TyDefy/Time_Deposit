@@ -1,6 +1,6 @@
 pragma solidity 0.5.10;
 
-import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
+import { WhitelistAdminRole } from "../../node_modules/openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
 import { IWithdraw } from "../interfaces/IWithdraw.sol";
 
 contract BasicRegistry is WhitelistAdminRole {
