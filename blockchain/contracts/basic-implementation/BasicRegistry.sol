@@ -5,13 +5,12 @@ import { IWithdraw } from "../interfaces/IWithdraw.sol";
 
 contract BasicRegistry is WhitelistAdminRole {
     // Enums for the types of contracts
-    enum ContractType { INVALID, WITHDRAW, PENALTY }
+    enum ContractType { INVALID, CYCLIC_WITHDRAW, ROLLING_WITHDRAW, PENALTY }
     // Details of a withdraw/penalty
     struct Details {
         ContractType contractType;
         address instance;
         string name;
-        string implementationType;
         bool active;
     }
     // Storage of withdraw/penalty contracts
@@ -40,7 +39,6 @@ contract BasicRegistry is WhitelistAdminRole {
         address indexed admin, 
         address indexed utility, 
         string name, 
-        string description, 
         uint8 typeOfUtil
     );
 
@@ -99,7 +97,8 @@ contract BasicRegistry is WhitelistAdminRole {
 
         if(_withdraw != address(0)) {
             require(
-                contractLibraries_[_withdraw].contractType == ContractType.WITHDRAW,
+                contractLibraries_[_withdraw].contractType == ContractType.CYCLIC_WITHDRAW ||
+                contractLibraries_[_withdraw].contractType == ContractType.ROLLING_WITHDRAW,
                 "Please register withdraw utility"
             );
 
@@ -126,7 +125,6 @@ contract BasicRegistry is WhitelistAdminRole {
         address _admin,
         address _contract,
         string memory _name,
-        string memory _description,
         uint8 _type
     )
         public
@@ -140,15 +138,12 @@ contract BasicRegistry is WhitelistAdminRole {
         contractLibraries_[_contract]
             .name = _name;
         contractLibraries_[_contract]
-            .implementationType = _description;
-        contractLibraries_[_contract]
             .active = true;
 
         emit UtilityRegistration(
             _admin, 
             _contract, 
             _name, 
-            _description, 
             _type
         );
 
@@ -170,14 +165,12 @@ contract BasicRegistry is WhitelistAdminRole {
         view 
         returns(
             string memory,
-            string memory,
             uint8,
             bool
         )
     {
         return (
             contractLibraries_[_util].name,
-            contractLibraries_[_util].implementationType,
             uint8(contractLibraries_[_util].contractType),
             contractLibraries_[_util].active
         );

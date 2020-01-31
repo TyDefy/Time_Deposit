@@ -73,10 +73,10 @@ describe("Basic pool factory", async () => {
             let deployedUtilityTx = await(await factoryInstance.from(admin).deployUtility(
                 test_settings.penalty.percentage,
                 test_settings.cyclicWithdraw.cycleLength,
+                test_settings.cyclicWithdraw.withdrawViolation,
+                test_settings.cyclicWithdraw.interestWithdrawViolation,
                 test_settings.registrySettings.penalty.name,
-                test_settings.registrySettings.penalty.implementationType,
-                test_settings.registrySettings.withdraw.name,
-                test_settings.registrySettings.withdraw.implementationType,
+                test_settings.registrySettings.withdraw.name
             )).wait();
 
             let utilityDetails = await registryInstance.from(admin).utilityDetails(
@@ -90,16 +90,11 @@ describe("Basic pool factory", async () => {
             );
             assert.equal(
                 utilityDetails[1],
-                test_settings.registrySettings.withdraw.implementationType,
-                "Withdraw contract description incorrect"
-            );
-            assert.equal(
-                utilityDetails[2],
                 test_settings.registrySettings.withdraw.type,
                 "Withdraw contract type incorrect"
             );
             assert.equal(
-                utilityDetails[3],
+                utilityDetails[2],
                 true,
                 "Withdraw contract activity incorrect"
             );
@@ -109,10 +104,10 @@ describe("Basic pool factory", async () => {
             let deployedUtilityTx = await(await factoryInstance.from(admin).deployUtility(
                 test_settings.penalty.percentage,
                 test_settings.cyclicWithdraw.cycleLength,
+                test_settings.cyclicWithdraw.withdrawViolation,
+                test_settings.cyclicWithdraw.interestWithdrawViolation,
                 test_settings.registrySettings.penalty.name,
-                test_settings.registrySettings.penalty.implementationType,
-                test_settings.registrySettings.withdraw.name,
-                test_settings.registrySettings.withdraw.implementationType,
+                test_settings.registrySettings.withdraw.name
             )).wait();
 
             let deployedPoolTx = await(await factoryInstance.from(admin).deployBasicPool(

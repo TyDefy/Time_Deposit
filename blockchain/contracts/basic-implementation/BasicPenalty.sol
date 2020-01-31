@@ -22,7 +22,7 @@ contract BasicPenalty is IPenalty {
         return (_amount - penalty, penalty);
     }
 
-    function penalty() public view returns(uint256) {
+    function penalty() public view returns(uint8) {
         return penalty_;
     }
 }

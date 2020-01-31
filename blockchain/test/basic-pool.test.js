@@ -52,7 +52,8 @@ describe("Basic Pool Tests", async () => {
             false, 
             penaltyInstance.contract.address,
             test_settings.cyclicWithdraw.cycleLength,
-            test_settings.cyclicWithdraw.withdrawViolation
+            test_settings.cyclicWithdraw.withdrawViolation,
+            test_settings.cyclicWithdraw.interestWithdrawViolation
         );
 
         basicPoolInstance = await deployer.deploy(
@@ -331,8 +332,94 @@ describe("Basic Pool Tests", async () => {
             );
         });
 
-        it("", async () => {
+        it("🧪 Get total balance", async () => {
+            let user1Balance = await basicPoolInstance.getTotalBalance(user1.signer.address);
+            let user2Balance = await basicPoolInstance.getTotalBalance(user2.signer.address);
+            let penaltyPotBalace = await basicPoolInstance.penaltyPotBalance();
+
+            assert.equal(
+                user1Balance.toString(),
+                0,
+                "User 1 has pre-existing balance"
+            );
+            assert.equal(
+                user2Balance.toString(),
+                0,
+                "User 2 has pre-existing balance"
+            );
+            assert.equal(
+                penaltyPotBalace.toString(),
+                0,
+                "Penalty pot pre-existing balance"
+            );
+
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
             
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+
+            await assert.notRevert(basicPoolInstance.from(user1).withdraw(
+                test_settings.basicPool.deposit
+            ));
+
+            user1Balance = await basicPoolInstance.getTotalBalance(user1.signer.address);
+            user2Balance = await basicPoolInstance.getTotalBalance(user2.signer.address);
+            penaltyPotBalace = await basicPoolInstance.penaltyPotBalance();
+            
+            console.log()
+
+            assert.equal(
+                user1Balance.toString(),
+                0,
+                "User 1 has balance after withdrawing"
+            );
+            assert.equal(
+                user2Balance.toString(),
+                0,
+                "User 2 has pre-existing balance"
+            );
+            assert.equal(
+                penaltyPotBalace.toString(),
+                test_settings.basicPool.penaltyAmountInCdai.toString(),
+                "Penalty pot has not been contributed towards by premature withdraw"
+            );
+
+            await pDaiInstance.from(user2).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            
+            await basicPoolInstance.from(user2).deposit(
+                test_settings.basicPool.deposit
+            );
+
+            console.log()
+
+            user1Balance = await basicPoolInstance.getTotalBalance(user1.signer.address);
+            user2Balance = await basicPoolInstance.getTotalBalance(user2.signer.address);
+            penaltyPotBalace = await basicPoolInstance.penaltyPotBalance();
+
+            console.log()
+
+            assert.equal(
+                user1Balance.toString(),
+                0,
+                "User 1 has balance after withdrawing"
+            );
+            assert.equal(
+                user2Balance.toString(),
+                test_settings.basicPool.userCdaiBalanceWithPenalty.toString(),
+                "User cDai balance + penalty share is incorrect"
+            );
+            assert.equal(
+                penaltyPotBalace.toString(),
+                test_settings.basicPool.penaltyAmountInCdai.toString(),
+                "Penalty pot has unexpectedly changed"
+            );
         });
 
         it("", async () => {

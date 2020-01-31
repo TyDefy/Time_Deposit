@@ -52,7 +52,8 @@ describe("Pool tests - withdraw", async () => {
             false, 
             penaltyInstance.contract.address,
             test_settings.cyclicWithdraw.cycleLength,
-            test_settings.cyclicWithdraw.withdrawViolation
+            test_settings.cyclicWithdraw.withdrawViolation,
+            test_settings.cyclicWithdraw.interestWithdrawViolation
         );
 
         basicPoolInstance = await deployer.deploy(
@@ -1141,5 +1142,75 @@ describe("Pool tests - withdraw", async () => {
         });
 
         //TODO test the final withdraw as well as closing withdraw
+    });
+
+    describe("Blocking withdraw functionality", async () => {
+        it("🧪 Blocking withdraws", async () => {
+            let cyclicWithdrawBlockedInstance = await deployer.deploy(
+                cyclicWithdrawAbi, 
+                false, 
+                penaltyInstance.contract.address,
+                test_settings.cyclicWithdraw.cycleLength,
+                false,
+                test_settings.cyclicWithdraw.interestWithdrawViolation
+            );
+        
+            let basicPoolBlockedInstance = await deployer.deploy(
+                basicPoolAbi, 
+                false, 
+                admin.signer.address,
+                cyclicWithdrawBlockedInstance.contract.address,
+                pDaiInstance.contract.address,
+                cDaiInstance.contract.address,
+            );
+
+            await pDaiInstance.from(user1).approve(
+                basicPoolBlockedInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+
+            await basicPoolBlockedInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+
+            await assert.revert(basicPoolBlockedInstance.from(user1).withdraw(
+                test_settings.basicPool.deposit
+            ));
+        });
+
+        it("🧪 Blocking interest withdraws", async () => {
+            let cyclicWithdrawBlockedInstance = await deployer.deploy(
+                cyclicWithdrawAbi, 
+                false, 
+                penaltyInstance.contract.address,
+                test_settings.cyclicWithdraw.cycleLength,
+                true,
+                false
+            );
+        
+            let basicPoolBlockedInstance = await deployer.deploy(
+                basicPoolAbi, 
+                false, 
+                admin.signer.address,
+                cyclicWithdrawBlockedInstance.contract.address,
+                pDaiInstance.contract.address,
+                cDaiInstance.contract.address,
+            );
+
+            await pDaiInstance.from(user1).approve(
+                basicPoolBlockedInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+
+            await basicPoolBlockedInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+
+            await basicPoolBlockedInstance.from(user1).withdraw(
+                test_settings.basicPool.withdraw
+            );
+
+            await assert.revert(basicPoolBlockedInstance.from(user1).withdrawInterest());
+        });
     });
 });
