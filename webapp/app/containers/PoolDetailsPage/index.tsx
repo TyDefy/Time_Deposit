@@ -76,9 +76,10 @@ const PoolDetailsPage: React.FunctionComponent<Props> = ({
           case 'invest':
             return <InvestModal
               name={pool.name}
+              period={pool.period}
               daiBalance={daiBalance}
               currentInterestRate={pool.interestRate || 0}
-              nextWithdrawlDate={new Date()}
+              nextWithdrawlDate={pool.nextWithdrawDate? pool.nextWithdrawDate : new Date()}
               type={pool.type}
               onClose={() => setShowModal(false)}
               onSubmit={(value) => deposit(value)} />;
