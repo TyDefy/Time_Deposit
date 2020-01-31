@@ -269,6 +269,7 @@ function* poolTransactionListener(poolContract: Pool) {
     const txDate = yield call([provider, provider.getBlock], newTx.blockNumber);
     const latestTx = yield select(selectLatestPoolTxTime(poolContract.address));
     if (new Date(txDate.timestamp * 1000) > latestTx) {
+      debugger;
       (newTx.type === 'Deposit') ?
         yield put(addPoolTx({
           poolAddress: poolContract.address,
@@ -285,7 +286,7 @@ function* poolTransactionListener(poolContract: Pool) {
           type: 'Withdraw',
           txHash: newTx.transactionHash || '0x',
           time: new Date(txDate.timestamp * 1000),
-          amount: Number(formatEther(newTx.withdrawAmount.add(newTx.penaltyAmount))),
+          amount: Number(formatEther(newTx.amountInDai.add(newTx.penaltyAmount))),
           cdaiAmount: Number(formatEther(newTx.cDaiAmount)),
         }))
     }
@@ -339,6 +340,7 @@ function* poolWatcherSaga(action) {
     const depositTxActions = yield Promise.all(depositLogs.map(
       async log => {
         const parsedDeposit = poolContract.interface.parseLog(log).values;
+        debugger;
         return addPoolTx({
           poolAddress: poolContract.address,
           userAddress: parsedDeposit.user,
@@ -359,14 +361,14 @@ function* poolWatcherSaga(action) {
     const withdrawTxActions = yield Promise.all(withdrawLogs.map(
       async log => {
         const parsedWithdraw = poolContract.interface.parseLog(log).values;
-
+        debugger;
         return addPoolTx({
           poolAddress: poolContract.address,
           userAddress: parsedWithdraw.user,
           type: 'Withdraw',
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
-          amount: Number(formatEther(parsedWithdraw.withdrawAmount.add(parsedWithdraw.penaltyAmount))),
+          amount: Number(formatEther(parsedWithdraw.amountInDai.add(parsedWithdraw.penalty))),
           cdaiAmount: Number(formatEther(parsedWithdraw.amountIncDai))
         })
       }));
