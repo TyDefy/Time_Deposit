@@ -55,7 +55,7 @@ contract CyclicWithdraw is IWithdraw {
                 return (true, withdraw, penalty);
             } else {
                 return (false, 0, 0);
-            }
+            } 
         } else {
             return (true, _amount, 0);
         }

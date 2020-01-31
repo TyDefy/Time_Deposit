@@ -179,6 +179,7 @@ contract BasicPool is WhitelistAdminRole {
                 _amount,
                 users_[msg.sender].lastWtihdraw
             );
+            require(withdrawAllowed, "Withdraw is not allowed in violation");
             // Applying the penalty if there is one
             if(penaltyAmount != 0) {
                 // If there is a penalty, this applies it
