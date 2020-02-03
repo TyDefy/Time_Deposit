@@ -138,11 +138,9 @@ function* deployedPoolWatcher() {
 function* createPoolSaga(action) {
   const { poolFactoryContract, signer, provider }: BlockchainContext = yield getContext('blockchain');
   try {
-    // TODO Figure out how to populate the withdraw address, what to do with the user's period, fee and other parameters
     let utilityAddress = action.payload.utilityAddress;
     if (utilityAddress === 'new') {
       yield put(setTxContext('Deploying utilities'));
-      debugger;
       const deployUtilitiesTx: ContractTransaction = yield call(
         [poolFactoryContract, poolFactoryContract.deployUtility],
         action.payload.penaltyRate,
@@ -194,7 +192,6 @@ export default function* poolFactorySaga() {
     const parsedLogs = deployedPoolLogs.map(log =>
       poolFactoryContract.interface.parseLog(log).values);
     for (const log of parsedLogs) {
-      debugger;
       yield put(
         poolDeployed({
           address: log.pool,
