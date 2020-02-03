@@ -64,7 +64,9 @@ export const createPool = createAsyncAction(
     feeRate: number,
     canWithdrawInViolation: boolean,
     canWithdrawInterestInViolation: boolean,
-  }, undefined, string>();
+  }, 
+  undefined, 
+  string>();
 
 export const addPoolTx = createStandardAction('ADD_POOL_TX')<{
   poolAddress: string,
@@ -111,6 +113,8 @@ export const utilityDeployed = createStandardAction('UTILITY_DEPLOYED')<{
   penaltyAddress: string,
   penaltyRate: number,
   penaltyName: string,
+  canWithdrawInViolation: boolean,
+  canWithdrawInterestInViolation: boolean,
 }>();
 
 export const terminatePool = createAsyncAction(

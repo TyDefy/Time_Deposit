@@ -21,8 +21,11 @@ contract BasicFactory is WhitelistAdminRole {
         string _withdrawName,
         address indexed penalty,
         uint8 _penaltyRate,
-        string _penaltyName
+        string _penaltyName,
+        bool _canWithdrawInViolation,
+        bool _canWithdrawInterestInViolation
     );
+
     event DeployedPool(
         address indexed pool,
         address indexed withdraw,
@@ -160,69 +163,71 @@ contract BasicFactory is WhitelistAdminRole {
             _withdrawName,
             address(newPenalty),
             _penaltyPercentage,
-            _penaltyName
-        );
-
-        return(
-            address(newWithdraw),
-            address(newPenalty)
-        );
-    }
-
-    function deployRollingUtility(
-        uint8 _penaltyPercentage,
-        uint8 _cycleLength,
-        bool _canWithdrawInViolation,
-        bool _canWithdrawInterestInViolation,
-        string memory _penaltyName,
-        string memory _withdrawName
-    )
-        public
-        onlyWhitelistAdmin()
-        returns(address, address)
-    {
-        BasicPenalty newPenalty = new BasicPenalty(
-            _penaltyPercentage
-        );
-
-        RollingWithdraw newWithdraw = new RollingWithdraw(
-            address(newPenalty),
-            _cycleLength,
+            _penaltyName,
             _canWithdrawInViolation,
             _canWithdrawInterestInViolation
         );
 
-        require(
-            registryInstance_.registerUtility(
-                msg.sender,
-                address(newPenalty),
-                _penaltyName,
-                3
-            ),
-            "Penalty registration failed"
-        );
-        require(
-            registryInstance_.registerUtility(
-                msg.sender,
-                address(newWithdraw),
-                _withdrawName,
-                2
-            ),
-            "Penalty registration failed"
-        );
-
-        emit DeployedUtilities(
-            address(newWithdraw),
-            _cycleLength,
-            _withdrawName,
-            address(newPenalty),
-            _penaltyPercentage,
-            _penaltyName
-        );
-
         return(
             address(newWithdraw),
             address(newPenalty)
         );
     }
+
+    // function deployRollingUtility(
+    //     uint8 _penaltyPercentage,
+    //     uint8 _cycleLength,
+    //     bool _canWithdrawInViolation,
+    //     bool _canWithdrawInterestInViolation,
+    //     string memory _penaltyName,
+    //     string memory _withdrawName
+    // )
+    //     public
+    //     onlyWhitelistAdmin()
+    //     returns(address, address)
+    // {
+    //     BasicPenalty newPenalty = new BasicPenalty(
+    //         _penaltyPercentage
+    //     );
+
+    //     RollingWithdraw newWithdraw = new RollingWithdraw(
+    //         address(newPenalty),
+    //         _cycleLength,
+    //         _canWithdrawInViolation,
+    //         _canWithdrawInterestInViolation
+    //     );
+
+    //     require(
+    //         registryInstance_.registerUtility(
+    //             msg.sender,
+    //             address(newPenalty),
+    //             _penaltyName,
+    //             3
+    //         ),
+    //         "Penalty registration failed"
+    //     );
+    //     require(
+    //         registryInstance_.registerUtility(
+    //             msg.sender,
+    //             address(newWithdraw),
+    //             _withdrawName,
+    //             2
+    //         ),
+    //         "Penalty registration failed"
+    //     );
+
+    //     emit DeployedUtilities(
+    //         address(newWithdraw),
+    //         _cycleLength,
+    //         _withdrawName,
+    //         address(newPenalty),
+    //         _penaltyPercentage,
+    //         _penaltyName
+    //     );
+
+    //     return(
+    //         address(newWithdraw),
+    //         address(newPenalty)
+    //     );
+    // }
 }

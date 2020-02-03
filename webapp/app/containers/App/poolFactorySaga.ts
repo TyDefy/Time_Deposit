@@ -13,7 +13,7 @@ export function* deployedUtilityWatcher() {
   const { poolFactoryContract, provider }: BlockchainContext = yield getContext('blockchain');
 
   const deployedUtilitiesEventFilter = {
-    ...poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null),
+    ...poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null, null, null),
     fromBlock: 0,
     toBlock: 'latest',
   }
@@ -26,16 +26,19 @@ export function* deployedUtilityWatcher() {
       yield put(
         utilityDeployed({
           withdrawAddress: log.withdraw,
-          cycleLength: log._cycleLength.toNumber(),
+          cycleLength: log._cycleLength,
           withdrawName: log._withdrawName,
           penaltyAddress: log.penalty,
           penaltyName: log._penaltyName,
           penaltyRate: log._penaltyRate,
+          canWithdrawInViolation: log._canWithdrawInVoilation,
+          canWithdrawInterestInViolation: log._canWithdrawInterestInViolation,
         })
       );
     };
   } catch (error) {
     console.log('error');
+    console.log(error);
   }
 
   const utilityDeployedChannel = eventChannel(emit => {
@@ -45,20 +48,24 @@ export function* deployedUtilityWatcher() {
       withdrawName,
       penalty,
       penaltyRate,
-      penaltyName
+      penaltyName,
+      canWithdrawInViolation,
+      canWithdrawInterestInViolation
     ) => emit({
       withdraw,
       cycleLength,
       withdrawName,
       penalty,
       penaltyRate,
-      penaltyName
+      penaltyName,
+      canWithdrawInViolation,
+      canWithdrawInterestInViolation
     })
 
-    poolFactoryContract.on(poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null),
+    poolFactoryContract.on(poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null, null, null),
       utilityDeployedHandler);
     return () => {
-      poolFactoryContract.off(poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null),
+      poolFactoryContract.off(poolFactoryContract.filters.DeployedUtilities(null, null, null, null, null, null, null, null),
         utilityDeployedHandler);
     }
   })
@@ -68,11 +75,13 @@ export function* deployedUtilityWatcher() {
     yield put(
       utilityDeployed({
         withdrawAddress: newUtility.withdraw,
-        cycleLength: newUtility.cycleLength.toNumber(),
+        cycleLength: newUtility.cycleLength,
         withdrawName: newUtility.withdrawName,
         penaltyAddress: newUtility.penalty,
         penaltyName: newUtility.penaltyName,
         penaltyRate: newUtility.penaltyRate,
+        canWithdrawInViolation: newUtility.canWithdrawInViolation,
+        canWithdrawInterestInViolation: newUtility.canWithdrawInterestInViolation
       })
     )
   }
@@ -120,7 +129,7 @@ function* deployedPoolWatcher() {
       name: newPool.name,
       description: newPool.description,
       type: newPool.tokenSymbol,
-      period: newPool.period.toNumber(),
+      period: newPool.period,
       active: true,
     }));
   }
@@ -133,14 +142,15 @@ function* createPoolSaga(action) {
     let utilityAddress = action.payload.utilityAddress;
     if (utilityAddress === 'new') {
       yield put(setTxContext('Deploying utilities'));
+      debugger;
       const deployUtilitiesTx: ContractTransaction = yield call(
         [poolFactoryContract, poolFactoryContract.deployUtility],
         action.payload.penaltyRate,
         action.payload.cycleLength,
+        action.payload.canWithdrawInViolation,
+        action.payload.canWithdrawInterestInViolation,
         action.payload.penaltyName,
-        action.payload.penaltyDescription,
-        action.payload.withdrawName,
-        action.payload.withdrawDescription)
+        action.payload.withdrawName);
 
       yield put(setTxHash(deployUtilitiesTx.hash));
       yield call([deployUtilitiesTx, deployUtilitiesTx.wait]);
@@ -156,12 +166,14 @@ function* createPoolSaga(action) {
     yield put(setTxHash(deployPoolTx.hash));
     yield call([deployPoolTx, deployPoolTx.wait]);
     const newPoolAction = yield take(poolDeployed);
-    //@ts-ignore
-    const poolContract: Pool = new Contract(newPoolAction.payload.address, PoolContractAbi, signer || provider)
-    yield put(setTxContext('Initialising pool'));
-    const initTx: ContractTransaction = yield call([poolContract, poolContract.init], action.payload.feeRate);
-    yield put(setTxHash(initTx.hash));
-    yield call([initTx, initTx.wait]);
+    if (action.payload.feeRate !== 0) {
+      //@ts-ignore
+      const poolContract: Pool = new Contract(newPoolAction.payload.address, PoolContractAbi, signer || provider)
+      yield put(setTxContext('Initialising pool'));
+      const initTx: ContractTransaction = yield call([poolContract, poolContract.init], action.payload.feeRate);
+      yield put(setTxHash(initTx.hash));
+      yield call([initTx, initTx.wait]);
+    }
     yield put(createPool.success());
   } catch (error) {
     yield put(createPool.failure(error.message));
@@ -182,6 +194,7 @@ export default function* poolFactorySaga() {
     const parsedLogs = deployedPoolLogs.map(log =>
       poolFactoryContract.interface.parseLog(log).values);
     for (const log of parsedLogs) {
+      debugger;
       yield put(
         poolDeployed({
           address: log.pool,
@@ -189,13 +202,14 @@ export default function* poolFactorySaga() {
           name: log.name,
           description: log.description,
           type: log.tokenSymbol,
-          period: log.cycleLength.toNumber(),
+          period: log.cycleLength,
           active: true,
         })
       );
     };
   } catch (error) {
     console.log('error');
+    console.log(error);
   }
 
   yield spawn(deployedPoolWatcher);
