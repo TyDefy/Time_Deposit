@@ -1,6 +1,7 @@
 import { ActionType } from 'typesafe-actions';
 import * as actions from './actions';
 import { ApplicationRootState } from 'types';
+import {Utility} from '../App'
 
 /* --- STATE --- */
 interface PoolDetailsPageState {
