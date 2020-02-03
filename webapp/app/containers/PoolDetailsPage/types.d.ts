@@ -9,16 +9,6 @@ interface PoolDetailsPageState {
 
 interface UtilityState {
   [index: string]: Utility;
- 
-}
-
-interface Utility {
-  withdrawAddress: string;
-  cycleLength: number;
-  withdrawName: string;
-  penaltyAddress: string;
-  penaltyName: string;
-  penaltyRate: number;
 }
 
 

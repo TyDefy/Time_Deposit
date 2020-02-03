@@ -82,11 +82,11 @@ export interface Utility {
   withdrawAddress: string,
   cycleLength: number,
   withdrawName: string,
-  withdrawDescription?: string,
   penaltyAddress: string,
   penaltyRate: number,
   penaltyName: string,
-  penaltyDescription?: string
+  canWithdrawInViolation: true,
+  canWithdrawInterestInViolation: true,
 }
 
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;
