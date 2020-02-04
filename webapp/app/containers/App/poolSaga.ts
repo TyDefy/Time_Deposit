@@ -295,7 +295,7 @@ function* poolTransactionListener(poolContract: Pool) {
     const txDate = yield call([provider, provider.getBlock], newTx.blockNumber);
     const latestTx = yield select(selectLatestPoolTxTime(poolContract.address));
     if (new Date(txDate.timestamp * 1000) > latestTx) {
-      (newTx.type === 'Deposit') ?
+      if (newTx.type === 'Deposit') {
         yield put(addPoolTx({
           poolAddress: poolContract.address,
           userAddress: newTx.address,
@@ -304,16 +304,27 @@ function* poolTransactionListener(poolContract: Pool) {
           time: new Date(txDate.timestamp * 1000),
           amount: Number(formatEther(newTx.daiAmount)),
           cdaiAmount: Number(formatEther(newTx.cDaiAmount))
-        })) :
+        }));
+      } else { 
         yield put(addPoolTx({
           poolAddress: poolContract.address,
           userAddress: newTx.address,
           type: 'Withdraw',
           txHash: newTx.transactionHash || '0x',
           time: new Date(txDate.timestamp * 1000),
-          amount: Number(formatEther(newTx.withdrawAmount.add(newTx.penaltyAmount))),
+          amount: Number(formatEther(newTx.withdrawAmount)),
           cdaiAmount: Number(formatEther(newTx.cDaiAmount)),
         }))
+        yield put(addPoolTx({
+          poolAddress: poolContract.address,
+          userAddress: newTx.address,
+          type: 'Penalty',
+          txHash: newTx.transactionHash || '0x',
+          time: new Date(txDate.timestamp * 1000),
+          amount: Number(formatEther(newTx.penaltyAmount)),
+          cdaiAmount: 0,
+        }))
+      }
     }
   }
 }

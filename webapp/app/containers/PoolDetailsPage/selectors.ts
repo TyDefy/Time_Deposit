@@ -4,7 +4,7 @@ import { StateProps, OwnProps } from '.';
 import { selectPools } from 'containers/HomePage/selectors';
 import { selectDaiBalance, selectEthAddress, selectExchangeRate, selectInterestRate } from 'containers/App/selectors';
 
-const selectSelectedPoolAddress = (state: RootState, props: OwnProps) => {
+export const selectSelectedPoolAddress = (state: RootState, props: OwnProps) => {
   return props.match.params.poolAddress
 };
 

@@ -2,15 +2,18 @@ import { createStructuredSelector, createSelector } from 'reselect';
 import { RootState } from 'containers/App/types';
 import { StateProps } from '.';
 import { OwnProps } from 'containers/PoolDetailsPage';
-import { selectPool } from 'containers/PoolDetailsPage/selectors';
+import { selectPools } from 'containers/HomePage/selectors';
+import { selectSelectedPoolAddress } from 'containers/PoolDetailsPage/selectors';
 
 /**
  * Default selector used by AdminPoolDetailsPage
  */
 
 const selectAdminPoolDetails = createSelector(
-  selectPool,
-  (pool) => {
+  selectPools,
+  selectSelectedPoolAddress,
+  (pools, poolAddress) => {
+    const pool = pools.filter(p => p.address === poolAddress)[0];
     const participants = new Set(pool.transactions?.map(p => p.userAddress))
     const poolParticipants = [...participants]
       .map(participant => {
