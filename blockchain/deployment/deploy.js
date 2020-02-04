@@ -29,7 +29,7 @@ const deploy = async (network, secret) => {
 		network = 'local';
 	}
 
-	const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS;
+	const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS_PUBLIC_KEY;
 
 	if (network === 'local') {
 		const deployer = new etherlime.JSONRPCPrivateKeyDeployer(secret, 'http://localhost:8545/', defaultConfigs);
@@ -67,7 +67,7 @@ const deploy = async (network, secret) => {
 			pDaiInstance.contract.address,
 			"DAI",
 			pcDaiInstance.contract.address,
-			"cDai"
+			"cDAI"
 		);
 
 		await poolRegistryInstance.registerDeployer(
@@ -78,10 +78,10 @@ const deploy = async (network, secret) => {
 		let newUtilities = await (await poolFactoryInstance.deployUtility(
 			process.env.PENALTY_PERCENTAGE,
 			process.env.CYCLE_LENGTH,
+			process.env.CAN_WITHDRAW_IN_VIOLATION,
+			process.env.CAN_WITHDRAW_INTEREST_IN_VIOLATION,
 			process.env.PENALTY_NAME,
-			process.env.PENALTY_DESCRIPTION,
-			process.env.WITHDRAW_NAME,
-			process.env.WITHDRAW_DESCRIPTION,
+			process.env.WITHDRAW_NAME
 		)).wait();
 
 		const withdrawAddress = newUtilities.events[2].args.withdraw;
@@ -99,6 +99,10 @@ const deploy = async (network, secret) => {
 			POOL_FACTORY_ADDRESS=${poolFactoryInstance.contract.address}
 		`;
 		console.log(CONTRACT_ADDRESSES);
+
+		console.log("Withdraw address:" + withdrawAddress);
+		console.log("Penalty address:" + penaltyAddress + "\nPool address:");
+		console.log(newPool.events[3].args.pool)
 
 		const addresses = (process.env.ADDESSES_TO_MINT).split(',');
 
@@ -118,7 +122,7 @@ const deploy = async (network, secret) => {
 			"PseudoDai",
 			"pDAI",
 			18
-		);
+		);//0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa
 
 		const pcDaiInstance = await deploy(
 			pcDaiABI,
@@ -127,7 +131,7 @@ const deploy = async (network, secret) => {
 			"pcDai",
 			18,
 			pDaiInstance.contract.address
-		);
+		);//0x2acc448d73e8d53076731fea2ef3fc38214d0a7d
 
 		const poolRegistryInstance = await deploy(
 			poolRegistryABI,

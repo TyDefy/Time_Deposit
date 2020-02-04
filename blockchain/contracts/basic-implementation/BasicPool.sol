@@ -1,6 +1,6 @@
 pragma solidity 0.5.10;
 
-import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
+import { WhitelistAdminRole } from "../../node_modules/openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
 import { IWithdraw } from "../interfaces/IWithdraw.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 import { ICToken } from "../interfaces/ICToken.sol";
@@ -427,5 +427,9 @@ contract BasicPool is WhitelistAdminRole {
 
     function isPoolActive() public view returns(bool) {
         return isAlive_;
+    }
+
+    function getWithdrawInstance() public view returns(address) {
+        return address(withdrawInstance_);
     }
 }
