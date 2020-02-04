@@ -13,7 +13,8 @@ let basicFactoryAbi = require('../build/BasicFactory.json');
 const test_settings = {
     cyclicWithdraw: {
         cycleLength: "10",
-        withdrawViolation: true
+        withdrawViolation: true,
+        interestWithdrawViolation: true
     },
     penalty: {
         percentage: 15

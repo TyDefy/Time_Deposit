@@ -55,7 +55,8 @@ describe("Basic Registry Tests", async () => {
             false, 
             penaltyInstance.contract.address,
             test_settings.cyclicWithdraw.cycleLength,
-            test_settings.cyclicWithdraw.withdrawViolation
+            test_settings.cyclicWithdraw.withdrawViolation,
+            test_settings.cyclicWithdraw.interestWithdrawViolation
         );
 
         basicPoolInstance = await deployer.deploy(
@@ -112,7 +113,6 @@ describe("Basic Registry Tests", async () => {
                 admin.signer.address,
                 penaltyInstance.contract.address,
                 test_settings.registrySettings.penalty.name,
-                test_settings.registrySettings.penalty.implementationType,
                 test_settings.registrySettings.penalty.type
             );
             
@@ -127,16 +127,11 @@ describe("Basic Registry Tests", async () => {
             );
             assert.equal(
                 details[1],
-                test_settings.registrySettings.penalty.implementationType,
-                "Implementation type of util incorrectly registered"
-            );
-            assert.equal(
-                details[2],
                 test_settings.registrySettings.penalty.type,
                 "Type of util incorrect"
             );
             assert.equal(
-                details[3],
+                details[2],
                 true,
                 "Util was not registered as active"
             );
@@ -147,7 +142,6 @@ describe("Basic Registry Tests", async () => {
                 admin.signer.address,
                 penaltyInstance.contract.address,
                 test_settings.registrySettings.penalty.name,
-                test_settings.registrySettings.penalty.implementationType,
                 test_settings.registrySettings.penalty.type
             );
 
@@ -155,7 +149,6 @@ describe("Basic Registry Tests", async () => {
                 admin.signer.address,
                 cyclicWithdrawInstance.contract.address,
                 test_settings.registrySettings.withdraw.name,
-                test_settings.registrySettings.withdraw.implementationType,
                 test_settings.registrySettings.withdraw.type
             );
 
@@ -193,7 +186,6 @@ describe("Basic Registry Tests", async () => {
                 admin.signer.address,
                 penaltyInstance.contract.address,
                 test_settings.registrySettings.penalty.name,
-                test_settings.registrySettings.penalty.implementationType,
                 test_settings.registrySettings.penalty.type
             );
 
@@ -221,7 +213,6 @@ describe("Basic Registry Tests", async () => {
                 admin.signer.address,
                 penaltyInstance.contract.address,
                 test_settings.registrySettings.penalty.name,
-                test_settings.registrySettings.penalty.implementationType,
                 test_settings.registrySettings.penalty.type
             );
             
@@ -236,16 +227,11 @@ describe("Basic Registry Tests", async () => {
             );
             assert.equal(
                 details[1],
-                test_settings.registrySettings.penalty.implementationType,
-                "Implementation type of util incorrectly registered"
-            );
-            assert.equal(
-                details[2],
                 test_settings.registrySettings.penalty.type,
                 "Type of util incorrect"
             );
             assert.equal(
-                details[3],
+                details[2],
                 true,
                 "Util was not registered as active"
             );
@@ -254,7 +240,6 @@ describe("Basic Registry Tests", async () => {
                 admin.signer.address,
                 cyclicWithdrawInstance.contract.address,
                 test_settings.registrySettings.withdraw.name,
-                test_settings.registrySettings.withdraw.implementationType,
                 test_settings.registrySettings.withdraw.type
             );
             
@@ -269,16 +254,11 @@ describe("Basic Registry Tests", async () => {
             );
             assert.equal(
                 details[1],
-                test_settings.registrySettings.withdraw.implementationType,
-                "Implementation type of util incorrectly registered"
-            );
-            assert.equal(
-                details[2],
                 test_settings.registrySettings.withdraw.type,
                 "Type of util incorrect"
             );
             assert.equal(
-                details[3],
+                details[2],
                 true,
                 "Util was not registered as active"
             );
@@ -296,16 +276,11 @@ describe("Basic Registry Tests", async () => {
             );
             assert.equal(
                 details[1],
-                "",
-                "Implementation type of util incorrectly registered"
-            );
-            assert.equal(
-                details[2],
                 0,
                 "Type of util incorrect"
             );
             assert.equal(
-                details[3],
+                details[2],
                 false,
                 "Util was not registered as active"
             );
@@ -321,16 +296,11 @@ describe("Basic Registry Tests", async () => {
             );
             assert.equal(
                 details[1],
-                "",
-                "Implementation type of util incorrectly registered"
-            );
-            assert.equal(
-                details[2],
                 0,
                 "Type of util incorrect"
             );
             assert.equal(
-                details[3],
+                details[2],
                 false,
                 "Util was not registered as active"
             );
@@ -341,7 +311,6 @@ describe("Basic Registry Tests", async () => {
                 admin.signer.address,
                 penaltyInstance.contract.address,
                 test_settings.registrySettings.penalty.name,
-                test_settings.registrySettings.penalty.implementationType,
                 test_settings.registrySettings.penalty.type
             );
 
@@ -349,7 +318,6 @@ describe("Basic Registry Tests", async () => {
                 admin.signer.address,
                 cyclicWithdrawInstance.contract.address,
                 test_settings.registrySettings.withdraw.name,
-                test_settings.registrySettings.withdraw.implementationType,
                 test_settings.registrySettings.withdraw.type
             );
 

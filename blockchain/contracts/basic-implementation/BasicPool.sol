@@ -9,7 +9,7 @@ contract BasicPool is WhitelistAdminRole {
     // Tracks fee collection
     uint256 internal accumulativeFeeCollection_;
     // The fee as a percentage of the penality %
-    uint256 internal feePercentage_ = 0;
+    uint8 internal feePercentage_ = 0;
     // Lock for setting the fee
     bool internal feeLock_ = false;
     // Instance of the withdraw library 
@@ -18,8 +18,6 @@ contract BasicPool is WhitelistAdminRole {
     IERC20 internal collateralInstance_;
     // Instance of the interest earning token (cDAI)
     ICToken internal cTokenInstance_;
-    // Mutex variable
-    bool internal lock_;
     // The total amount of collateral in this pool
     uint256 internal totalCCollateral_;
     // The amount of cToken allocated to the penalty pool
@@ -36,16 +34,6 @@ contract BasicPool is WhitelistAdminRole {
     }
     // A mapping of all active suers
     mapping(address => UserInfo) internal users_;
-
-    modifier mutex() {
-        require(
-            lock_,
-            "Contract locked, please try again"
-        );
-        lock_ = false;
-        _;
-        lock_ = true;
-    }
 
     modifier killSwitch() {
         require(
@@ -77,6 +65,9 @@ contract BasicPool is WhitelistAdminRole {
     event PoolTerminated(
         address indexed terminator
     );
+    event FeeSet(
+        uint8 feePercentage
+    );
 
     constructor(
         address _admin,
@@ -92,10 +83,14 @@ contract BasicPool is WhitelistAdminRole {
         cTokenInstance_ = ICToken(_cToken);
     }
 
-    function init(uint256 _fee) public onlyWhitelistAdmin() {
+    function init(uint8 _fee) public onlyWhitelistAdmin() {
         require(!feeLock_, "Fee has already been set");
         feePercentage_ = _fee;
         feeLock_ = true;
+
+        emit FeeSet(
+            _fee
+        );
     }
 
     function terminatePool() public onlyWhitelistAdmin() {
@@ -184,6 +179,7 @@ contract BasicPool is WhitelistAdminRole {
                 _amount,
                 users_[msg.sender].lastWtihdraw
             );
+            require(withdrawAllowed, "Withdraw is not allowed in violation");
             // Applying the penalty if there is one
             if(penaltyAmount != 0) {
                 // If there is a penalty, this applies it
@@ -242,6 +238,15 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     function withdrawInterest() public killSwitch() {
+        if(address(withdrawInstance_) != address(0)) { 
+            require(
+                withdrawInstance_.canWithdrawInterest(
+                    users_[msg.sender].lastWtihdraw
+                ),
+                "Cannot withdraw interest in violation"
+            );
+        }
+        
         // Calculating total interest available
         uint256 rewardInCdai = getInterestAmount(msg.sender);
 

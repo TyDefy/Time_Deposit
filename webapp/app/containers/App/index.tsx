@@ -67,6 +67,7 @@ export interface Pool {
   balance: number;
   participants: number;
   interestRate?: number;
+  penaltyRate?: number;
   contribution?: number;
   interestAccrued?: number;
   availableInterest?: number;
@@ -83,11 +84,11 @@ export interface Utility {
   withdrawAddress: string,
   cycleLength: number,
   withdrawName: string,
-  withdrawDescription?: string,
   penaltyAddress: string,
   penaltyRate: number,
   penaltyName: string,
-  penaltyDescription?: string
+  canWithdrawInViolation: boolean,
+  canWithdrawInterestInViolation: boolean,
 }
 
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;

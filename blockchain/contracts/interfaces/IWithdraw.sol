@@ -32,6 +32,8 @@ contract IWithdraw {
 		view
 		returns(bool, uint256, uint256);
 
+    function canWithdrawInterest(uint256 _lastWithdraw) public view returns(bool);
+
     /**
       * @notice Tells the pool how much a user can withdraw. Emits the 
       *         withdrawCalculated event.
@@ -53,5 +55,7 @@ contract IWithdraw {
 
     function cantWithdrawInViolation() public view returns(bool);
 
-    function getCycle() public view returns(uint256);
+    function cantWithdrawInterestInViolation() public view returns(bool);
+
+    function getCycle() public view returns(uint8);
 }

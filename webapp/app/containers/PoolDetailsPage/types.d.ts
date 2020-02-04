@@ -1,6 +1,7 @@
 import { ActionType } from 'typesafe-actions';
 import * as actions from './actions';
 import { ApplicationRootState } from 'types';
+import {Utility} from '../App'
 
 /* --- STATE --- */
 interface PoolDetailsPageState {
@@ -9,16 +10,6 @@ interface PoolDetailsPageState {
 
 interface UtilityState {
   [index: string]: Utility;
- 
-}
-
-interface Utility {
-  withdrawAddress: string;
-  cycleLength: number;
-  withdrawName: string;
-  penaltyAddress: string;
-  penaltyName: string;
-  penaltyRate: number;
 }
 
 

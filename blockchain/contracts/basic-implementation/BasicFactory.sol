@@ -3,6 +3,7 @@ pragma solidity 0.5.10;
 import { BasicRegistry } from "./BasicRegistry.sol";
 import { BasicPool } from "./BasicPool.sol";
 import { CyclicWithdraw } from "./CyclicWithdraw.sol";
+import { RollingWithdraw } from "./RollingWithdraw.sol";
 import { IWithdraw } from "../interfaces/IWithdraw.sol";
 import { BasicPenalty } from "./BasicPenalty.sol";
 import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
@@ -16,24 +17,25 @@ contract BasicFactory is WhitelistAdminRole {
 
     event DeployedUtilities(
         address indexed withdraw,
-        uint256 _cycleLength,
+        uint8 _cycleLength,
         string _withdrawName,
-        // string _withdrawDescription,
         address indexed penalty,
         uint8 _penaltyRate,
-        string _penaltyName
-        // string _penaltyDescription
+        string _penaltyName,
+        bool _canWithdrawInViolation,
+        bool _canWithdrawInterestInViolation
     );
 
     event DeployedPool(
         address indexed pool,
         address indexed withdraw,
-        uint256 penaltyPercentage,
+        uint8 penaltyPercentage,
         string name,
         string description,
-        uint256 cycleLength,
-        string collateralSymbol,
-        string tokenSymbol
+        uint8 cycleLength,
+        string tokenSymbol,
+        bool interestWithdrawInViolationBlocked,
+        bool withdrawInViolationBlocked
     );
 
     constructor(
@@ -84,14 +86,18 @@ contract BasicFactory is WhitelistAdminRole {
             "Pool registration falied"
         );
 
-        uint256 cycleLength = 0;
+        uint8 cycleLength = 0;
         address penaltyInstance = address(0);
-        uint256 penaltyPercentage = 0;
+        uint8 penaltyPercentage = 0;
+        bool interestWithdrawInViolationBlocked = true;
+        bool withdrawInViolationBlocked = true;
 
         if(_withdraw != address(0)) {
             cycleLength = IWithdraw(_withdraw).getCycle();
             penaltyInstance = IWithdraw(_withdraw).getPenalty();
             penaltyPercentage = BasicPenalty(penaltyInstance).penalty();
+            interestWithdrawInViolationBlocked = IWithdraw(_withdraw).cantWithdrawInterestInViolation();
+            withdrawInViolationBlocked = IWithdraw(_withdraw).cantWithdrawInViolation();
         }
 
         emit DeployedPool(
@@ -101,8 +107,9 @@ contract BasicFactory is WhitelistAdminRole {
             _poolName, 
             _poolDescription, 
             cycleLength,
-            collateralSymbol_,
-            tokenSymbol_
+            tokenSymbol_,
+            interestWithdrawInViolationBlocked,
+            withdrawInViolationBlocked
         );
 
         return(address(newPool));
@@ -110,11 +117,11 @@ contract BasicFactory is WhitelistAdminRole {
 
     function deployUtility(
         uint8 _penaltyPercentage,
-        uint256 _cycleLength,
+        uint8 _cycleLength,
+        bool _canWithdrawInViolation,
+        bool _canWithdrawInterestInViolation,
         string memory _penaltyName,
-        string memory _penaltyDescription,
-        string memory _withdrawName,
-        string memory _withdrawDescription
+        string memory _withdrawName
     )
         public
         onlyWhitelistAdmin()
@@ -127,7 +134,8 @@ contract BasicFactory is WhitelistAdminRole {
         CyclicWithdraw newWithdraw = new CyclicWithdraw(
             address(newPenalty),
             _cycleLength,
-            true
+            _canWithdrawInViolation,
+            _canWithdrawInterestInViolation
         );
 
         require(
@@ -135,8 +143,7 @@ contract BasicFactory is WhitelistAdminRole {
                 msg.sender,
                 address(newPenalty),
                 _penaltyName,
-                _penaltyDescription,
-                2
+                3
             ),
             "Penalty registration failed"
         );
@@ -145,7 +152,6 @@ contract BasicFactory is WhitelistAdminRole {
                 msg.sender,
                 address(newWithdraw),
                 _withdrawName,
-                _withdrawDescription,
                 1
             ),
             "Penalty registration failed"
@@ -155,11 +161,11 @@ contract BasicFactory is WhitelistAdminRole {
             address(newWithdraw),
             _cycleLength,
             _withdrawName,
-            // _withdrawDescription,
             address(newPenalty),
             _penaltyPercentage,
-            _penaltyName
-            // _penaltyDescription
+            _penaltyName,
+            _canWithdrawInViolation,
+            _canWithdrawInterestInViolation
         );
 
         return(
@@ -167,4 +173,61 @@ contract BasicFactory is WhitelistAdminRole {
             address(newPenalty)
         );
     }
+
+    // function deployRollingUtility(
+    //     uint8 _penaltyPercentage,
+    //     uint8 _cycleLength,
+    //     bool _canWithdrawInViolation,
+    //     bool _canWithdrawInterestInViolation,
+    //     string memory _penaltyName,
+    //     string memory _withdrawName
+    // )
+    //     public
+    //     onlyWhitelistAdmin()
+    //     returns(address, address)
+    // {
+    //     BasicPenalty newPenalty = new BasicPenalty(
+    //         _penaltyPercentage
+    //     );
+
+    //     RollingWithdraw newWithdraw = new RollingWithdraw(
+    //         address(newPenalty),
+    //         _cycleLength,
+    //         _canWithdrawInViolation,
+    //         _canWithdrawInterestInViolation
+    //     );
+
+    //     require(
+    //         registryInstance_.registerUtility(
+    //             msg.sender,
+    //             address(newPenalty),
+    //             _penaltyName,
+    //             3
+    //         ),
+    //         "Penalty registration failed"
+    //     );
+    //     require(
+    //         registryInstance_.registerUtility(
+    //             msg.sender,
+    //             address(newWithdraw),
+    //             _withdrawName,
+    //             2
+    //         ),
+    //         "Penalty registration failed"
+    //     );
+
+    //     emit DeployedUtilities(
+    //         address(newWithdraw),
+    //         _cycleLength,
+    //         _withdrawName,
+    //         address(newPenalty),
+    //         _penaltyPercentage,
+    //         _penaltyName
+    //     );
+
+    //     return(
+    //         address(newWithdraw),
+    //         address(newPenalty)
+    //     );
+    // }
 }
