@@ -66,8 +66,8 @@ const CreatePool: React.FunctionComponent<Props> = ({ utilities, createPool }: P
         penaltyName: 'new',
         penaltyRate: 0,
         feeRate: 0,
-        canWithdrawInViolation: false,
-        canWithdrawInterestInViolation: false,
+        canWithdrawInViolation: ,
+        canWithdrawInterestInViolation: ,
       }}
       // validationSchema={CreatePoolSchema}
       onSubmit={(values, actions) => {
