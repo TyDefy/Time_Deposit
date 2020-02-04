@@ -42,6 +42,13 @@ export const setCDaiRates = createAsyncAction(
 },
 string>();
 
+export const setUserTotalBalanceAmount = createStandardAction(
+  'SET_USER_TOTAL_BALANCE_AMOUNT')
+  <{
+    poolAddress: string,
+    totalBalance: number
+  }>();
+
 export const setUserInfo = createStandardAction('SET_USER_INFO')<{
     lastDepositDate: Date;
     lastWithdrawDate: Date;

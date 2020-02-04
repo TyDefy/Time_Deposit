@@ -95,7 +95,7 @@ const PoolDetailsPage: React.FunctionComponent<Props> = ({
               name={pool.name}
               type={pool.type}
               penaltyRate={penaltyRate}
-              availableFunds={(pool.balance + (pool.availableInterest || 0) || 0)}
+              availableFunds={(pool.contribution ? pool.contribution + (pool.availableInterest || 0) : 0)}
               onSubmit={(value) => withdraw(value)}
               onClose={() => setShowModal(false)} />;
           default:

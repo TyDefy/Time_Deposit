@@ -73,6 +73,7 @@ export interface Pool {
   availableInterest?: number;
   daysUntilAccess?: string;
   transactions: Array<Transaction>;
+  userTotalBalanceAndPenaltiesCDai?: number;
   cdaiBalance: number;
   userLastDepositDate?: Date,
   userLastWithdrawDate?: Date,
