@@ -4,10 +4,13 @@ const poolRegistryABI = require('../build/BasicRegistry.json');
 const BasicFactoryABI = require('../build/BasicFactory.json');
 const pcDaiABI = require('../build/pcToken.json');
 const pDaiABI = require('../build/pDai.json');
+const erc20ABI = require('../build/IERC20_Rinkeby.json');
+const pcTokenABI = require('../build/ICToken.json');
 
 let DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
 const etherlime = require('etherlime-lib');
+const ethers = require('ethers');
 
 Array.prototype.asyncForEach = async function (callback, thisArg) {
 	thisArg = thisArg || this
@@ -29,7 +32,7 @@ const deploy = async (network, secret) => {
 		network = 'local';
 	}
 
-	const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS;
+	const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS_PUBLIC_KEY;
 
 	if (network === 'local') {
 		const deployer = new etherlime.JSONRPCPrivateKeyDeployer(secret, 'http://localhost:8545/', defaultConfigs);
@@ -67,7 +70,7 @@ const deploy = async (network, secret) => {
 			pDaiInstance.contract.address,
 			"DAI",
 			pcDaiInstance.contract.address,
-			"cDai"
+			"cDAI"
 		);
 
 		await poolRegistryInstance.registerDeployer(
@@ -78,10 +81,10 @@ const deploy = async (network, secret) => {
 		let newUtilities = await (await poolFactoryInstance.deployUtility(
 			process.env.PENALTY_PERCENTAGE,
 			process.env.CYCLE_LENGTH,
+			process.env.CAN_WITHDRAW_IN_VIOLATION,
+			process.env.CAN_WITHDRAW_INTEREST_IN_VIOLATION,
 			process.env.PENALTY_NAME,
-			process.env.PENALTY_DESCRIPTION,
-			process.env.WITHDRAW_NAME,
-			process.env.WITHDRAW_DESCRIPTION,
+			process.env.WITHDRAW_NAME
 		)).wait();
 
 		const withdrawAddress = newUtilities.events[2].args.withdraw;
@@ -100,6 +103,10 @@ const deploy = async (network, secret) => {
 		`;
 		console.log(CONTRACT_ADDRESSES);
 
+		console.log("Withdraw address:" + withdrawAddress);
+		console.log("Penalty address:" + penaltyAddress + "\nPool address:");
+		console.log(newPool.events[3].args.pool)
+
 		const addresses = (process.env.ADDESSES_TO_MINT).split(',');
 
 		for (const address of addresses) {
@@ -112,22 +119,13 @@ const deploy = async (network, secret) => {
 
 		const deploy = (...args) => deployer.deployAndVerify(...args);
 
-		const pDaiInstance = await deploy(
-			pDaiABI,
-			false,
-			"PseudoDai",
-			"pDAI",
-			18
-		);
+		const dai = "0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa";
 
-		const pcDaiInstance = await deploy(
-			pcDaiABI,
-			false,
-			"pcToken",
-			"pcDai",
-			18,
-			pDaiInstance.contract.address
-		);
+		const pDaiInstance = deployer.wrapDeployedContract(erc20ABI, dai);
+
+		const cDai = "0x2acc448d73e8d53076731fea2ef3fc38214d0a7d";
+
+		const pcDaiInstance = deployer.wrapDeployedContract(pcTokenABI, cDai);
 
 		const poolRegistryInstance = await deploy(
 			poolRegistryABI,
@@ -140,9 +138,9 @@ const deploy = async (network, secret) => {
 			false,
 			ADMIN_ADDRESS,
 			poolRegistryInstance.contract.address,
-			pDaiInstance.contract.address,
+			dai,
 			"DAI",
-			pcDaiInstance.contract.address,
+			cDai,
 			"cDai"
 		);
 
@@ -152,7 +150,7 @@ const deploy = async (network, secret) => {
 		);
 
 		const CONTRACT_ADDRESSES = `
-			DAI_ADDRESS=${pDaiInstance.contract.address}
+			DAI_ADDRESS=${dai}
 			POOL_REGISTRY_ADDRESS=${poolRegistryInstance.contract.address}
 			POOL_FACTORY_ADDRESS=${poolFactoryInstance.contract.address}
 		`;
@@ -161,9 +159,14 @@ const deploy = async (network, secret) => {
 		const addresses = (process.env.ADDESSES_TO_MINT).split(',');
 
 		for (const address of addresses) {
-			await (await pDaiInstance.mintTo(address));
+			await (await pDaiInstance.allocateTo(
+                address,
+                ethers.utils.parseUnits("100", 18)
+            ));
 			console.log(`successfully minted to ${address}`);
 		}
+	} else if (network === 'mainnet') {
+	    console.log("Script & contracts are not ready for main net deployment")
 	}
 };
 

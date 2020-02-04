@@ -428,4 +428,8 @@ contract BasicPool is WhitelistAdminRole {
     function isPoolActive() public view returns(bool) {
         return isAlive_;
     }
+
+    function getWithdrawInstance() public view returns(address) {
+        return address(withdrawInstance_);
+    }
 }
