@@ -29,6 +29,9 @@ export const poolDeployed = createStandardAction('POOL_DEPLOYED')<{
   type: string,
   period: number,
   active: boolean,
+  interestWithdrawInViolationBlocked: boolean,
+  withdrawInViolationBlocked: boolean,
+  penaltyRate: number,
 }>();
 
 export const setCDaiRates = createAsyncAction(

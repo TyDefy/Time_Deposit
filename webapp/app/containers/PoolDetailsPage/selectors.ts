@@ -36,19 +36,9 @@ export const selectPool = createSelector(
     return pool;
   })
 
-
-export const selectPoolPenalty = createSelector(
-    selectPool,
-    selectUtilities,
-    (pool, utilities) => {
-      const utility = utilities[pool.withdraw];
-      return utility?.penaltyRate || 0;
-    })
-
 const selectPoolDetailsPage = createStructuredSelector<RootState, OwnProps, StateProps>({
   pool: selectPool,
   daiBalance: selectDaiBalance,
-  penaltyRate: selectPoolPenalty
 });
 
 export default selectPoolDetailsPage;

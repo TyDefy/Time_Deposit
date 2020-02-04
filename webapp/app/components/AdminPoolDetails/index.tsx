@@ -94,8 +94,8 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
   participants,
   totalInterest,
   feeRate,
-  pentalyRate,
   participantDetails,
+  penaltyRate,
   terminatePool,
   active
 }: OwnProps) => (
@@ -140,7 +140,7 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
         </Grid>
         <Grid item xs={2}>
           <Typography className={classes.label}>Penalty</Typography>
-          <Typography className={classes.value}>{`${(pentalyRate).toFixed(2)} %`}</Typography>
+          <Typography className={classes.value}>{`${(penaltyRate).toFixed(2)} %`}</Typography>
         </Grid>
       </Grid>
       <Grid container direction="row">
