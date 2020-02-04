@@ -57,6 +57,7 @@ export interface DispatchProps {
 }
 
 export interface Pool {
+  active: boolean;
   address: string;
   withdraw: string;
   name: string;
@@ -69,14 +70,13 @@ export interface Pool {
   contribution?: number;
   interestAccrued?: number;
   availableInterest?: number;
-  daysUntilAccess?: number;
+  daysUntilAccess?: string;
   transactions: Array<Transaction>;
   userTotalBalanceAndPenaltiesCDai?: number;
   cdaiBalance: number;
-  userContribution?: number,
-  usercDaiAmount?: number,
   userLastDepositDate?: Date,
   userLastWithdrawDate?: Date,
+  nextWithdrawDate?: Date,
 }
 
 export interface Utility {

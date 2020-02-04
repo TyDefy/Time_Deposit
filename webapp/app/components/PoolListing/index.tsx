@@ -9,7 +9,7 @@ import { Theme, createStyles, withStyles, WithStyles, Container, Typography, But
 import { Pool } from 'containers/App';
 import { forwardTo } from 'utils/history';
 
-const styles = ({spacing, palette}: Theme) =>
+const styles = ({ spacing, palette }: Theme) =>
   createStyles({
     pageHeader: {
       justifyContent: 'space-between',
@@ -26,7 +26,23 @@ const styles = ({spacing, palette}: Theme) =>
       float: "left",
       margin: "20px 0 0 8px",
       fontWeight: 'bold',
-    }
+    },
+    poolActive: {
+      verticalAlign: "top",
+      display: "inline-block",
+      float: "left",
+      padding: 8,
+      margin: "25px 20px 0 20px",
+      backgroundColor: 'green'
+    },
+    poolTerminated: {
+      verticalAlign: "top",
+      display: "inline-block",
+      float: "left",
+      padding: 8,
+      margin: "25px 20px 0 20px",
+      backgroundColor: 'red'
+    },
   });
 
 interface OwnProps extends WithStyles<typeof styles> {
@@ -44,6 +60,7 @@ const PoolListing: React.FunctionComponent<OwnProps> = ({ pools, classes }: OwnP
         <TableRow>
           <TableCell>Pool Name</TableCell>
           <TableCell>Type</TableCell>
+          <TableCell>Active</TableCell>
           <TableCell>Period</TableCell>
           <TableCell>Pool Cap</TableCell>
           <TableCell>Pool Participants</TableCell>
@@ -55,7 +72,11 @@ const PoolListing: React.FunctionComponent<OwnProps> = ({ pools, classes }: OwnP
           <TableRow key={p.address} onClick={() => forwardTo(`/admin/pool/${p.address}`)} className={classes.poolRow}>
             <TableCell>{p.name}</TableCell>
             <TableCell>{p.type}</TableCell>
-            <TableCell><Chip label={`${p.period} months`}/></TableCell>
+            <TableCell><Chip
+              className={(p.active) ? classes.poolActive : classes.poolTerminated}
+              label={(p.active) ? `Active` : `Terminated`} />
+            </TableCell>
+            <TableCell><Chip label={`${p.period} months`} /></TableCell>
             <TableCell>{p.balance}</TableCell>
             <TableCell>{p.participants}</TableCell>
             <TableCell>{`${((p.interestRate || 0) * 100).toFixed(2)} %`}</TableCell>

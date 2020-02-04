@@ -37,9 +37,24 @@ const styles = ({ spacing , palette }: Theme) =>
       padding: 8,
       margin: "25px 20px 0 20px"
     },
+    poolActive: {
+      verticalAlign: "top",
+      display: "inline-block",
+      float: "left",
+      padding: 8,
+      margin: "25px 20px 0 20px",
+      backgroundColor: 'green'
+    },
+    poolTerminated: {
+      verticalAlign: "top",
+      display: "inline-block",
+      float: "left",
+      padding: 8,
+      margin: "25px 20px 0 20px",
+      backgroundColor: 'red'
+    },
     currentInterest: {
       verticalAlign: "top",
-      
       display: "inline-block",
       float: "right",
       margin: "25px 20px 0 20px",
@@ -84,12 +99,14 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
   availableInterest,
   transactions,
   showModal,
+  active,
 }: OwnProps) => (
     <Container maxWidth='lg'>
       <Grid container direction='row' className={classes.poolDetailsHeaderRow}>
-        <Grid item xs={4}><Typography variant='h3' className={classes.poolName}>{name}</Typography></Grid>
-        <Grid item xs={4}><Chip className={classes.period} label={`${period} month(s)`} /></Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}><Typography variant='h3' className={classes.poolName}>{name}</Typography></Grid>
+        <Grid item xs={3}><Chip className={classes.period} label={`${period} month(s)`} /></Grid>
+        <Grid item xs={3}><Chip className={(active) ? classes.poolActive : classes.poolTerminated} label={(active) ? `Active` : `Terminated`} /></Grid>
+        <Grid item xs={3}>
           <Typography className={classes.currentInterest}>
             Current Interest:  
             <strong className={classes.percentageInterest}>

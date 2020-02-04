@@ -49,7 +49,7 @@ const PoolCardList: React.FunctionComponent<OwnProps> = ({
         <Typography variant="h5" className={classes.poolHeader}>
           {listLabel}
         </Typography>
-        <Grid container spacing={1} direction="row" justify='space-around' className={classes.poolGrid}>
+        <Grid container spacing={2} direction="row" justify='space-around' className={classes.poolGrid}>
           {pools.map(p => <PoolCard key={p.address} {...p} />)}
         </Grid>
       </Paper>

@@ -1,12 +1,12 @@
 import { BlockchainContext } from "blockchainContext";
 import { getContext, takeEvery, call, put, fork, take, select, delay } from "redux-saga/effects";
-import { 
-  poolDeployed, 
-  addPoolTx, 
-  connectMetamask, 
-  deposit, 
-  withdraw, 
-  withdrawInterest, 
+import {
+  poolDeployed,
+  addPoolTx,
+  connectMetamask,
+  deposit,
+  withdraw,
+  withdrawInterest,
   terminatePool,
   setUserTotalBalanceAmount, 
   setUserInfo, 
@@ -16,13 +16,13 @@ import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
 import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/BasicPool';
 import { Log } from "ethers/providers";
-import { formatEther, parseEther, BigNumber} from "ethers/utils";
+import { formatEther, parseEther, BigNumber } from "ethers/utils";
 import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
 import { setTxContext, setTxHash } from "containers/TransactionModal/actions";
 
-function* poolTerminateListener(poolContract: Pool) {
+function* terminatePoolListener(poolContract: Pool) {
   while (true) {
     const action = yield take(getType(terminatePool.request));
     const { signer }: BlockchainContext = yield getContext('blockchain');
@@ -37,7 +37,7 @@ function* poolTerminateListener(poolContract: Pool) {
             [writeableContract, writeableContract.terminatePool]);
           yield put(setTxHash(tx.hash));
           yield call([tx, tx.wait]);
-          yield put(terminatePool.success());
+          yield put(terminatePool.success({ poolAddress: poolContract.address }));
           yield put(enqueueSnackbar({
             message: 'Pool terminated successfully'
           }))
@@ -61,6 +61,25 @@ function* poolTerminateListener(poolContract: Pool) {
       yield put(deposit.failure('Please connect with metamask'));
       yield take(getType(connectMetamask.success));
     }
+  }
+}
+
+function* poolTerminatedListener(poolContract: Pool) {
+  const poolTerminatedChannel = eventChannel(emit => {
+    const terminateHandler = () => {
+      emit({
+        poolTerminated: 'pool terminated',
+      });
+    };
+    poolContract.on(poolContract.filters.PoolTerminated(null), terminateHandler);
+    return () => {
+      poolContract.off(poolContract.filters.PoolTerminated(null), terminateHandler);
+    };
+  });
+
+  while (true) {
+    yield take(poolTerminatedChannel);
+    yield put(terminatePool.success({ poolAddress: poolContract.address }));
   }
 }
 
@@ -304,29 +323,30 @@ function* getUserInfoListener(poolContract: Pool) {
   while (true) {
     const { ethAddress }: BlockchainContext = yield getContext('blockchain');
     var lastDeposit, lastWithdraw;
-    
+
     if (ethAddress) {
-      try{
+      try {
+        const userInfo = yield call([poolContract, poolContract.getUserInfo], ethAddress);
+        lastDeposit = formatEther(userInfo[2]);
+        lastWithdraw = formatEther(userInfo[3]);
 
-      const userInfo = yield call([poolContract, poolContract.getUserInfo], ethAddress);
-      lastDeposit  =  new Date(parseInt(formatEther(userInfo[2]).substr(10, 20)) *1000);
-      lastWithdraw  =  new Date(parseInt(formatEther(userInfo[3]).substr(10, 20)) *1000);
-
-      } catch (e){
+        if (lastDeposit !== "0.0" && lastWithdraw !== "0.0") {
+          yield put(setUserInfo({
+            lastDepositDate: new Date(parseInt(lastDeposit.substr(10, 20)) * 1000),
+            lastWithdrawDate: new Date(parseInt(lastWithdraw.substr(10, 20)) * 1000),
+            poolAddress: poolContract.address
+          }));
+        }
+      } catch (e) {
         console.log('There was an error getting the user info');
         console.log(e);
-        return;
       }
-
-      yield put(setUserInfo({
-        lastDepositDate: lastDeposit,
-        lastWithdrawDate: lastWithdraw,
-        poolAddress: poolContract.address
-      }));
-    
-    yield delay(15000);
+      yield delay(15000);
+    } else {
+      console.log('waiting for user to connect')
+      yield take(connectMetamask.success);
+    }
   }
-}
 }
 
 function* poolWatcherSaga(action) {
@@ -387,12 +407,22 @@ function* poolWatcherSaga(action) {
     console.log(error);
   }
 
+  const terminateLogs: Log[] = yield call([provider, provider.getLogs], {
+    ...poolContract.filters.PoolTerminated(null),
+    fromBlock: 0,
+    toBlock: 'latest',
+  });
+
+  if (terminateLogs.length > 0) {
+    yield put(terminatePool.success({ poolAddress: poolContract.address }));
+  }
   yield fork(poolTransactionListener, poolContract);
   yield fork(poolDepositListener, poolContract);
   yield fork(poolWithdrawListener, poolContract);
   yield fork(poolWithdrawInterestListener, poolContract);
   yield fork(poolTerminateListener, poolContract);
   yield fork(getUserTotalBalanceListener, poolContract);
+  yield fork(terminatePoolListener, poolContract);
   yield fork(getUserInfoListener, poolContract);
 }
 

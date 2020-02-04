@@ -38,6 +38,7 @@ interface OwnProps extends WithStyles<typeof styles> {
   daiBalance: number;
   currentInterestRate: number;
   nextWithdrawlDate: Date;
+  period: number,
   onClose(): void;
   onSubmit(amount: number): void;
 }
@@ -48,6 +49,7 @@ const InvestModal: React.FC<OwnProps> = ({
   type,
   currentInterestRate,
   nextWithdrawlDate,
+  period,
   onClose,
   onSubmit,
   classes
@@ -63,8 +65,12 @@ const InvestModal: React.FC<OwnProps> = ({
       <Typography className={classes.value}>{daiBalance.toFixed(2)}</Typography>
       <Typography className={classes.label}>Current Interest Rate</Typography>
       <Typography className={classes.value}>{(currentInterestRate * 100).toFixed(2)}</Typography>
-      <Typography className={classes.label}>Next Withdraw Date</Typography>
-      <Typography className={classes.value}>{dayjs(nextWithdrawlDate).format('YYYY-MM-DD')}</Typography>
+      {period > 0 ? <div>
+                    <Typography className={classes.label}>Next Withdraw Date</Typography>
+                    <Typography className={classes.value}>{dayjs(nextWithdrawlDate).format('YYYY-MM-DD')}</Typography>
+                    </div> : null
+
+      }
       <Typography className={classes.label}>Amount to invest</Typography>
       <TextField type='number' value={value} onChange={(e) => setValue(parseInt(e.target.value))}/>
       <Grid container direction='row' justify='space-around' className={classes.buttonBar}>
