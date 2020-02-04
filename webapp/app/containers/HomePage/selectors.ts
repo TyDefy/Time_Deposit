@@ -24,7 +24,7 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
     const balance = p.transactions?.reduce((poolBalance, t) =>
     t.type === 'Deposit' ? poolBalance += t.amount : poolBalance -= t.amount, 0) || 0;
     
-   // const penaltyAmount = p.userTotalBalanceAndPenaltiesCDai ? (p.userTotalBalanceAndPenaltiesCDai - cdaiByUser): 0;
+   const penaltyAmount = p.userTotalBalanceAndPenaltiesCDai ? (p.userTotalBalanceAndPenaltiesCDai - cdaiByUser): 0;
 
     return {
       ...p,
@@ -33,8 +33,8 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
       cdaiBalance: cdaiBalancePool,
       participants: new Set(p.transactions?.map(t => t.userAddress)).size,
       contribution: contribution,
-      interestAccrued: (cdaiByUser * exchangeRate) - contribution,
-      availableInterest: p.period === 0 ? (cdaiByUser * exchangeRate) - contribution : 0
+      interestAccrued: ((cdaiByUser + penaltyAmount) * exchangeRate) - contribution,
+      availableInterest: p.period === 0 ? ((cdaiByUser + penaltyAmount) * exchangeRate) - contribution : 0
     }
   })
 );
