@@ -5,9 +5,9 @@
  */
 
 import React from 'react';
-import { Theme, createStyles, withStyles, WithStyles, Button, Typography, Container, MenuItem, Grid } from '@material-ui/core';
+import { Theme, createStyles, withStyles, WithStyles, Button, Typography, Container, MenuItem, Grid, InputLabel } from '@material-ui/core';
 import { Form, FastField, Field } from 'formik';
-import { TextField } from 'formik-material-ui';
+import { TextField, Switch } from 'formik-material-ui';
 import { Utility } from 'containers/App';
 
 const styles = ({ spacing }: Theme) =>
@@ -32,11 +32,10 @@ interface OwnProps extends WithStyles<typeof styles> {
   poolTypes: Array<{ value: number, label: string }>,
   utilities: Array<Utility>,
   values: any,
-  setFieldValue(field: string, value: any): void,
 }
 
 const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
-  { classes, poolTypes, utilities, values, setFieldValue }: OwnProps,
+  { classes, poolTypes, utilities, values }: OwnProps,
 ) => {
   const isNewUtility = values.utilityAddress === 'new';
 
@@ -81,22 +80,17 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
           }}>
           {utilities.map(utility => (
             <MenuItem key={utility.withdrawAddress} value={utility.withdrawAddress}>
-              {utility.withdrawAddress === 'new' ? 
-                'New' : 
+              {utility.withdrawAddress === 'new' ?
+                'New' :
                 `${utility.withdrawName} - ${utility.cycleLength} months - ${utility.penaltyName} - ${utility.penaltyRate} %`}
             </MenuItem>
           ))}
         </Field>
-        { isNewUtility &&
+        {isNewUtility &&
           <>
             <Field
               name='withdrawName'
               label='Withdraw Name'
-              component={TextField}
-              disabled={!isNewUtility} />
-            <Field
-              name='withdrawDescription'
-              label='Withdraw Description'
               component={TextField}
               disabled={!isNewUtility} />
             <Field
@@ -110,11 +104,6 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
               component={TextField}
               disabled={!isNewUtility} />
             <Field
-              name='penaltyDescription'
-              label='Penalty Description'
-              component={TextField}
-              disabled={!isNewUtility} />
-            <Field
               name='penaltyRate'
               type='number'
               label='Penalty'
@@ -124,6 +113,22 @@ const PoolDetailsForm: React.FunctionComponent<OwnProps> = (
                 max: 100,
                 step: 1
               }}
+              disabled={!isNewUtility} />
+            <InputLabel htmlFor='canWithdrawInViolation'>
+              Can Withdraw In Violation
+            </InputLabel>
+            <Field
+              name='canWithdrawInViolation'
+              id='canWithdrawInViolation'
+              component={Switch}
+              disabled={!isNewUtility} />
+            <InputLabel htmlFor='canWithdrawInterestInViolation'>
+              Can Withdraw Interest In Violation
+            </InputLabel>
+            <Field
+              name='canWithdrawInterestInViolation'
+              id='canWithdrawInterestInViolation'
+              component={Switch}
               disabled={!isNewUtility} />
           </>
         }
