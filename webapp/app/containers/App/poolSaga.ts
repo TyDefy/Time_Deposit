@@ -420,7 +420,7 @@ function* poolWatcherSaga(action) {
   yield fork(poolDepositListener, poolContract);
   yield fork(poolWithdrawListener, poolContract);
   yield fork(poolWithdrawInterestListener, poolContract);
-  yield fork(poolTerminateListener, poolContract);
+  yield fork(poolTerminatedListener, poolContract);
   yield fork(getUserTotalBalanceListener, poolContract);
   yield fork(terminatePoolListener, poolContract);
   yield fork(getUserInfoListener, poolContract);

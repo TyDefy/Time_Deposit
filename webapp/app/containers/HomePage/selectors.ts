@@ -19,19 +19,14 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
       .reduce((poolCdaiBalance, t) => t.type === 'Deposit' ? poolCdaiBalance += t.cdaiAmount : poolCdaiBalance -= t.cdaiAmount, 0) : 0;
 
     const contribution =  ethAddress ?
-    p.transactions?.filter(t => t.userAddress === ethAddress)
+    p.transactions?.filter(t => t.userAddress.toUpperCase() === ethAddress.toUpperCase())
       .reduce((contribution, t) => t.type === 'Deposit' ? contribution += t.amount : contribution -= t.amount, 0) : 0;
 
-      const contribution = ethAddress ?
-        p.transactions?.filter(t => t.userAddress.toLowerCase() === ethAddress.toLowerCase())
-          .reduce((contribution, t) => t.type === 'Deposit' ? contribution += t.amount : contribution -= t.amount, 0) : 0;
-     
-
-      const balance = p.transactions?.reduce((poolBalance, t) =>
+    const balance = p.transactions?.reduce((poolBalance, t) =>
         t.type === 'Deposit' ? poolBalance += t.amount : poolBalance -= t.amount, 0) || 0;
     
     
-   const penaltyAmount = p.userTotalBalanceAndPenaltiesCDai ? (p.userTotalBalanceAndPenaltiesCDai - cdaiByUser): 0;
+    const penaltyAmount = p.userTotalBalanceAndPenaltiesCDai ? (p.userTotalBalanceAndPenaltiesCDai - cdaiByUser): 0;
 
       var lastWithdrawDate = p.userLastWithdrawDate;
       var withdrawDate;
@@ -49,8 +44,8 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
         cdaiBalance: cdaiBalancePool,
         participants: new Set(p.transactions?.map(t => t.userAddress)).size,
         contribution: contribution,
-            interestAccrued: ((cdaiByUser + penaltyAmount) * exchangeRate) - contribution,
-      availableInterest: p.period === 0 ? ((cdaiByUser + penaltyAmount) * exchangeRate) - contribution : 0
+        interestAccrued: ((cdaiByUser + penaltyAmount) * exchangeRate) - contribution,
+        availableInterest: p.period === 0 ? ((cdaiByUser + penaltyAmount) * exchangeRate) - contribution : 0,
         daysUntilAccess: daysUntilAccess,
       }
     })
