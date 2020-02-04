@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "etherlime ganache --networkId=1337 --output=none",
+    "start": "etherlime ganache --networkId=1337",
     "start:dev": "run-p start deploy:local",
     "build": "etherlime compile --runs=999 --exportAbi && yarn generate-typings",
     "deploy:local": "etherlime deploy --runs=500",

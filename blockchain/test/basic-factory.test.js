@@ -100,6 +100,68 @@ describe("Basic pool factory", async () => {
             );
         });
 
+        it("Registers a cyclic withdraw", async () => {
+            let deployedUtilityTx = await(await factoryInstance.from(admin).deployUtility(
+                test_settings.penalty.percentage,
+                0,
+                test_settings.cyclicWithdraw.withdrawViolation,
+                test_settings.cyclicWithdraw.interestWithdrawViolation,
+                test_settings.registrySettings.penalty.name,
+                test_settings.registrySettings.withdraw.name
+            )).wait();
+
+            let utilityDetails = await registryInstance.from(admin).utilityDetails(
+                deployedUtilityTx.events[2].args.withdraw
+            );
+
+            assert.equal(
+                utilityDetails[0],
+                test_settings.registrySettings.withdraw.name,
+                "Withdraw contract name incorrect"
+            );
+            assert.equal(
+                utilityDetails[1],
+                test_settings.registrySettings.withdrawRolling.type,
+                "Withdraw contract type incorrect"
+            );
+            assert.equal(
+                utilityDetails[2],
+                true,
+                "Withdraw contract activity incorrect"
+            );
+        });
+
+        it("Registers a rolling withdraw", async () => {
+            let deployedUtilityTx = await(await factoryInstance.from(admin).deployUtility(
+                test_settings.penalty.percentage,
+                10,
+                test_settings.cyclicWithdraw.withdrawViolation,
+                test_settings.cyclicWithdraw.interestWithdrawViolation,
+                test_settings.registrySettings.penalty.name,
+                test_settings.registrySettings.withdraw.name
+            )).wait();
+
+            let utilityDetails = await registryInstance.from(admin).utilityDetails(
+                deployedUtilityTx.events[2].args.withdraw
+            );
+
+            assert.equal(
+                utilityDetails[0],
+                test_settings.registrySettings.withdraw.name,
+                "Withdraw contract name incorrect"
+            );
+            assert.equal(
+                utilityDetails[1],
+                test_settings.registrySettings.withdraw.type,
+                "Withdraw contract type incorrect"
+            );
+            assert.equal(
+                utilityDetails[2],
+                true,
+                "Withdraw contract activity incorrect"
+            );
+        });
+
         it("Can deploy a basic pool", async () => {
             let deployedUtilityTx = await(await factoryInstance.from(admin).deployUtility(
                 test_settings.penalty.percentage,

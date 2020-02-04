@@ -61,12 +61,17 @@ const test_settings = {
         penalty: {
             name: "15% flat penalty",
             implementationType: "A flat rate fee of 15% of withdraw amount",
-            type: 2
+            type: 3
         },
         withdraw: {
             name: "Cyclic withdraw",
             implementationType: "Cyclic penalty withdraw",
             type: 1
+        },
+        withdrawRolling: {
+            name: "Cyclic withdraw",
+            implementationType: "Cyclic penalty withdraw",
+            type: 2
         },
         pool: {
             name: "3 Month Savings Pool",

@@ -131,12 +131,45 @@ contract BasicFactory is WhitelistAdminRole {
             _penaltyPercentage
         );
 
-        CyclicWithdraw newWithdraw = new CyclicWithdraw(
-            address(newPenalty),
-            _cycleLength,
-            _canWithdrawInViolation,
-            _canWithdrawInterestInViolation
-        );
+        IWithdraw newWithdraw;
+
+        if(_cycleLength == 0) {
+            RollingWithdraw newRollingWithdraw = new RollingWithdraw(
+                address(newPenalty),
+                _cycleLength,
+                _canWithdrawInViolation,
+                _canWithdrawInterestInViolation
+            );
+            newWithdraw = IWithdraw(newRollingWithdraw);
+
+            require(
+                registryInstance_.registerUtility(
+                    msg.sender,
+                    address(newWithdraw),
+                    _withdrawName,
+                2
+                ),
+                "Penalty registration failed"
+            );
+        } else {
+            CyclicWithdraw newCyclicWithdraw = new CyclicWithdraw(
+                address(newPenalty),
+                _cycleLength,
+                _canWithdrawInViolation,
+                _canWithdrawInterestInViolation
+            );
+            newWithdraw = IWithdraw(newCyclicWithdraw);
+
+            require(
+                registryInstance_.registerUtility(
+                    msg.sender,
+                    address(newWithdraw),
+                    _withdrawName,
+                    1
+                ),
+                "Penalty registration failed"
+            );
+        }
 
         require(
             registryInstance_.registerUtility(
@@ -144,15 +177,6 @@ contract BasicFactory is WhitelistAdminRole {
                 address(newPenalty),
                 _penaltyName,
                 3
-            ),
-            "Penalty registration failed"
-        );
-        require(
-            registryInstance_.registerUtility(
-                msg.sender,
-                address(newWithdraw),
-                _withdrawName,
-                1
             ),
             "Penalty registration failed"
         );
@@ -173,61 +197,4 @@ contract BasicFactory is WhitelistAdminRole {
             address(newPenalty)
         );
     }
-
-    // function deployRollingUtility(
-    //     uint8 _penaltyPercentage,
-    //     uint8 _cycleLength,
-    //     bool _canWithdrawInViolation,
-    //     bool _canWithdrawInterestInViolation,
-    //     string memory _penaltyName,
-    //     string memory _withdrawName
-    // )
-    //     public
-    //     onlyWhitelistAdmin()
-    //     returns(address, address)
-    // {
-    //     BasicPenalty newPenalty = new BasicPenalty(
-    //         _penaltyPercentage
-    //     );
-
-    //     RollingWithdraw newWithdraw = new RollingWithdraw(
-    //         address(newPenalty),
-    //         _cycleLength,
-    //         _canWithdrawInViolation,
-    //         _canWithdrawInterestInViolation
-    //     );
-
-    //     require(
-    //         registryInstance_.registerUtility(
-    //             msg.sender,
-    //             address(newPenalty),
-    //             _penaltyName,
-    //             3
-    //         ),
-    //         "Penalty registration failed"
-    //     );
-    //     require(
-    //         registryInstance_.registerUtility(
-    //             msg.sender,
-    //             address(newWithdraw),
-    //             _withdrawName,
-    //             2
-    //         ),
-    //         "Penalty registration failed"
-    //     );
-
-    //     emit DeployedUtilities(
-    //         address(newWithdraw),
-    //         _cycleLength,
-    //         _withdrawName,
-    //         address(newPenalty),
-    //         _penaltyPercentage,
-    //         _penaltyName
-    //     );
-
-    //     return(
-    //         address(newWithdraw),
-    //         address(newPenalty)
-    //     );
-    // }
 }
