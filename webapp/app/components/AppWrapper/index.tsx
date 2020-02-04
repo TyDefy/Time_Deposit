@@ -108,7 +108,7 @@ const AppWrapper: React.FunctionComponent<Props> = ({
         <Container maxWidth='lg'>
           <Toolbar disableGutters={true} className={classes.toolbar}>
             <Link className={classes.appBarLogo} to="/">
-              <ReactSVG src="/Time_Deposit_logo.svg" />
+              <ReactSVG src="/Time_Deposit_2.svg" />
             </Link>
             <div className={classes.navAccount}>
               <List className={classes.navList}>
