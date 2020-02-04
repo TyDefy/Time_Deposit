@@ -100,6 +100,10 @@ const deploy = async (network, secret) => {
 		`;
 		console.log(CONTRACT_ADDRESSES);
 
+		console.log("Withdraw address:" + withdrawAddress);
+		console.log("Penalty address:" + penaltyAddress + "\nPool address:");
+		console.log(newPool.events[3].args.pool)
+
 		const addresses = (process.env.ADDESSES_TO_MINT).split(',');
 
 		for (const address of addresses) {
