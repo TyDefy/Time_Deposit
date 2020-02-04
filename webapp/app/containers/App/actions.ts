@@ -51,7 +51,22 @@ export const setUserInfo = createStandardAction('SET_USER_INFO')<{
 export const createPool = createAsyncAction(
   '@TX_REQUEST/CREATE_POOL',
   '@TX_SUCCESS/CREATE_POOL',
-  '@TX_FAILURE/CREATE_POOL')<any, undefined, string>();
+  '@TX_FAILURE/CREATE_POOL')<{
+    name: string,
+    description: string,
+    type: number,
+    utilityAddress: string,
+    cycleLength: number,
+    withdrawName: string,
+    penaltyAddress: string,
+    penaltyName: string,
+    penaltyRate: number,
+    feeRate: number,
+    canWithdrawInViolation: boolean,
+    canWithdrawInterestInViolation: boolean,
+  }, 
+  undefined, 
+  string>();
 
 export const addPoolTx = createStandardAction('ADD_POOL_TX')<{
   poolAddress: string,
@@ -98,6 +113,8 @@ export const utilityDeployed = createStandardAction('UTILITY_DEPLOYED')<{
   penaltyAddress: string,
   penaltyRate: number,
   penaltyName: string,
+  canWithdrawInViolation: boolean,
+  canWithdrawInterestInViolation: boolean,
 }>();
 
 export const terminatePool = createAsyncAction(

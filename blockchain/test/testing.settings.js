@@ -13,7 +13,8 @@ let basicFactoryAbi = require('../build/BasicFactory.json');
 const test_settings = {
     cyclicWithdraw: {
         cycleLength: "10",
-        withdrawViolation: true
+        withdrawViolation: true,
+        interestWithdrawViolation: true
     },
     penalty: {
         percentage: 15
@@ -31,7 +32,8 @@ const test_settings = {
         interestEarned: "2244038717306567",
         penaltyShare: "710569455138470517047",
         penaltyShareMinusFee: "568455564110776413638",
-        penaltyShareMinusFeePlusInterest: "568457808149493720205"
+        penaltyShareMinusFeePlusInterest: "568457808149493720205",
+        userCdaiBalanceWithPenalty: "5447699156061607297361"
     },
     pDaiSettings: {
         name: "pDai",
