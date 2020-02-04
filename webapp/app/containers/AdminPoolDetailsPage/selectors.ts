@@ -2,7 +2,7 @@ import { createStructuredSelector, createSelector } from 'reselect';
 import { RootState } from 'containers/App/types';
 import { StateProps } from '.';
 import { OwnProps } from 'containers/PoolDetailsPage';
-import { selectPool, selectUtilities } from 'containers/PoolDetailsPage/selectors';
+import { selectPool } from 'containers/PoolDetailsPage/selectors';
 
 /**
  * Default selector used by AdminPoolDetailsPage
@@ -10,10 +10,8 @@ import { selectPool, selectUtilities } from 'containers/PoolDetailsPage/selector
 
 const selectAdminPoolDetails = createSelector(
   selectPool,
-  selectUtilities,
-  (pool, utilities) => {
+  (pool) => {
     const participants = new Set(pool.transactions?.map(p => p.userAddress))
-    const penaltyRate = utilities[pool.withdraw]?.penaltyRate || 0;
     const poolParticipants = [...participants]
       .map(participant => {
         const userTransactions = pool.transactions?.filter(t => t.userAddress === participant);
@@ -32,7 +30,6 @@ const selectAdminPoolDetails = createSelector(
       participantDetails: poolParticipants,
       totalInterest: poolParticipants.reduce((totalInterest, participant) => totalInterest += participant.interest, 0), 
       feeRate: 0, 
-      pentalyRate: penaltyRate
     }
   }
 )
