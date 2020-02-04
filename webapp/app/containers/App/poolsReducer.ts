@@ -57,6 +57,15 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         }
       }
     }
+    case getType(AppActions.setUserTotalBalanceAmount): {
+      return {
+        ...state,
+        [action.payload.poolAddress]: {
+          ...state[action.payload.poolAddress],
+          userTotalBalanceAndPenaltiesCDai: action.payload.totalBalance,
+        }
+      }
+    }
     case getType(AppActions.addPoolTx): {
       return {
         ...state,

@@ -67,12 +67,13 @@ export interface Pool {
   balance: number;
   participants: number;
   interestRate?: number;
-  penaltyRate?: number;
+  penaltyRate: number;
   contribution?: number;
   interestAccrued?: number;
   availableInterest?: number;
   daysUntilAccess?: string;
   transactions: Array<Transaction>;
+  userTotalBalanceAndPenaltiesCDai?: number;
   cdaiBalance: number;
   userLastDepositDate?: Date,
   userLastWithdrawDate?: Date,

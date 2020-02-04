@@ -29,6 +29,9 @@ export const poolDeployed = createStandardAction('POOL_DEPLOYED')<{
   type: string,
   period: number,
   active: boolean,
+  interestWithdrawInViolationBlocked: boolean,
+  withdrawInViolationBlocked: boolean,
+  penaltyRate: number,
 }>();
 
 export const setCDaiRates = createAsyncAction(
@@ -41,6 +44,13 @@ export const setCDaiRates = createAsyncAction(
   interestRate: number
 },
 string>();
+
+export const setUserTotalBalanceAmount = createStandardAction(
+  'SET_USER_TOTAL_BALANCE_AMOUNT')
+  <{
+    poolAddress: string,
+    totalBalance: number
+  }>();
 
 export const setUserInfo = createStandardAction('SET_USER_INFO')<{
     lastDepositDate: Date;
