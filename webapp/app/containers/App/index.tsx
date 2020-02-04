@@ -86,8 +86,8 @@ export interface Utility {
   penaltyAddress: string,
   penaltyRate: number,
   penaltyName: string,
-  canWithdrawInViolation: true,
-  canWithdrawInterestInViolation: true,
+  canWithdrawInViolation: boolean,
+  canWithdrawInterestInViolation: boolean,
 }
 
 type Props = StateProps & DispatchProps & OwnProps & RouteComponentProps;
