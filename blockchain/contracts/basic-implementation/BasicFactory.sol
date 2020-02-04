@@ -6,7 +6,7 @@ import { CyclicWithdraw } from "./CyclicWithdraw.sol";
 import { RollingWithdraw } from "./RollingWithdraw.sol";
 import { IWithdraw } from "../interfaces/IWithdraw.sol";
 import { BasicPenalty } from "./BasicPenalty.sol";
-import { WhitelistAdminRole } from "../../node_modules/openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
+import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
 
 contract BasicFactory is WhitelistAdminRole {
     address internal collateral_;

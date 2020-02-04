@@ -1,7 +1,7 @@
 pragma solidity 0.5.10;
 
-import { ERC20 } from "../node_modules/openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
-import { SafeMath } from "../node_modules/openzeppelin-solidity/contracts/math/SafeMath.sol";
+import { ERC20 } from "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
+import { SafeMath } from "openzeppelin-solidity/contracts/math/SafeMath.sol";
 import { ICToken } from "./interfaces/ICToken.sol";
 import { IERC20 } from "./interfaces/IERC20.sol";
 
