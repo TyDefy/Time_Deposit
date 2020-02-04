@@ -8,7 +8,8 @@ import {
   withdraw,
   withdrawInterest,
   terminatePool,
-  setUserInfo,
+  setUserTotalBalanceAmount, 
+  setUserInfo, 
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
@@ -230,7 +231,32 @@ function* poolWithdrawInterestListener(poolContract: Pool) {
     }
   }
 }
+// Total Balance + Penalties
+function* getUserTotalBalanceListener(poolContract: Pool) {
+  while (true) {
+    const { ethAddress }: BlockchainContext = yield getContext('blockchain');
+    var totalBalanceValue;
+    if (ethAddress) {
+      try{
+      const totalBalance = yield call([poolContract, poolContract.getTotalBalance], ethAddress);
+      totalBalanceValue  =  Number(formatEther(totalBalance));
+       
+      } catch (e){
+        console.log('There was an error getting the user interest amount');
+      }
 
+      yield put(setUserTotalBalanceAmount({
+        poolAddress: poolContract.address,
+        totalBalance: totalBalanceValue
+      }));
+    }
+
+    yield delay(30000);
+  }
+}
+
+
+ 
 function* poolTransactionListener(poolContract: Pool) {
   const { provider }: BlockchainContext = yield getContext('blockchain');
 
@@ -359,14 +385,13 @@ function* poolWatcherSaga(action) {
     const withdrawTxActions = yield Promise.all(withdrawLogs.map(
       async log => {
         const parsedWithdraw = poolContract.interface.parseLog(log).values;
-
         return addPoolTx({
           poolAddress: poolContract.address,
           userAddress: parsedWithdraw.user,
           type: 'Withdraw',
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
-          amount: Number(formatEther(parsedWithdraw.withdrawAmount.add(parsedWithdraw.penaltyAmount))),
+          amount: Number(formatEther(parsedWithdraw.amountInDai.add(parsedWithdraw.penalty))),
           cdaiAmount: Number(formatEther(parsedWithdraw.amountIncDai))
         })
       }));
@@ -394,8 +419,9 @@ function* poolWatcherSaga(action) {
   yield fork(poolDepositListener, poolContract);
   yield fork(poolWithdrawListener, poolContract);
   yield fork(poolWithdrawInterestListener, poolContract);
-  yield fork(terminatePoolListener, poolContract);
   yield fork(poolTerminatedListener, poolContract);
+  yield fork(getUserTotalBalanceListener, poolContract);
+  yield fork(terminatePoolListener, poolContract);
   yield fork(getUserInfoListener, poolContract);
 }
 

@@ -18,7 +18,8 @@ export const selectPool = createSelector(
   selectInterestRate, 
   (allPools, ethAddress, selectedPool, exchangeRate, interestRate) => {
     const pool = allPools.filter(p => p.address === selectedPool)[0];
-    pool.transactions = pool.transactions?.filter(t => t.userAddress.toLowerCase() === ethAddress);
+    pool.transactions = pool.transactions?.filter(t => t.userAddress.toLowerCase() === ethAddress)
+      .sort((a, b) => (a.time < b.time) ? -1 : 1);
     pool.interestRate = interestRate;
     pool.contribution = pool.transactions?.reduce((total, transaction) => 
       (transaction.type === 'Deposit') ? total += transaction.amount : total -= transaction.amount, 0);
@@ -35,19 +36,9 @@ export const selectPool = createSelector(
     return pool;
   })
 
-
-export const selectPoolPenalty = createSelector(
-    selectPool,
-    selectUtilities,
-    (pool, utilities) => {
-      const utility = utilities[pool.withdraw];
-      return utility?.penaltyRate || 0;
-    })
-
 const selectPoolDetailsPage = createStructuredSelector<RootState, OwnProps, StateProps>({
   pool: selectPool,
   daiBalance: selectDaiBalance,
-  penaltyRate: selectPoolPenalty
 });
 
 export default selectPoolDetailsPage;

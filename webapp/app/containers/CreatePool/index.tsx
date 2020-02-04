@@ -27,12 +27,13 @@ interface DispatchProps {
     utilityAddress,
     cycleLength,
     withdrawName,
-    withdrawDescription,
     penaltyAddress,
-    penaltyDescription,
     penaltyName,
     penaltyRate,
-    feeRate}): void
+    feeRate,
+    canWithdrawInViolation,
+    canWithdrawInterestInViolation
+  }): void
 }
 
 export interface StateProps {
@@ -52,7 +53,6 @@ const CreatePool: React.FunctionComponent<Props> = ({ utilities, createPool }: P
   // });
   const poolTypes = [{ value: 0, label: 'cDAI' }]
 
-
   return (
     <Formik
       initialValues={{
@@ -62,33 +62,32 @@ const CreatePool: React.FunctionComponent<Props> = ({ utilities, createPool }: P
         utilityAddress: 'new',
         cycleLength: 0,
         withdrawName: 'new',
-        withdrawDescription: 'new',
         penaltyAddress: 'new',
-        penaltyDescription: 'new',
         penaltyName: 'new',
         penaltyRate: 0,
         feeRate: 0,
+        canWithdrawInViolation: false,
+        canWithdrawInterestInViolation: false,
       }}
       // validationSchema={CreatePoolSchema}
       onSubmit={(values, actions) => {
         createPool(values)
       }}
-      render={({values, setFieldValue}) =>
+      render={({values}) =>
         <PoolDetailsForm
           utilities={[{
             withdrawAddress: 'new',
             cycleLength: 0,
             withdrawName: 'new',
-            withdrawDescription: 'new',
             penaltyAddress: 'new',
             penaltyRate: 0,
-            penaltyDescription: 'new',
             penaltyName: 'new',
+            canWithdrawInViolation: true,
+            canWithdrawInterestInViolation: true,
           },
           ...utilities]}
           poolTypes={poolTypes}
           values={values}
-          setFieldValue={setFieldValue}
         />
       }
     />

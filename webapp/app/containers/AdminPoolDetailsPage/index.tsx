@@ -39,7 +39,6 @@ export interface PoolParticipant {
 export interface PoolDetails extends Pool {
   totalInterest: number;
   feeRate: number;
-  pentalyRate: number;
   participantDetails: Array<PoolParticipant>;
 }
 

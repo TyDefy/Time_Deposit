@@ -97,6 +97,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
   contribution,
   interestAccrued,
   availableInterest,
+  description,
   transactions,
   showModal,
   active,
@@ -115,6 +116,13 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
           </Typography>
         </Grid>
       </Grid>
+      <br/>
+      <Grid container direction='row' spacing={0} className={classes.poolDetailsRow}>
+        <Grid item xs={12}>
+          <Typography className={classes.value}>{description}</Typography>
+        </Grid>
+      </Grid>
+      <br/>
       <Grid container direction='row' spacing={0} className={classes.poolDetailsRow}>
         <Grid item xs={4}>
           <Typography className={classes.label}>Currency Type</Typography>

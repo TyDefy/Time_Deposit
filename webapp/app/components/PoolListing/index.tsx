@@ -32,7 +32,6 @@ const styles = ({ spacing, palette }: Theme) =>
       display: "inline-block",
       float: "left",
       padding: 8,
-      margin: "25px 20px 0 20px",
       backgroundColor: 'green'
     },
     poolTerminated: {
@@ -40,7 +39,6 @@ const styles = ({ spacing, palette }: Theme) =>
       display: "inline-block",
       float: "left",
       padding: 8,
-      margin: "25px 20px 0 20px",
       backgroundColor: 'red'
     },
   });

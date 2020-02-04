@@ -94,7 +94,8 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
   participants,
   totalInterest,
   feeRate,
-  pentalyRate,
+  penaltyRate,
+  description,
   participantDetails,
   terminatePool,
   active
@@ -115,6 +116,11 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
               {`${((interestRate || 0) * 100).toFixed(2)} %`}
             </strong>
           </Typography>
+        </Grid>
+      </Grid>
+      <Grid container direction='row' spacing={0} className={classes.poolDetailsRow}>
+        <Grid item xs={12}>
+          <Typography className={classes.value}>{description}</Typography>
         </Grid>
       </Grid>
       <Grid container direction='row' className={classes.poolDetailsRow}>
@@ -140,7 +146,7 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
         </Grid>
         <Grid item xs={2}>
           <Typography className={classes.label}>Penalty</Typography>
-          <Typography className={classes.value}>{`${(pentalyRate).toFixed(2)} %`}</Typography>
+          <Typography className={classes.value}>{`${(penaltyRate).toFixed(2)} %`}</Typography>
         </Grid>
       </Grid>
       <Grid container direction="row">
