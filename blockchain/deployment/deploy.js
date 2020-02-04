@@ -4,10 +4,13 @@ const poolRegistryABI = require('../build/BasicRegistry.json');
 const BasicFactoryABI = require('../build/BasicFactory.json');
 const pcDaiABI = require('../build/pcToken.json');
 const pDaiABI = require('../build/pDai.json');
+const erc20ABI = require('../build/IERC20_Rinkeby.json');
+const pcTokenABI = require('../build/ICToken.json');
 
 let DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
 const etherlime = require('etherlime-lib');
+const ethers = require('ethers');
 
 Array.prototype.asyncForEach = async function (callback, thisArg) {
 	thisArg = thisArg || this
@@ -116,22 +119,13 @@ const deploy = async (network, secret) => {
 
 		const deploy = (...args) => deployer.deployAndVerify(...args);
 
-		const pDaiInstance = await deploy(
-			pDaiABI,
-			false,
-			"PseudoDai",
-			"pDAI",
-			18
-		);//0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa
+		const dai = "0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa";
 
-		const pcDaiInstance = await deploy(
-			pcDaiABI,
-			false,
-			"pcToken",
-			"pcDai",
-			18,
-			pDaiInstance.contract.address
-		);//0x2acc448d73e8d53076731fea2ef3fc38214d0a7d
+		const pDaiInstance = deployer.wrapDeployedContract(erc20ABI, dai);
+
+		const cDai = "0x2acc448d73e8d53076731fea2ef3fc38214d0a7d";
+
+		const pcDaiInstance = deployer.wrapDeployedContract(pcTokenABI, cDai);
 
 		const poolRegistryInstance = await deploy(
 			poolRegistryABI,
@@ -144,9 +138,9 @@ const deploy = async (network, secret) => {
 			false,
 			ADMIN_ADDRESS,
 			poolRegistryInstance.contract.address,
-			pDaiInstance.contract.address,
+			dai,
 			"DAI",
-			pcDaiInstance.contract.address,
+			cDai,
 			"cDai"
 		);
 
@@ -156,7 +150,7 @@ const deploy = async (network, secret) => {
 		);
 
 		const CONTRACT_ADDRESSES = `
-			DAI_ADDRESS=${pDaiInstance.contract.address}
+			DAI_ADDRESS=${dai}
 			POOL_REGISTRY_ADDRESS=${poolRegistryInstance.contract.address}
 			POOL_FACTORY_ADDRESS=${poolFactoryInstance.contract.address}
 		`;
@@ -165,9 +159,14 @@ const deploy = async (network, secret) => {
 		const addresses = (process.env.ADDESSES_TO_MINT).split(',');
 
 		for (const address of addresses) {
-			await (await pDaiInstance.mintTo(address));
+			await (await pDaiInstance.allocateTo(
+                address,
+                ethers.utils.parseUnits("100", 18)
+            ));
 			console.log(`successfully minted to ${address}`);
 		}
+	} else if (network === 'mainnet') {
+	    console.log("Script & contracts are not ready for main net deployment")
 	}
 };
 
