@@ -93,6 +93,7 @@ function* getCDaiRates() {
   const environment = parseInt(`${process.env.CHAIN_ID}`);
   
   while(true) {
+    //local devnet contract constant
     var exchangeRate = 211098294354306448527248519/1e28;
     var interestRate = 0;
     try {
