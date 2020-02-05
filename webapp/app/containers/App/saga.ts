@@ -90,24 +90,43 @@ function* connectMetamaskSaga() {
 }
 
 function* getCDaiRates() {
+  const environment = parseInt(`${process.env.CHAIN_ID}`);
+  
   while(true) {
+    var exchangeRate = 211098294354306448527248519/1e28;
+    var interestRate = 0;
     try {
-      const response = yield call(fetch, 'https://api.compound.finance/api/v2/ctoken?addresses[]=0x5d3a536e4d6dbd6114cc1ead35777bab948e3643');
-      var responseBody = yield response.json();
-     
+      if(environment == 1){
+        const response = yield call(fetch, 'https://api.compound.finance/api/v2/ctoken?addresses[]=0x5d3a536e4d6dbd6114cc1ead35777bab948e3643');
+        var responseBody = yield response.json();
+  
+        exchangeRate = responseBody.cToken[0].exchange_rate.value;
+        interestRate = responseBody.cToken[0].supply_rate.value;
+      }
+      else if(environment == 4)
+      {
+        const response = yield call(fetch, 'https://api.stage.compound.finance/api/v2/ctoken');
+        var responseBody = yield response.json();
+
+        exchangeRate = responseBody.cToken[5].exchange_rate.value;
+        interestRate = responseBody.cToken[5].supply_rate.value;
+      }
+      
     } catch (e) {
       yield put(setCDaiRates.failure(e.message));
       return;
     }
 
     yield put(setCDaiRates.success({
-      exchangeRate: responseBody.cToken[0].exchange_rate.value,
-      interestRate: responseBody.cToken[0].supply_rate.value,
+      exchangeRate: exchangeRate,
+      interestRate: interestRate,
     }));
 
     yield delay(15000);
   }
 }
+
+
 
 function* getUserType() {
   const { poolRegistryContract, ethAddress = '' }: BlockchainContext = yield getContext('blockchain');

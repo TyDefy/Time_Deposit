@@ -48,6 +48,15 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         }
       }
     }
+    case getType(AppActions.setPoolPenaltyPotBalance): {
+      return {
+        ...state,
+        [action.payload.poolAddress]: {
+          ...state[action.payload.poolAddress],
+          penaltyPotBalance: action.payload.penaltyPotBalance
+        }
+      }
+    }
     case getType(AppActions.setPoolInterestAccrued): {
       return {
         ...state,

@@ -52,6 +52,13 @@ export const setUserTotalBalanceAmount = createStandardAction(
     totalBalance: number
   }>();
 
+  export const setPoolPenaltyPotBalance = createStandardAction(
+    'SET_POOL_PENALTY_POT_BALANCE')
+    <{
+      poolAddress: string,
+      penaltyPotBalance: number
+    }>();
+
 export const setUserInfo = createStandardAction('SET_USER_INFO')<{
     lastDepositDate: Date;
     lastWithdrawDate: Date;
