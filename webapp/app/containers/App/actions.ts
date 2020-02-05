@@ -29,6 +29,9 @@ export const poolDeployed = createStandardAction('POOL_DEPLOYED')<{
   type: string,
   period: number,
   active: boolean,
+  interestWithdrawInViolationBlocked: boolean,
+  withdrawInViolationBlocked: boolean,
+  penaltyRate: number,
 }>();
 
 export const setCDaiRates = createAsyncAction(
@@ -79,7 +82,7 @@ export const addPoolTx = createStandardAction('ADD_POOL_TX')<{
   poolAddress: string,
   userAddress: string;
   time: Date;
-  type: 'Deposit' | 'Withdraw';
+  type: 'Deposit' | 'Withdraw' | 'Penalty';
   amount: number;
   cdaiAmount: number;
   txHash: string;

@@ -4,7 +4,7 @@ import { StateProps, OwnProps } from '.';
 import { selectPools } from 'containers/HomePage/selectors';
 import { selectDaiBalance, selectEthAddress, selectExchangeRate, selectInterestRate } from 'containers/App/selectors';
 
-const selectSelectedPoolAddress = (state: RootState, props: OwnProps) => {
+export const selectSelectedPoolAddress = (state: RootState, props: OwnProps) => {
   return props.match.params.poolAddress
 };
 
@@ -36,19 +36,9 @@ export const selectPool = createSelector(
     return pool;
   })
 
-
-export const selectPoolPenalty = createSelector(
-    selectPool,
-    selectUtilities,
-    (pool, utilities) => {
-      const utility = utilities[pool.withdraw];
-      return utility?.penaltyRate || 0;
-    })
-
 const selectPoolDetailsPage = createStructuredSelector<RootState, OwnProps, StateProps>({
   pool: selectPool,
   daiBalance: selectDaiBalance,
-  penaltyRate: selectPoolPenalty
 });
 
 export default selectPoolDetailsPage;

@@ -2,16 +2,21 @@ pragma solidity 0.5.10;
 
 import { IWithdraw } from "../interfaces/IWithdraw.sol";
 import { IPenalty } from "../interfaces/IPenalty.sol";
+import { BokkyPooBahsDateTimeLibrary } from "../BokkyPooBahsDateTimeLibrary.sol";
 
 contract CyclicWithdraw is IWithdraw {
     // How long each user must wait to withdraw legally again.
-    uint8 internal cycleLength_;
+    uint256 internal cycleLength_;
+    // The cycle lenght in months
+    uint8 internal cycleLenghtInMonths_;
     // Withdraw control for pool
     bool internal canWithdrawInViolation_;
     // Instance of penalty contract
     IPenalty internal penaltyInstance_;
     // A switch that can block the withdrawing of interest
     bool internal canWithdrawInterestInViolation_;
+
+    using BokkyPooBahsDateTimeLibrary for uint256;
 
     constructor(
         address _penalty,
@@ -22,7 +27,8 @@ contract CyclicWithdraw is IWithdraw {
         public
     {
         penaltyInstance_ = IPenalty(_penalty);
-        cycleLength_ = _cycleLength;
+        cycleLenghtInMonths_ = _cycleLength;
+        cycleLength_ = cycleLength_.addMonths(_cycleLength);
         // If true, a user can withdraw in violation, but pay a fee.
         // if false, a user cannot withdraw in violation.
         canWithdrawInViolation_ = _canWithdrawInViolation;
@@ -96,7 +102,7 @@ contract CyclicWithdraw is IWithdraw {
     }
 
     function getCycle() public view returns(uint8) {
-        return cycleLength_;
+        return cycleLenghtInMonths_;
     } 
 
     function getPenalty() public view returns(address) {
