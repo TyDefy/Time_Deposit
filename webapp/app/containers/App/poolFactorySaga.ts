@@ -197,6 +197,7 @@ export default function* poolFactorySaga() {
     const parsedLogs = deployedPoolLogs.map(log =>
       poolFactoryContract.interface.parseLog(log).values);
     for (const log of parsedLogs) {
+      debugger;
       yield put(
         poolDeployed({
           address: log.pool,
@@ -205,10 +206,10 @@ export default function* poolFactorySaga() {
           description: log.description,
           type: log.tokenSymbol,
           period: log.cycleLength,
+          penaltyRate: log.penaltyPercentage,
           active: true,
           canWithdrawInViolation: log.canWithdrawInViolation,
           canWithdrawInterestInViolation: log.canWithdrawInterestInViolation,
-          penaltyRate: log.penaltyPercentage,
         })
       );
     };

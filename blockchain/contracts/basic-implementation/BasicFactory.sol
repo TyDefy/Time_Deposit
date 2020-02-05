@@ -34,8 +34,8 @@ contract BasicFactory is WhitelistAdminRole {
         string description,
         uint8 cycleLength,
         string tokenSymbol,
-        bool interestWithdrawInViolationBlocked,
-        bool withdrawInViolationBlocked
+        bool canWithdrawInViolation,
+        bool canWithdrawInterestInViolation
     );
 
     constructor(
