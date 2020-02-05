@@ -34,8 +34,8 @@ contract BasicFactory is WhitelistAdminRole {
         string description,
         uint8 cycleLength,
         string tokenSymbol,
-        bool interestWithdrawInViolationBlocked,
-        bool withdrawInViolationBlocked
+        bool canWithdrawInViolation,
+        bool canWithdrawInterestInViolation
     );
 
     constructor(
@@ -89,15 +89,15 @@ contract BasicFactory is WhitelistAdminRole {
         uint8 cycleLength = 0;
         address penaltyInstance = address(0);
         uint8 penaltyPercentage = 0;
-        bool interestWithdrawInViolationBlocked = true;
-        bool withdrawInViolationBlocked = true;
+        bool canWithdrawInterestInViolation = true;
+        bool canWithdrawInViolation = true;
 
         if(_withdraw != address(0)) {
             cycleLength = IWithdraw(_withdraw).getCycle();
             penaltyInstance = IWithdraw(_withdraw).getPenalty();
             penaltyPercentage = BasicPenalty(penaltyInstance).penalty();
-            interestWithdrawInViolationBlocked = IWithdraw(_withdraw).cantWithdrawInterestInViolation();
-            withdrawInViolationBlocked = IWithdraw(_withdraw).cantWithdrawInViolation();
+            canWithdrawInterestInViolation = IWithdraw(_withdraw).canWithdrawInterestInViolation();
+            canWithdrawInViolation = IWithdraw(_withdraw).canWithdrawInViolation();
         }
 
         emit DeployedPool(
@@ -108,8 +108,8 @@ contract BasicFactory is WhitelistAdminRole {
             _poolDescription, 
             cycleLength,
             tokenSymbol_,
-            interestWithdrawInViolationBlocked,
-            withdrawInViolationBlocked
+            canWithdrawInterestInViolation,
+            canWithdrawInViolation
         );
 
         return(address(newPool));

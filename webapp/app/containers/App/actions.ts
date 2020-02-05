@@ -29,8 +29,8 @@ export const poolDeployed = createStandardAction('POOL_DEPLOYED')<{
   type: string,
   period: number,
   active: boolean,
-  interestWithdrawInViolationBlocked: boolean,
-  withdrawInViolationBlocked: boolean,
+  canWithdrawInterestInViolation: boolean,
+  canWithdrawInViolation: boolean,
   penaltyRate: number,
 }>();
 
