@@ -352,7 +352,7 @@ function* getUserInfoListener(poolContract: Pool) {
         console.log('There was an error getting the user info');
         console.log(e);
       }
-      yield delay(15000);
+      yield delay(100000);
     } else {
       console.log('waiting for user to connect')
       yield take(connectMetamask.success);
