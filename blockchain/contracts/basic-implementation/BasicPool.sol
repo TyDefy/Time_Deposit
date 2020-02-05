@@ -1,6 +1,6 @@
 pragma solidity 0.5.10;
 
-import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
+import { WhitelistAdminRole } from "../../node_modules/openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
 import { IWithdraw } from "../interfaces/IWithdraw.sol";
 import { IERC20 } from "../interfaces/IERC20.sol";
 import { ICToken } from "../interfaces/ICToken.sol";
@@ -99,7 +99,7 @@ contract BasicPool is WhitelistAdminRole {
         emit PoolTerminated(
             msg.sender
         );
-    }
+    }//4611
 
     /**
       * @notice Allows a user to deposit raw collateral (DAI) into
@@ -312,10 +312,14 @@ contract BasicPool is WhitelistAdminRole {
         // If the user has collateral with the pool
         if(users_[_user].collateralInvested != 0) {
             // Works out the interest earned
-            interestEarnedInCdai = users_[_user].balance - ((
-                    users_[_user].collateralInvested*1e28
-                )/cTokenInstance_.exchangeRateCurrent()
-            );
+            interestEarnedInCdai = users_[_user].balance - _collateralToInterest(
+                    users_[_user].collateralInvested
+                );
+            
+            // users_[_user].balance - ((
+            //         users_[_user].collateralInvested*1e28
+            //     )/cTokenInstance_.exchangeRateCurrent()
+            // );
         }
         // Adding the two
         uint256 availableInterest = (interestEarnedInCdai + penaltyPotShare);
@@ -431,5 +435,9 @@ contract BasicPool is WhitelistAdminRole {
 
     function getWithdrawInstance() public view returns(address) {
         return address(withdrawInstance_);
+    }
+    
+    function _collateralToInterest(uint256 _amount) internal returns(uint256) {
+        return (_amount*1e28)/cTokenInstance_.exchangeRateCurrent();
     }
 }
