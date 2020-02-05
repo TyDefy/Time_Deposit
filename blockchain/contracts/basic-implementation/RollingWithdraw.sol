@@ -66,11 +66,11 @@ contract RollingWithdraw is IWithdraw {
         return (withdraw, penalty);
     }
 
-    function cantWithdrawInViolation() public view returns(bool) {
+    function canWithdrawInViolation() public view returns(bool) {
         return violationWithdraw_;
     }
 
-    function cantWithdrawInterestInViolation() public view returns(bool) {
+    function canWithdrawInterestInViolation() public view returns(bool) {
         return interestViolationWithdraw_;
     }
 

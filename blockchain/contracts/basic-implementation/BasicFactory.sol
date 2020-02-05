@@ -96,8 +96,8 @@ contract BasicFactory is WhitelistAdminRole {
             cycleLength = IWithdraw(_withdraw).getCycle();
             penaltyInstance = IWithdraw(_withdraw).getPenalty();
             penaltyPercentage = BasicPenalty(penaltyInstance).penalty();
-            interestWithdrawInViolationBlocked = IWithdraw(_withdraw).cantWithdrawInterestInViolation();
-            withdrawInViolationBlocked = IWithdraw(_withdraw).cantWithdrawInViolation();
+            interestWithdrawInViolationBlocked = IWithdraw(_withdraw).canWithdrawInterestInViolation();
+            withdrawInViolationBlocked = IWithdraw(_withdraw).canWithdrawInViolation();
         }
 
         emit DeployedPool(

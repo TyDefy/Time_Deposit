@@ -93,11 +93,11 @@ contract CyclicWithdraw is IWithdraw {
         }
     }
 
-    function cantWithdrawInViolation() public view returns(bool) {
+    function canWithdrawInViolation() public view returns(bool) {
         return canWithdrawInViolation_;
     }
 
-    function cantWithdrawInterestInViolation() public view returns(bool) {
+    function canWithdrawInterestInViolation() public view returns(bool) {
         return canWithdrawInterestInViolation_;
     }
 
