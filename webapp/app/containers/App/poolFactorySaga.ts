@@ -99,8 +99,8 @@ function* deployedPoolWatcher() {
       description,
       period,
       tokenSymbol,
-      interestWithdrawInViolationBlocked,
-      withdrawInViolationBlocked
+      canWithdrawInterestInViolation,
+      canWithdrawInViolation,
     ) => {
       emit({
         pool,
@@ -110,8 +110,8 @@ function* deployedPoolWatcher() {
         description,
         period,
         tokenSymbol,
-        interestWithdrawInViolationBlocked,
-        withdrawInViolationBlocked
+        canWithdrawInterestInViolation,
+        canWithdrawInViolation,
       })
     };
 
@@ -134,8 +134,8 @@ function* deployedPoolWatcher() {
       period: newPool.period,
       active: true,
       penaltyRate: newPool.penaltyPercentage,
-      interestWithdrawInViolationBlocked: newPool.interestWithdrawInViolationBlocked,
-      withdrawInViolationBlocked: newPool.withdrawInViolationBlocked,
+      canWithdrawInViolation: newPool.canWithdrawInViolation,
+      canWithdrawInterestInViolation: newPool.canWithdrawInterestInViolation,
     }));
   }
 }
@@ -197,6 +197,7 @@ export default function* poolFactorySaga() {
     const parsedLogs = deployedPoolLogs.map(log =>
       poolFactoryContract.interface.parseLog(log).values);
     for (const log of parsedLogs) {
+      debugger;
       yield put(
         poolDeployed({
           address: log.pool,
@@ -205,10 +206,10 @@ export default function* poolFactorySaga() {
           description: log.description,
           type: log.tokenSymbol,
           period: log.cycleLength,
-          active: true,
-          interestWithdrawInViolationBlocked: log.interestWithdrawInViolationBlocked,
-          withdrawInViolationBlocked: log.withdrawInViolationBlocked,
           penaltyRate: log.penaltyPercentage,
+          active: true,
+          canWithdrawInViolation: log.canWithdrawInViolation,
+          canWithdrawInterestInViolation: log.canWithdrawInterestInViolation,
         })
       );
     };
