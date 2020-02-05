@@ -49,7 +49,7 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
         contribution: contribution,
         interestAccrued: contribution > 0 ? ((cdaiByUser + penaltyAmount) * exchangeRate) - contribution : 0,
         availableInterest: p.period === 0 ? ((cdaiByUser + penaltyAmount) * exchangeRate) - contribution : 0,
-        daysUntilAccess: daysUntilAccess,
+        daysUntilAccess: contribution > 0 ? daysUntilAccess : '-',
       }
     })
 );

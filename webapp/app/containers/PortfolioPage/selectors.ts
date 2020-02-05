@@ -14,10 +14,9 @@ const selectPortfolioTotalHoldings = createSelector(selectPortfolioPools, select
 const selectPortfolioContributed = createSelector(selectPortfolioPools,
   pools => pools.reduce((total, pool) => total += pool.contribution || 0, 0));
 
-const selectPortfolioInterestRate = createSelector(selectPortfolioContributed,selectPortfolioTotalHoldings,
-    (contributed, totalHoldings) => {
-      return ((totalHoldings - contributed) / contributed);
-  });
+  const selectPortfolioInterestRate = createSelector(selectPortfolioPools,
+    pools => 0)
+  
 
 const selectPortfolioInterestAccrued = createSelector(selectPortfolioPools,
   pools => pools.reduce((total, pool) => total += pool.interestAccrued || 0, 0));
