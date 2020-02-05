@@ -197,7 +197,6 @@ export default function* poolFactorySaga() {
     const parsedLogs = deployedPoolLogs.map(log =>
       poolFactoryContract.interface.parseLog(log).values);
     for (const log of parsedLogs) {
-      debugger;
       yield put(
         poolDeployed({
           address: log.pool,
