@@ -71,6 +71,7 @@ export interface Pool {
   contribution?: number;
   interestAccrued?: number;
   availableInterest?: number;
+  penaltyPotBalance?: number;
   daysUntilAccess?: string;
   transactions: Array<Transaction>;
   userTotalBalanceAndPenaltiesCDai?: number;

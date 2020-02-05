@@ -9,7 +9,8 @@ import {
   withdrawInterest,
   terminatePool,
   setUserTotalBalanceAmount, 
-  setUserInfo, 
+  setUserInfo,
+  setPoolPenaltyPotBalance, 
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
@@ -255,6 +256,26 @@ function* getUserTotalBalanceListener(poolContract: Pool) {
   }
 }
 
+function* getPoolTotalPenaltyPoolListener(poolContract: Pool) {
+  while (true) {
+      var penaltyPotBalance;
+      try{
+      const penaltyPotValue = yield call([poolContract, poolContract.penaltyPotBalance]);
+      penaltyPotBalance  =  Number(formatEther(penaltyPotValue));
+       
+      } catch (e){
+        console.log('There was an error getting the penaltyPoolBalance amount');
+      }
+
+      yield put(setPoolPenaltyPotBalance({
+        poolAddress: poolContract.address,
+        penaltyPotBalance: penaltyPotBalance
+      }));
+      yield delay(100000);
+    }
+}
+
+
 
  
 function* poolTransactionListener(poolContract: Pool) {
@@ -352,7 +373,7 @@ function* getUserInfoListener(poolContract: Pool) {
         console.log('There was an error getting the user info');
         console.log(e);
       }
-      yield delay(15000);
+      yield delay(10000);
     } else {
       console.log('waiting for user to connect')
       yield take(connectMetamask.success);
@@ -434,6 +455,8 @@ function* poolWatcherSaga(action) {
   yield fork(getUserTotalBalanceListener, poolContract);
   yield fork(terminatePoolListener, poolContract);
   yield fork(getUserInfoListener, poolContract);
+  yield fork(getPoolTotalPenaltyPoolListener, poolContract);
+  
 }
 
 export default function* poolSaga() {
