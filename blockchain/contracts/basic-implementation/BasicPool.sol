@@ -311,6 +311,10 @@ contract BasicPool is WhitelistAdminRole {
       * @return uint256 The portion of the penalty pool the user is entitled to
       */
     function getInterestAmount(address _user) public returns(uint256, uint256) {
+        emit InterestAvailable(
+            _user,
+            (_getInterestEarned(_user) + _getPenaltyPotPortion(_user))
+        );
         return (_getInterestEarned(_user), _getPenaltyPotPortion(_user));
     }
 

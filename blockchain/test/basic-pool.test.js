@@ -362,6 +362,8 @@ describe("Basic Pool Tests", async () => {
                 test_settings.basicPool.deposit
             );
 
+            console.log()
+
             await assert.notRevert(basicPoolInstance.from(user1).withdraw(
                 test_settings.basicPool.deposit
             ));
@@ -370,7 +372,9 @@ describe("Basic Pool Tests", async () => {
             user2Balance = await basicPoolInstance.getTotalBalance(user2.signer.address);
             penaltyPotBalace = await basicPoolInstance.penaltyPotBalance();
             
-            console.log()
+            console.log(user1Balance.toString())
+            console.log(user2Balance.toString())
+            console.log(penaltyPotBalace.toString())
 
             assert.equal(
                 user1Balance.toString(),
@@ -420,10 +424,6 @@ describe("Basic Pool Tests", async () => {
                 test_settings.basicPool.penaltyAmountInCdai.toString(),
                 "Penalty pot has unexpectedly changed"
             );
-        });
-
-        it("", async () => {
-            
         });
     });
 });
