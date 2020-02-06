@@ -303,30 +303,10 @@ contract BasicPool is WhitelistAdminRole {
     // View functions
 
     function getInterestAmount(address _user) public returns(uint256) {
-        uint256 penaltyPotShare = 0;
-        uint256 interestEarnedInCdai = 0;
-        // If there is a penalty pot
-        if(penaltyPot_ != 0) {
-            // Gets the users portion of the penalty pot
-            penaltyPotShare = ((
-                        (users_[_user].balance*1e18)/totalCCollateral_
-                    )*penaltyPot_
-                )/1e18;
-        }
-        // If the user has collateral with the pool
-        if(users_[_user].collateralInvested != 0) {
-            // Works out the interest earned_user
-            interestEarnedInCdai = _getInterestEarned(_user);
-        }
-        // Adding the two
-        uint256 availableInterest = (interestEarnedInCdai + penaltyPotShare);
-        // Emits the interest for the user
-        emit InterestAvailable(
-            _user,
-            availableInterest
-        );
-        // Calculating total interest available
-        return availableInterest;
+        uint256 penaltyPotShare = _getPenaltyPotPortion(_user);
+        uint256 interestEarnedInCdai = _getInterestEarned(_user);
+
+        return interestEarnedInCdai + penaltyPotShare;
     }
 
     function getTotalBalance(address _user) public view returns(uint256) {
@@ -441,11 +421,15 @@ contract BasicPool is WhitelistAdminRole {
       * @return The amount of interest in cDai that has accumulated
       */
     function _getInterestEarned(address _user) internal returns(uint256) {
-        uint256 currentValue = _getCurrentCdaiValue(
+        if(users_[_user].collateralInvested != 0) {
+            uint256 currentValue = _getCurrentCdaiValue(
                 users_[_user].collateralInvested
             );
             
-        return users_[_user].balance - currentValue;
+            return users_[_user].balance - currentValue;
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -462,6 +446,13 @@ contract BasicPool is WhitelistAdminRole {
             return 0;
         }
     }
+
+    function _addInterestToBalance(address _user) internal {
+        uint256 interestEarned = _getInterestEarned(_user);
+        uint256 interestInDai = _getCurrentDaiValue(interestEarned);
+        
+        users_[msg.sender].collateralInvested += interestInDai;
+    } 
     
     /**
       * @notice Takes a Dai value and returns the current cDai value of that
@@ -473,4 +464,27 @@ contract BasicPool is WhitelistAdminRole {
         // Dai in cDai out
         return (_amountInDai*1e18)/cTokenInstance_.exchangeRateCurrent();
     }
+
+    /**
+      * @notice Takes a cDai value and returns the current Dai value of that amount.
+      * @param  _amountInCdai The amount in cDai
+      * @return uint256 The current value of the cDai in Dai
+      */
+    function _getCurrentDaiValue(uint256 _amountInCdai) internal returns(uint256) {
+        // cDai in Dai out
+        return (_amountInCdai*cTokenInstance_.exchangeRateCurrent())/1e18;
+    }
+
+    /**
+      * @notice Adds the current earned interest to the balance of the user.
+      * @dev    Allows the withdraw function to "reset" interest earned into 
+      *         the collateral   
+      * @param  _user The address of the user
+      */
+    function _addInterestToBalance(address _user) internal {
+        uint256 interestEarned = _getInterestEarned(_user);
+        uint256 interestInDai = _getCurrentDaiValue(interestEarned);
+        
+        users_[msg.sender].collateralInvested += interestInDai;
+    } 
 }
