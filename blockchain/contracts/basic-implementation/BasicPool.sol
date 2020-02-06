@@ -160,6 +160,8 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     function withdraw(uint256 _amount) public killSwitch() {
+        // Adding any earned interest into the balance of the user
+        _addInterestToBalance(msg.sender);
         // Ensuring the user has a suficcient balance
         require(
             users_[msg.sender].collateralInvested >= _amount,
@@ -185,9 +187,7 @@ contract BasicPool is WhitelistAdminRole {
             // Applying the penalty if there is one
             if(penaltyAmount != 0) {
                 // If there is a penalty, this applies it
-                uint256 penaltyAmountInCdai = (
-                        penaltyAmount*1e28
-                    )/cTokenInstance_.exchangeRateCurrent();
+                uint256 penaltyAmountInCdai = _getCurrentCdaiValue(penaltyAmount);
                 // If the fee has been set up, this executes it
                 if(feePercentage_ != 0) {
                     // Gets the fee amount of the penalty
@@ -223,6 +223,8 @@ contract BasicPool is WhitelistAdminRole {
         users_[msg.sender].balance = users_[msg.sender].balance - cDaiBurnt;
         users_[msg.sender].lastWtihdraw = now;
 
+        // TODO penalty leak fix (collateral removed from balance)
+
         require(
             collateralInstance_.transfer(
                 msg.sender,
@@ -249,21 +251,25 @@ contract BasicPool is WhitelistAdminRole {
             );
         }
         
-        // Calculating total interest available
-        uint256 rewardInCdai = getInterestAmount(msg.sender);
+        uint256 interestInCdai;
+        uint256 penaltyPotPortion;
+        (interestInCdai, penaltyPotPortion) = getInterestAmount(msg.sender);
+        uint256 totalRewardInCdai = interestInCdai + penaltyPotPortion;
 
-        totalCCollateral_ = totalCCollateral_ - rewardInCdai;
-        users_[msg.sender].balance = users_[msg.sender].balance - rewardInCdai;
+        totalCCollateral_ = totalCCollateral_ - totalRewardInCdai;
+        users_[msg.sender].balance = users_[msg.sender].balance - interestInCdai;
+        users_[msg.sender].collateralPenaltyClaimed = users_[msg.sender].collateralInvested;
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
 
         require(
-            cTokenInstance_.redeem(rewardInCdai) == 0,
+            cTokenInstance_.redeem(totalRewardInCdai) == 0,
             "Interest collateral transfer failed"
         );
 
         uint256 balanceAfter = collateralInstance_.balanceOf(address(this));
         uint256 rewardInDai = balanceAfter - balanceBefore;
+        penaltyPot_ -= penaltyPotPortion;
 
         require(
             collateralInstance_.transfer(
@@ -277,19 +283,16 @@ contract BasicPool is WhitelistAdminRole {
             msg.sender,
             rewardInDai
         );
-
-        users_[msg.sender].collateralPenaltyClaimed = users_[msg.sender].collateralInvested;
     }
 
     function withdrawAndClose() public killSwitch() {
-        uint256 fullUserBalance = users_[msg.sender].collateralInvested;
         // Withdraw full balance 
         withdrawInterest();
+        uint256 fullUserBalance = users_[msg.sender].collateralInvested;
         withdraw(fullUserBalance);
     }
 
     function finalWithdraw() public {
-        uint256 fullUserBalance = users_[msg.sender].collateralInvested;
         // Ensureing this can only be called once contract is killed
         require(
             !isAlive_,
@@ -297,32 +300,23 @@ contract BasicPool is WhitelistAdminRole {
         );
         // Withdraw full balance 
         withdrawInterest();
+        uint256 fullUserBalance = users_[msg.sender].collateralInvested;
         withdraw(fullUserBalance);
     }
 
-    // View functions
-
-    function getInterestAmount(address _user) public returns(uint256) {
-        uint256 penaltyPotShare = _getPenaltyPotPortion(_user);
-        uint256 interestEarnedInCdai = _getInterestEarned(_user);
-
-        return interestEarnedInCdai + penaltyPotShare;
+    /**
+      * @notice Calculates interest amounts in cDai
+      * @param  _user The address of the user
+      * @return uint256 The amount of interest earned
+      * @return uint256 The portion of the penalty pool the user is entitled to
+      */
+    function getInterestAmount(address _user) public returns(uint256, uint256) {
+        return (_getInterestEarned(_user), _getPenaltyPotPortion(_user));
     }
 
     function getTotalBalance(address _user) public view returns(uint256) {
-        uint256 penaltyPotShare = 0;
-
-        if(penaltyPot_ != 0 && users_[_user].balance != 0) {
-            // Gets the users portion of the penalty pot
-            penaltyPotShare = ((
-                        (users_[_user].balance*1e18)/totalCCollateral_
-                    )*penaltyPot_
-                )/1e18;
-        }
-
-        return (
-            users_[_user].balance + penaltyPotShare
-        );
+        uint256 penaltyPortion = _getPenaltyPotPortion(_user);
+        return (users_[_user].balance + penaltyPortion);
     }
 
     function canWithdraw(
@@ -437,7 +431,10 @@ contract BasicPool is WhitelistAdminRole {
       * @param  _user Address of user
       * @return uint256 The users portion of the penalty pot
       */ 
-    function _getPenaltyPotPortion(address _user) internal returns(uint256) {
+    function _getPenaltyPotPortion(address _user) internal view returns(uint256) {
+        // if(users_[msg.sender].collateralPenaltyClaimed < users_[_user].collateralInvested) {
+        //     uint256 claimPortion = users_[_user].collateralInvested - users_[msg.sender].collateralPenaltyClaimed;
+        // } TODO penalty repeat withdraw catch
         if(penaltyPot_ != 0) {
             return (((users_[_user].balance*1e18)/totalCCollateral_
                     )*penaltyPot_
@@ -446,13 +443,6 @@ contract BasicPool is WhitelistAdminRole {
             return 0;
         }
     }
-
-    function _addInterestToBalance(address _user) internal {
-        uint256 interestEarned = _getInterestEarned(_user);
-        uint256 interestInDai = _getCurrentDaiValue(interestEarned);
-        
-        users_[msg.sender].collateralInvested += interestInDai;
-    } 
     
     /**
       * @notice Takes a Dai value and returns the current cDai value of that
