@@ -430,7 +430,7 @@ function* poolWatcherSaga(action) {
         addPoolTx({
           poolAddress: poolContract.address,
           userAddress: parsedWithdraw.user,
-          type: 'Withdraw',
+          type: 'Penalty',
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
           amount: Number(formatEther(parsedWithdraw.penalty)),
