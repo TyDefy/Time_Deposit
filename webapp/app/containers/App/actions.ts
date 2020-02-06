@@ -100,6 +100,11 @@ export const setPoolInterestRate = createStandardAction('SET_POOL_INTEREST_RATE'
   interestRate: number;
 }>()
 
+export const setPoolFeeRate = createStandardAction('SET_POOL_FEE_RATE')<{
+  poolAddress: string;
+  feeRate: number;
+}>()
+
 export const setPoolInterestAccrued = createStandardAction('SET_POOL_INTEREST_ACCRUED')<{
   poolAddress: string;
   interestAccrued: number;

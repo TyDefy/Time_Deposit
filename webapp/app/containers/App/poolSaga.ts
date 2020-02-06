@@ -10,7 +10,8 @@ import {
   terminatePool,
   setUserTotalBalanceAmount, 
   setUserInfo,
-  setPoolPenaltyPotBalance, 
+  setPoolPenaltyPotBalance,
+  setPoolFeeRate, 
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
@@ -447,6 +448,18 @@ function* poolWatcherSaga(action) {
   if (terminateLogs.length > 0) {
     yield put(terminatePool.success({ poolAddress: poolContract.address }));
   }
+
+  const feeSetLogs: Log[] = yield call([provider, provider.getLogs], {
+    ...poolContract.filters.FeeSet(null),
+    fromBlock: 0,
+    toBlock: 'latest',
+  });
+
+  if (feeSetLogs.length > 0) {
+    const parsedLog = poolContract.interface.parseLog(feeSetLogs[0]).values;
+    yield put(setPoolFeeRate({ poolAddress: poolContract.address, feeRate: parsedLog.feePercentage }));
+  }
+
   yield fork(poolTransactionListener, poolContract);
   yield fork(poolDepositListener, poolContract);
   yield fork(poolWithdrawListener, poolContract);
