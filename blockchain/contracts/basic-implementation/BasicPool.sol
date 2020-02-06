@@ -31,6 +31,7 @@ contract BasicPool is WhitelistAdminRole {
         uint256 balance;
         uint256 lastDeposit;
         uint256 lastWtihdraw;
+        uint256 collateralPenaltyClaimed;
     }
     // A mapping of all active suers
     mapping(address => UserInfo) internal users_;
@@ -148,6 +149,7 @@ contract BasicPool is WhitelistAdminRole {
         // If its a new user, last withdraw set to now
         if(users_[msg.sender].lastWtihdraw == 0) {
             users_[msg.sender].lastWtihdraw = now;
+            users_[msg.sender].collateralPenaltyClaimed = 0;
         }
         
         emit Deposit(
@@ -275,6 +277,8 @@ contract BasicPool is WhitelistAdminRole {
             msg.sender,
             rewardInDai
         );
+
+        users_[msg.sender].collateralPenaltyClaimed = users_[msg.sender].collateralInvested;
     }
 
     function withdrawAndClose() public killSwitch() {
@@ -311,15 +315,8 @@ contract BasicPool is WhitelistAdminRole {
         }
         // If the user has collateral with the pool
         if(users_[_user].collateralInvested != 0) {
-            // Works out the interest earned
-            interestEarnedInCdai = users_[_user].balance - _collateralToInterest(
-                    users_[_user].collateralInvested
-                );
-            
-            // users_[_user].balance - ((
-            //         users_[_user].collateralInvested*1e28
-            //     )/cTokenInstance_.exchangeRateCurrent()
-            // );
+            // Works out the interest earned_user
+            interestEarnedInCdai = _getInterestEarned(_user);
         }
         // Adding the two
         uint256 availableInterest = (interestEarnedInCdai + penaltyPotShare);
@@ -436,8 +433,44 @@ contract BasicPool is WhitelistAdminRole {
     function getWithdrawInstance() public view returns(address) {
         return address(withdrawInstance_);
     }
+
+    /**
+      * @notice Works out the difference between the collateral invested
+      *         and the current value of the cDai.
+      * @param  _user The user's address 
+      * @return The amount of interest in cDai that has accumulated
+      */
+    function _getInterestEarned(address _user) internal returns(uint256) {
+        uint256 currentValue = _getCurrentCdaiValue(
+                users_[_user].collateralInvested
+            );
+            
+        return users_[_user].balance - currentValue;
+    }
+
+    /**
+      * @notice Works out the users portion of the penalty pot
+      * @param  _user Address of user
+      * @return uint256 The users portion of the penalty pot
+      */ 
+    function _getPenaltyPotPortion(address _user) internal returns(uint256) {
+        if(penaltyPot_ != 0) {
+            return (((users_[_user].balance*1e18)/totalCCollateral_
+                    )*penaltyPot_
+                )/1e18;
+        } else {
+            return 0;
+        }
+    }
     
-    function _collateralToInterest(uint256 _amount) internal returns(uint256) {
-        return (_amount*1e28)/cTokenInstance_.exchangeRateCurrent();
+    /**
+      * @notice Takes a Dai value and returns the current cDai value of that
+      *         amount.
+      * @param  _amountInDai The amount of dai
+      * @return uint256 The amount of cDai the Dai is currenty worth
+      */
+    function _getCurrentCdaiValue(uint256 _amountInDai) internal returns(uint256) {
+        // Dai in cDai out
+        return (_amountInDai*1e18)/cTokenInstance_.exchangeRateCurrent();
     }
 }
