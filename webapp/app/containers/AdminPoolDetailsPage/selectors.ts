@@ -32,7 +32,6 @@ const selectAdminPoolDetails = createSelector(
       ...pool,
       participantDetails: poolParticipants,
       totalInterest: poolParticipants.reduce((totalInterest, participant) => totalInterest += participant.interest, 0), 
-      feeRate: 0, 
     }
   }
 )
