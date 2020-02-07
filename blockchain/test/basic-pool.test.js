@@ -211,11 +211,11 @@ describe("Basic Pool Tests", async () => {
 
     describe("Core Functionality", async () => {
         it("Close pool to deposits", async () => {
-
+            //TODO
         });
 
         it("Kill switch on pool", async () => {
-
+            //TODO
         });
     });
 
@@ -425,6 +425,36 @@ describe("Basic Pool Tests", async () => {
                 test_settings.basicPool.penaltyAmountInCdai.toString(),
                 "Penalty pot has unexpectedly changed"
             );
+        });
+
+        it("Get user interest", async () => {
+            let userInterest = await basicPoolInstance.getUserInterest(user1.signer.address);
+            console.log(userInterest.toString());
+
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+
+            userInterest = await basicPoolInstance.getUserInterest(user1.signer.address);
+            console.log(userInterest.toString());
+
+            await pDaiInstance.from(user2).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user2).deposit(
+                test_settings.basicPool.deposit
+            );
+            let tx = await(await basicPoolInstance.from(user2).withdraw(
+                test_settings.basicPool.deposit
+            )).wait();
+
+            userInterest = await basicPoolInstance.getUserInterest(user1.signer.address);
+            console.log(userInterest.toString());
         });
     });
 });
