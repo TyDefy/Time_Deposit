@@ -304,6 +304,14 @@ contract BasicPool is WhitelistAdminRole {
         withdraw(fullUserBalance);
     }
 
+    function withdrawAdminFee() public onlyWhitelistAdmin() {
+        require(
+            cTokenInstance_.redeem(accumulativeFeeCollection_) == 0,
+            "Interest collateral transfer failed"
+        );
+        accumulativeFeeCollection_ = 0;
+    }
+
     /**
       * @notice Calculates interest amounts in cDai
       * @param  _user The address of the user
