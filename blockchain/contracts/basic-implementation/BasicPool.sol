@@ -339,6 +339,17 @@ contract BasicPool is WhitelistAdminRole {
         return (_getInterestEarned(_user), _getPenaltyPotPortion(_user));
     }
 
+    
+    /**
+      * @param  _user Address of the user
+      * @return uint256 The total interest and penalty reward a user has
+      */
+    function getUserInterest(address _user) public view returns(uint256) {
+        uint256 interest = _getInterestEarned(_user);
+        uint256 penaltyPortion = _getPenaltyPotPortion(_user);
+        return interest + penaltyPortion;
+    }
+
     function getTotalBalance(address _user) public view returns(uint256) {
         uint256 penaltyPortion = _getPenaltyPotPortion(_user);
         return (users_[_user].balance + penaltyPortion);
@@ -432,6 +443,11 @@ contract BasicPool is WhitelistAdminRole {
     function getWithdrawInstance() public view returns(address) {
         return address(withdrawInstance_);
     }
+
+    /**
+      * -----------------------------------------------
+      * INTERNAL FUNCTIONS
+      */
 
     /**
       * @notice Works out the difference between the collateral invested
