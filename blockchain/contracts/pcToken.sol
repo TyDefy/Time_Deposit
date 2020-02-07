@@ -114,6 +114,10 @@ contract pcToken is ICToken, ERC20 {
         return 8556432781;
     }
 
+    function exchangeRateStored() public view returns(uint) {
+        return exchange_;
+    }
+
     /**
       * @notice Takes a Dai value and returns the current cDai value of that
       *         amount.

@@ -345,7 +345,7 @@ contract BasicPool is WhitelistAdminRole {
       * @return uint256 The total interest and penalty reward a user has
       */
     function getUserInterest(address _user) public view returns(uint256) {
-        uint256 interest = _getInterestEarned(_user);
+        uint256 interest = _getRoughInterestEarned(_user);
         uint256 penaltyPortion = _getPenaltyPotPortion(_user);
         return interest + penaltyPortion;
     }
@@ -518,4 +518,45 @@ contract BasicPool is WhitelistAdminRole {
         
         users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested + interestInDai;
     } 
+
+    /**
+      * @notice Takes a Dai value and returns the current cDai value of that
+      *         amount.
+      * @dev    This only returns a rough estimation as it is not using the current exchange rate
+      * @param  _amountInDai The amount of dai
+      * @return uint256 The amount of cDai the Dai is currenty worth
+      */
+    function _getRoughCdaiValue(uint256 _amountInDai) internal view returns(uint256) {
+        // Dai in cDai out
+        return (_amountInDai*1e18)/cTokenInstance_.exchangeRateStored();
+    }
+
+    /**
+      * @notice Takes a cDai value and returns the rough Dai value of that amount.
+      * @dev    This only returns a rough estimation as it is not using the current exchange rate
+      * @param  _amountInCdai The amount in cDai
+      * @return uint256 The current value of the cDai in Dai
+      */
+    function _getRoughDaiValue(uint256 _amountInCdai) internal view returns(uint256) {
+        // cDai in Dai out
+        return (_amountInCdai*cTokenInstance_.exchangeRateStored())/1e18;
+    }
+
+    /**
+      * @notice Works out the difference between the collateral invested
+      *         and the current value of the cDai.
+      * @param  _user The user's address 
+      * @return The amount of interest in cDai that has accumulated
+      */
+    function _getRoughInterestEarned(address _user) internal view returns(uint256) {
+        if(users_[_user].collateralInvested != 0) {
+            uint256 currentValue = _getRoughCdaiValue(
+                users_[_user].collateralInvested
+            );
+            
+            return users_[_user].balance - currentValue;
+        } else {
+            return 0;
+        }
+    }
 }
