@@ -429,7 +429,12 @@ describe("Basic Pool Tests", async () => {
 
         it("Get user interest", async () => {
             let userInterest = await basicPoolInstance.getUserInterest(user1.signer.address);
-            console.log(userInterest.toString());
+
+            assert.equal(
+                userInterest.toString(),
+                0,
+                "User has interest before depositing"
+            );
 
             await pDaiInstance.from(user1).approve(
                 basicPoolInstance.contract.address,
@@ -440,7 +445,22 @@ describe("Basic Pool Tests", async () => {
             );
 
             userInterest = await basicPoolInstance.getUserInterest(user1.signer.address);
-            console.log(userInterest.toString());
+
+            assert.equal(
+                userInterest.toString(),
+                0,
+                "User has interest before interest has been earned"
+            );
+
+            await cDaiInstance.from(admin).increaseExchange(test_settings.pcTokenSettings.exchangeIncrease);
+
+            userInterest = await basicPoolInstance.getUserInterest(user1.signer.address);
+
+            assert.equal(
+                userInterest.toString(),
+                test_settings.basicPool.earnedInterest,
+                "User has not earned interest"
+            );
 
             await pDaiInstance.from(user2).approve(
                 basicPoolInstance.contract.address,
@@ -454,7 +474,12 @@ describe("Basic Pool Tests", async () => {
             )).wait();
 
             userInterest = await basicPoolInstance.getUserInterest(user1.signer.address);
-            console.log(userInterest.toString());
+
+            assert.equal(
+                userInterest.toString(),
+                test_settings.basicPool.earnedInterestWithPenalty,
+                "User has not gained penalty"
+            );
         });
     });
 });
