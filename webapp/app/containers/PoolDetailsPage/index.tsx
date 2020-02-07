@@ -42,7 +42,7 @@ export interface StateProps {
 export interface Transaction {
   userAddress: string;
   time: Date;
-  type: 'Deposit' | 'Withdraw';
+  type: 'Deposit' | 'Withdraw' | 'Penalty';
   amount: number;
   cdaiAmount: number;
   txHash: string;

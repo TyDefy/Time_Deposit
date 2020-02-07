@@ -39,14 +39,13 @@ export interface PoolParticipant {
 
 export interface PoolDetails extends Pool {
   totalInterest: number;
-  feeRate: number;
   participantDetails: Array<PoolParticipant>;
 }
 
 type Props = StateProps & DispatchProps & OwnProps;
 
-const AdminPoolDetailsPage: React.FunctionComponent<Props> = ({pool, terminatePool}: Props) => {
-  return <AdminPoolDetails {...pool} terminatePool={terminatePool} />
+const AdminPoolDetailsPage: React.FunctionComponent<Props> = ({pool, terminatePool, withdrawPoolFee}: Props) => {
+  return <AdminPoolDetails {...pool} terminatePool={terminatePool} withdrawPoolFee={withdrawPoolFee} />
 };
 
 const mapStateToProps = (state, props) => selectAdminPoolDetailsPage(state, props);

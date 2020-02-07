@@ -69,6 +69,8 @@ export interface Pool {
   interestRate?: number;
   penaltyRate: number;
   feeRate: number;
+  feeAmountCDai?: number,
+  feeAmountInDai?: number,
   contribution?: number;
   interestAccrued?: number;
   availableInterest?: number;

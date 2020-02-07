@@ -82,6 +82,7 @@ const styles = ({ spacing, palette }: Theme) =>
 
 interface OwnProps extends WithStyles<typeof styles>, PoolDetails {
   terminatePool(): void;
+  withdrawPoolFee(): void;
 }
 
 const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
