@@ -7,12 +7,13 @@ import {
   deposit,
   withdraw,
   withdrawInterest,
-  terminatePool,
   setUserTotalBalanceAmount, 
   setUserInfo,
   setPoolPenaltyPotBalance,
   setPoolFeeRate,
-  setPoolFeeAmount, 
+  setPoolFeeAmount,
+  withdrawPoolFee,
+  terminatePool, 
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
@@ -46,6 +47,48 @@ function* terminatePoolListener(poolContract: Pool) {
           }))
         } catch (error) {
           yield put(terminatePool.failure(error.message));
+          yield put(enqueueSnackbar({
+            message: 'Something went wrong processing the transaction',
+            options: {
+              variant: 'error',
+            }
+          }))
+        }
+      }
+    } else {
+      yield put(enqueueSnackbar({
+        message: 'Please connect with metamask to continue',
+        options: {
+          variant: 'error'
+        }
+      }))
+      yield put(deposit.failure('Please connect with metamask'));
+      yield take(getType(connectMetamask.success));
+    }
+  }
+}
+
+function* withdrawFeeListener(poolContract: Pool) {
+  while (true) {
+    const action = yield take(getType(withdrawPoolFee.request));
+    const { signer }: BlockchainContext = yield getContext('blockchain');
+    if (signer) {
+      if (action.payload.poolAddress === poolContract.address) {
+        //@ts-ignore
+        const writeableContract = poolContract.connect(signer);
+        try {
+          yield put(setTxContext('Terminating pool'));
+          const tx: ContractTransaction = yield call(
+            //@ts-ignore
+            [writeableContract, writeableContract.withdrawAdminFee]);
+          yield put(setTxHash(tx.hash));
+          yield call([tx, tx.wait]);
+          yield put(withdrawPoolFee.success({ poolAddress: poolContract.address }));
+          yield put(enqueueSnackbar({
+            message: 'Pool terminated successfully'
+          }))
+        } catch (error) {
+          yield put(withdrawPoolFee.failure(error.message));
           yield put(enqueueSnackbar({
             message: 'Something went wrong processing the transaction',
             options: {
@@ -491,6 +534,8 @@ function* poolWatcherSaga(action) {
   yield fork(getUserInfoListener, poolContract);
   yield fork(getPoolTotalPenaltyPoolListener, poolContract);
   yield fork(poolFeeListener, poolContract)
+  yield fork(withdrawFeeListener, poolContract);
+
 }
 
 export default function* poolSaga() {
