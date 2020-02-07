@@ -97,8 +97,6 @@ const deploy = async (network, secret) => {
 			process.env.POOL_DESCRIPTION
 		)).wait();
 		
-		// console.log(newPool.events[3].args);
-
 		const poolInstance = deployer.wrapDeployedContract(basicPoolABI, newPool.events[3].args.pool);
 
 		await(await poolInstance.init(10)).wait();

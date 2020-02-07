@@ -11,7 +11,8 @@ import {
   setUserTotalBalanceAmount, 
   setUserInfo,
   setPoolPenaltyPotBalance,
-  setPoolFeeRate, 
+  setPoolFeeRate,
+  setPoolFeeAmount, 
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
@@ -20,7 +21,7 @@ import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/Bas
 import { Log } from "ethers/providers";
 import { formatEther, parseEther, BigNumber } from "ethers/utils";
 import { eventChannel } from "redux-saga";
-import { selectLatestPoolTxTime } from "./selectors";
+import { selectLatestPoolTxTime, selectIsAdmin } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
 import { setTxContext, setTxHash } from "containers/TransactionModal/actions";
 
@@ -382,6 +383,17 @@ function* getUserInfoListener(poolContract: Pool) {
   }
 }
 
+function* poolFeeListener(poolContract: Pool) {
+  while (true) {
+    const isAdmin: Boolean = yield select(selectIsAdmin);
+    if (isAdmin) {
+      const poolFeeAmount = yield call([poolContract, poolContract.accumulativeFee]);
+      yield put(setPoolFeeAmount({poolAddress: poolContract.address, feeAmount: Number(formatEther(poolFeeAmount))}))
+    }
+    yield delay(15000);
+  }
+}
+
 function* poolWatcherSaga(action) {
   const { provider, signer }: BlockchainContext = yield getContext('blockchain');
 
@@ -478,7 +490,7 @@ function* poolWatcherSaga(action) {
   yield fork(terminatePoolListener, poolContract);
   yield fork(getUserInfoListener, poolContract);
   yield fork(getPoolTotalPenaltyPoolListener, poolContract);
-  
+  yield fork(poolFeeListener, poolContract)
 }
 
 export default function* poolSaga() {

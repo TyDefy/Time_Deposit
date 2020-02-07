@@ -110,6 +110,11 @@ export const setPoolInterestAccrued = createStandardAction('SET_POOL_INTEREST_AC
   interestAccrued: number;
 }>()
 
+export const setPoolFeeAmount = createStandardAction('SET_POOL_FEE_AMOUNT')<{
+  poolAddress: string;
+  feeAmount: number;
+}>()
+
 export const deposit = createAsyncAction(
   '@TX_REQUEST/POOL_DEPOSIT',
   '@TX_SUCCESS/POOL_DEPOSIT',
