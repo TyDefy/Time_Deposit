@@ -305,11 +305,24 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     function withdrawAdminFee() public onlyWhitelistAdmin() {
+         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
+
         require(
             cTokenInstance_.redeem(accumulativeFeeCollection_) == 0,
             "Interest collateral transfer failed"
         );
+
+        uint256 balanceAfter = collateralInstance_.balanceOf(address(this));
+        uint256 rewardInDai = balanceAfter - balanceBefore;
         accumulativeFeeCollection_ = 0;
+
+        require(
+            collateralInstance_.transfer(
+                msg.sender,
+                rewardInDai
+            ),
+            "Collateral transfer failed"
+        );
     }
 
     /**
@@ -487,6 +500,6 @@ contract BasicPool is WhitelistAdminRole {
         uint256 interestEarned = _getInterestEarned(_user);
         uint256 interestInDai = _getCurrentDaiValue(interestEarned);
         
-        users_[msg.sender].collateralInvested += interestInDai;
+        users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested + interestInDai;
     } 
 }

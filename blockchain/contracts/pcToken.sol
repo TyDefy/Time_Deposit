@@ -20,7 +20,7 @@ contract pcToken is ICToken, ERC20 {
     uint256 internal totalReserves_;
     uint256 internal totalBorrows_;
     IERC20 internal collateralInstance_;
-    uint256 internal exchange_ = 211098294354306448527248519;
+    uint256 internal exchange_;
 
     event Approval(
         address indexed owner,
@@ -49,10 +49,11 @@ contract pcToken is ICToken, ERC20 {
         totalSupply_ = 57733536549738757;
         totalReserves_ = 125573360914251726089975;
         totalBorrows_ = 2867271208090219596939682;
+        exchange_ = 211098294354306448527248519;
     }
 
     function mint(uint mintAmount) public returns(uint) {
-        uint newCdai = (mintAmount*10**28)/exchangeRateCurrent();
+        uint newCdai = _getCurrentCdaiValue(mintAmount);
         _mint(msg.sender, newCdai);
         require(
             collateralInstance_.transferFrom(
@@ -67,8 +68,7 @@ contract pcToken is ICToken, ERC20 {
     }
 
     function redeem(uint redeemTokens) public returns (uint) {
-        // Working out how much Dai the redeemed tokens are worth
-        uint tokenValueInDai = (redeemTokens*exchangeRateCurrent())/10**28 + 1;
+        uint tokenValueInDai = _getCurrentDaiValue(redeemTokens);
         _burn(msg.sender, redeemTokens);
 
         require(
@@ -83,8 +83,9 @@ contract pcToken is ICToken, ERC20 {
     }
 
     function redeemUnderlying(uint redeemAmount) public returns(uint) {
-        uint256 cRedeemAmount = (redeemAmount*10**28)/exchangeRateCurrent();
+        uint256 cRedeemAmount = _getCurrentCdaiValue(redeemAmount);
         _burn(msg.sender, cRedeemAmount);
+
         require(
             collateralInstance_.transfer(
                 msg.sender,
@@ -111,5 +112,26 @@ contract pcToken is ICToken, ERC20 {
 
     function supplyRatePerBlock() public view returns(uint) {
         return 8556432781;
+    }
+
+    /**
+      * @notice Takes a Dai value and returns the current cDai value of that
+      *         amount.
+      * @param  _amountInDai The amount of dai
+      * @return uint256 The amount of cDai the Dai is currenty worth
+      */
+    function _getCurrentCdaiValue(uint256 _amountInDai) internal returns(uint256) {
+        // Dai in cDai out
+        return (_amountInDai*1e18)/exchangeRateCurrent();
+    }
+
+    /**
+      * @notice Takes a cDai value and returns the current Dai value of that amount.
+      * @param  _amountInCdai The amount in cDai
+      * @return uint256 The current value of the cDai in Dai
+      */
+    function _getCurrentDaiValue(uint256 _amountInCdai) internal returns(uint256) {
+        // cDai in Dai out
+        return (_amountInCdai*exchangeRateCurrent())/1e18;
     }
 }
