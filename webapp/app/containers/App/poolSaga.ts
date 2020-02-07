@@ -79,7 +79,6 @@ function* withdrawFeeListener(poolContract: Pool) {
         try {
           yield put(setTxContext('Terminating pool'));
           const tx: ContractTransaction = yield call(
-            //@ts-ignore
             [writeableContract, writeableContract.withdrawAdminFee]);
           yield put(setTxHash(tx.hash));
           yield call([tx, tx.wait]);

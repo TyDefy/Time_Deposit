@@ -99,7 +99,9 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
   description,
   participantDetails,
   terminatePool,
-  active
+  active,
+  feeAmountInDai = 0,
+  withdrawPoolFee,
 }: OwnProps) => (
     <Container maxWidth='lg'>
       <Grid container direction='row' className={classes.poolDetailsHeaderRow}>
@@ -125,33 +127,42 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
         </Grid>
       </Grid>
       <Grid container direction='row' className={classes.poolDetailsRow}>
-        <Grid item xs={2}>
+        <Grid item>
           <Typography className={classes.label}>Currency Type</Typography>
           <Typography className={classes.value}>{type}</Typography>
         </Grid>
-        <Grid item xs={2}>
+        <Grid item>
           <Typography className={classes.label}>Pool Total</Typography>
           <Typography className={classes.value}>{totalStaked.toFixed(2)}</Typography>
         </Grid>
-        <Grid item xs={2}>
+        <Grid item>
           <Typography className={classes.label}>Pool Participants</Typography>
           <Typography className={classes.value}>{participants}</Typography>
         </Grid>
-        <Grid item xs={2}>
+        <Grid item>
           <Typography className={classes.label}>Total Interest</Typography>
           <Typography className={classes.value}>{totalInterest.toFixed(2)}</Typography>
         </Grid>
-        <Grid item xs={2}>
+        <Grid item>
+          <Typography className={classes.label}>Penalty</Typography>
+          <Typography className={classes.value}>{`${(penaltyRate).toFixed(2)} %`}</Typography>
+        </Grid>
+        <Grid item>
+          <Typography className={classes.label}>Penalty Balance</Typography>
+          <Typography className={classes.value}></Typography>
+        </Grid>
+        <Grid item>
           <Typography className={classes.label}>Fee</Typography>
           <Typography className={classes.value}>{`${(feeRate).toFixed(2)} %`}</Typography>
         </Grid>
-        <Grid item xs={2}>
-          <Typography className={classes.label}>Penalty</Typography>
-          <Typography className={classes.value}>{`${(penaltyRate).toFixed(2)} %`}</Typography>
+        <Grid item>
+          <Typography className={classes.label}>Fee Balance</Typography>
+          <Typography className={classes.value}>{`${(feeAmountInDai)?.toFixed(2)} DAI`}</Typography>
         </Grid>
       </Grid>
       <Grid container direction="row">
         <Button onClick={terminatePool} className={classes.terminateButton}>Terminate Pool</Button>
+        {(feeAmountInDai > 0) && <Button onClick={withdrawPoolFee} className={classes.terminateButton}>Withdraw Fee</Button>}
       </Grid>
       <Table>
         <TableHead className={classes.tableHeader}>
