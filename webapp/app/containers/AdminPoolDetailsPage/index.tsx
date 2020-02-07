@@ -11,7 +11,7 @@ import { compose, Dispatch } from 'redux';
 import selectAdminPoolDetailsPage from './selectors';
 import AdminPoolDetails from 'components/AdminPoolDetails';
 import { Pool } from 'containers/App';
-import { withdrawFees } from 'containers/App/actions';
+import { terminatePool, withdrawPoolFee } from 'containers/App/actions';
 import { RouteComponentProps } from 'react-router-dom';
 
 interface RouteParams {
@@ -23,6 +23,7 @@ export interface OwnProps extends RouteComponentProps<RouteParams>,
 
 interface DispatchProps {
   terminatePool(): void;
+  withdrawPoolFee(): void;
 }
 
 export interface StateProps {
@@ -55,7 +56,8 @@ const mapDispatchToProps = (
   ownProps: OwnProps,
 ): DispatchProps => {
   return {
-    terminatePool: () => dispatch(withdrawFees.request({poolAddress: ownProps.match.params.poolAddress})),
+    terminatePool: () => dispatch(terminatePool.request({poolAddress: ownProps.match.params.poolAddress})),
+    withdrawPoolFee: () => dispatch(withdrawPoolFee.request({poolAddress: ownProps.match.params.poolAddress})),
   };
 };
 
