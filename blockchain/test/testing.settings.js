@@ -27,12 +27,12 @@ const test_settings = {
         withdrawPenalty: ethers.utils.parseUnits("75", 17),
         withdrawAmountOn100: ethers.utils.parseUnits("85", 18),
         penaltyAmountOn100: ethers.utils.parseUnits("15", 18),
-        penaltyAmountInCdai: "710569455138470517047",
+        penaltyAmountInCdai: "71056945513",
         fee: 20,
         interestEarned: "2244038717306567",
-        penaltyShare: "710569455138470517047",
-        penaltyShareMinusFee: "568455564110776413638",
-        penaltyShareMinusFeePlusInterest: "568457808149493720205",
+        penaltyShare: "71056945512",
+        penaltyShareMinusFee: "56845556411",
+        penaltyShareMinusFeePlusInterest: "224404",
         userCdaiBalanceWithPenalty: "5447699156061607297361"
     },
     pDaiSettings: {
@@ -42,17 +42,17 @@ const test_settings = {
         mintAmount: "100000000000000000000000000",
         mintAmountMinusDeposit: "99999900000000000000000000",
         withdrawWithPenalty: "99999985000000000000000000",
-        withdrawInterestBalancePenalty: "99999915000000000000000000",
-        withdrawInterestBalance: "99999900000047371297009232",
-        withdrawInterestPusPenaltyMinusFee: "99999912000053055852650340"
+        withdrawInterestBalancePenalty: "99999914999999999610090535",
+        withdrawInterestBalance: "99999900000047371324086683",
+        withdrawInterestPusPenaltyMinusFee: "99999912000053055652239429"
     },
     pcTokenSettings: {
         name: "cToken",
         symbol: "cDAI",
         decimals: 18,
-        mintAmount: "4737129700923136780314",
-        mintAmountMinusInterestPenalty: "4026560245784666263267",
-        mintAmountMinusInterest: "4737127456884419473747",
+        mintAmount: "473712970092",
+        mintAmountMinusInterestPenalty: "473712970092",
+        mintAmountMinusInterest: "473712745688",
         mintAmountMinusPenaltyInterestFee: "4168671892773643060109",
         interestRateYearly: "17989044278774400",
         exchangeIncrease: ethers.utils.parseUnits("100", 18)
