@@ -68,9 +68,11 @@ export interface Pool {
   participants: number;
   interestRate?: number;
   penaltyRate: number;
+  feeRate: number;
   contribution?: number;
   interestAccrued?: number;
   availableInterest?: number;
+  penaltyPotBalance?: number;
   daysUntilAccess?: string;
   transactions: Array<Transaction>;
   userTotalBalanceAndPenaltiesCDai?: number;

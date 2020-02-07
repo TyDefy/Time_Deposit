@@ -52,6 +52,13 @@ export const setUserTotalBalanceAmount = createStandardAction(
     totalBalance: number
   }>();
 
+  export const setPoolPenaltyPotBalance = createStandardAction(
+    'SET_POOL_PENALTY_POT_BALANCE')
+    <{
+      poolAddress: string,
+      penaltyPotBalance: number
+    }>();
+
 export const setUserInfo = createStandardAction('SET_USER_INFO')<{
     lastDepositDate: Date;
     lastWithdrawDate: Date;
@@ -91,6 +98,11 @@ export const addPoolTx = createStandardAction('ADD_POOL_TX')<{
 export const setPoolInterestRate = createStandardAction('SET_POOL_INTEREST_RATE')<{
   poolAddress: string;
   interestRate: number;
+}>()
+
+export const setPoolFeeRate = createStandardAction('SET_POOL_FEE_RATE')<{
+  poolAddress: string;
+  feeRate: number;
 }>()
 
 export const setPoolInterestAccrued = createStandardAction('SET_POOL_INTEREST_ACCRUED')<{

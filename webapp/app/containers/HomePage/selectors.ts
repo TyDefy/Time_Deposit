@@ -13,6 +13,8 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
 
     const cdaiBalancePool = p.transactions?.reduce((poolCdaiBalance, t) =>
     t.type === 'Deposit' ? poolCdaiBalance += t.cdaiAmount : poolCdaiBalance -= t.cdaiAmount, 0) || 0;
+
+    const poolPenaltyBalance = p.penaltyPotBalance ? (p.penaltyPotBalance * exchangeRate): 0;
     
     const cdaiByUser =  ethAddress ?
     p.transactions?.filter(t => t.userAddress.toUpperCase() === ethAddress.toUpperCase())
@@ -26,27 +28,28 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
         t.type === 'Deposit' ? poolBalance += t.amount : poolBalance -= t.amount, 0) || 0;
     
     
-    const penaltyAmount = p.userTotalBalanceAndPenaltiesCDai ? (p.userTotalBalanceAndPenaltiesCDai - cdaiByUser): 0;
+    const penaltyAmount = contribution > 0 && p.userTotalBalanceAndPenaltiesCDai ? (p.userTotalBalanceAndPenaltiesCDai - cdaiByUser): 0;
 
       var lastWithdrawDate = p.userLastWithdrawDate;
       var withdrawDate;
       if (p.period !== 0 && lastWithdrawDate) {
         let getMonths = lastWithdrawDate.getMonth() + p.period;
-        withdrawDate = lastWithdrawDate.setMonth(getMonths);
+        let withdrawDateValue = lastWithdrawDate;
+        withdrawDate = withdrawDateValue.setMonth(getMonths);
       }
-
+      
       const daysUntilAccess = lastWithdrawDate && p.period !== 0 ? Math.abs(dayjs(withdrawDate).diff(Date.now(), 'day')).toString() : '-';
 
       return {
         ...p,
         interestRate: interestRate,
-        balance: balance,
+        balance: (cdaiBalancePool * exchangeRate) + poolPenaltyBalance,
         cdaiBalance: cdaiBalancePool,
-        participants: new Set(p.transactions?.map(t => t.userAddress)).size,
+        participants: balance > 0 ? new Set(p.transactions?.map(t => t.userAddress)).size : 0,
         contribution: contribution,
-        interestAccrued: ((cdaiByUser + penaltyAmount) * exchangeRate) - contribution,
+        interestAccrued: contribution > 0 ? ((cdaiByUser + penaltyAmount) * exchangeRate) - contribution : 0,
         availableInterest: p.period === 0 ? ((cdaiByUser + penaltyAmount) * exchangeRate) - contribution : 0,
-        daysUntilAccess: daysUntilAccess,
+        daysUntilAccess: contribution > 0 ? daysUntilAccess : '-',
       }
     })
 );

@@ -25,6 +25,7 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         [action.payload.address]: {
           ...action.payload,
           type: 'cDAI', // TODO: Get this from the action payload
+          feeRate: 0,
           transactions: [],
         }
       }
@@ -45,6 +46,15 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
           ...state[action.payload.poolAddress],
           userLastDepositDate: action.payload.lastDepositDate,
           userLastWithdrawDate: action.payload.lastWithdrawDate,
+        }
+      }
+    }
+    case getType(AppActions.setPoolPenaltyPotBalance): {
+      return {
+        ...state,
+        [action.payload.poolAddress]: {
+          ...state[action.payload.poolAddress],
+          penaltyPotBalance: action.payload.penaltyPotBalance
         }
       }
     }
@@ -84,6 +94,15 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         [action.payload.poolAddress]: {
           ...state[action.payload.poolAddress],
           active: false,
+        }
+      }
+    }
+    case getType(AppActions.setPoolFeeRate): {
+      return {
+        ...state,
+        [action.payload.poolAddress]: {
+          ...state[action.payload.poolAddress],
+          feeRate: action.payload.feeRate
         }
       }
     }
