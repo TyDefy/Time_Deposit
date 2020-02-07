@@ -6,6 +6,7 @@ const pcDaiABI = require('../build/pcToken.json');
 const pDaiABI = require('../build/pDai.json');
 const erc20ABI = require('../build/IERC20_Rinkeby.json');
 const pcTokenABI = require('../build/ICToken.json');
+const basicPoolABI = require('../build/BasicPool.json');
 
 let DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 
@@ -95,6 +96,12 @@ const deploy = async (network, secret) => {
 			process.env.POOL_NAME,
 			process.env.POOL_DESCRIPTION
 		)).wait();
+		
+		// console.log(newPool.events[3].args);
+
+		const poolInstance = deployer.wrapDeployedContract(basicPoolABI, newPool.events[3].args.pool);
+
+		await(await poolInstance.init(10)).wait();
 
 		const CONTRACT_ADDRESSES = `
 			DAI_ADDRESS=${pDaiInstance.contract.address}
@@ -105,7 +112,6 @@ const deploy = async (network, secret) => {
 
 		console.log("Withdraw address:" + withdrawAddress);
 		console.log("Penalty address:" + penaltyAddress + "\nPool address:");
-		console.log(newPool.events[3].args.pool)
 
 		const addresses = (process.env.ADDESSES_TO_MINT).split(',');
 
