@@ -350,6 +350,12 @@ contract BasicPool is WhitelistAdminRole {
         return interest + penaltyPortion;
     }
 
+    //return user's total balance (initial deposit + interest accrued + penalty pot portion) in DAI/cDAI
+    function getUserBalance(address _user) public view returns(uint256) {
+        uint256 userInterestAndPenalty = getUserInterest(_user);
+        return (users_[_user].balance + userInterestAndPenalty);
+    }
+
     function getTotalBalance(address _user) public view returns(uint256) {
         uint256 penaltyPortion = _getPenaltyPotPortion(_user);
         return (users_[_user].balance + penaltyPortion);
