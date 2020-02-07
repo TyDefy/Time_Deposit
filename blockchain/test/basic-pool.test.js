@@ -481,5 +481,60 @@ describe("Basic Pool Tests", async () => {
                 "User has not gained penalty"
             );
         });
+
+        it("Get user total balance", async () => {
+            let userInterest = await basicPoolInstance.getTotalBalance(user1.signer.address);
+
+            assert.equal(
+                userInterest.toString(),
+                0,
+                "User has interest before depositing"
+            );
+
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+
+            userInterest = await basicPoolInstance.getUserInterest(user1.signer.address);
+
+            assert.equal(
+                userInterest.toString(),
+                0,
+                "User has interest before interest has been earned"
+            );
+
+            await cDaiInstance.from(admin).increaseExchange(test_settings.pcTokenSettings.exchangeIncrease);
+
+            userInterest = await basicPoolInstance.getTotalBalance(user1.signer.address);
+
+            assert.equal(
+                userInterest.toString(),
+                test_settings.basicPool.fullBalanceWithInterest,
+                "User has not earned interest"
+            );
+
+            await pDaiInstance.from(user2).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user2).deposit(
+                test_settings.basicPool.deposit
+            );
+            let tx = await(await basicPoolInstance.from(user2).withdraw(
+                test_settings.basicPool.deposit
+            )).wait();
+
+            userInterest = await basicPoolInstance.getTotalBalance(user1.signer.address);
+
+            assert.equal(
+                userInterest.toString(),
+                test_settings.basicPool.fullBalanceWithInterestAndPenalty,
+                "User has not gained penalty"
+            );
+        });
     });
 });
