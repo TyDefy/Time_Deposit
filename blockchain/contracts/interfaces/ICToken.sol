@@ -11,6 +11,8 @@ interface ICToken {
 
     function supplyRatePerBlock() external view returns (uint);
 
+    function exchangeRateStored() external view returns(uint);
+
     // Standard ERC20 functionality 
 
     /**

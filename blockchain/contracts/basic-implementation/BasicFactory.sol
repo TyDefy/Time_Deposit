@@ -25,7 +25,6 @@ contract BasicFactory is WhitelistAdminRole {
         bool _canWithdrawInViolation,
         bool _canWithdrawInterestInViolation
     );
-
     event DeployedPool(
         address indexed pool,
         address indexed withdraw,
