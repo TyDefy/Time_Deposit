@@ -3,7 +3,7 @@ import { BlockchainContext } from "blockchainContext";
 import { connectMetamask, setWeb3, setDaiBalance, setIsAdmin, setCDaiRates } from "./actions";
 import { getType } from "typesafe-actions";
 import { eventChannel } from "redux-saga";
-import { BigNumber, formatEther } from "ethers/utils";
+import { BigNumber, formatEther, formatUnits } from "ethers/utils";
 import poolFactorySaga, { deployedUtilityWatcher } from "./poolFactorySaga";
 import poolSaga from "./poolSaga";
 import { ICToken } from '../../../../blockchain/contractInterfaces/ICToken';
@@ -113,8 +113,8 @@ function* getCDaiRates() {
         //@ts-ignore
         var exchangeRateStored : BigNumber= yield call([cdaiContract, cdaiContract.exchangeRateStored])
 
-        var exchangeRateStoredValue = Number(formatEther(exchangeRateStored))/1e9;
-        
+        var exchangeRateStoredValue = Number(formatUnits(exchangeRateStored, 27));
+
         exchangeRate = exchangeRateStoredValue;
       }
       
