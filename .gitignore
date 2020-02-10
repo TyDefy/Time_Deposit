@@ -172,3 +172,5 @@ derivation_*
 .etherlime-store
 .outputParameter
 blockchain/.idea/
+
+blockchain/contracts/basic-implementation/scenario.json
