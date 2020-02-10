@@ -49,8 +49,8 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
         cdaiBalance: cdaiBalancePool,
         participants: balance > 0 ? new Set(p.transactions?.map(t => t.userAddress)).size : 0,
         contribution: contribution,
-        interestAccrued: contribution > 0 ? totalAmountwithPenalties - contribution : 0,
-        availableInterest: p.period === 0 ? totalAmountwithPenalties - contribution : 0,
+        interestAccrued: contribution > 0 && totalAmountwithPenalties ? Math.abs(totalAmountwithPenalties - contribution) : 0,
+        availableInterest: p.period === 0 && totalAmountwithPenalties ?  Math.abs(totalAmountwithPenalties - contribution) : 0,
         daysUntilAccess: contribution > 0 ? daysUntilAccess : '-',
       }
     })
