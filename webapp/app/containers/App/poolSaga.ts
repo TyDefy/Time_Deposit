@@ -20,7 +20,7 @@ import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
 import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/BasicPool';
 import { Log } from "ethers/providers";
-import { formatEther, parseEther, BigNumber, formatUnits } from "ethers/utils";
+import { formatEther, parseEther, BigNumber, formatUnits, parseUnits } from "ethers/utils";
 import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime, selectIsAdmin } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
@@ -463,7 +463,7 @@ function* poolWatcherSaga(action) {
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
           amount: Number(formatEther(parsedDeposit.amountInCollateral)),
-          cdaiAmount: Number(formatEther(parsedDeposit.amountInInterestEarning))
+          cdaiAmount: Number(formatUnits(parsedDeposit.amountInInterestEarning, 9))
         })
       }));
 
@@ -483,7 +483,7 @@ function* poolWatcherSaga(action) {
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
           amount: Number(formatEther(parsedWithdraw.amountInDai)),
-          cdaiAmount: Number(formatEther(parsedWithdraw.amountIncDai))
+          cdaiAmount: Number(parseUnits(parsedWithdraw.amountIncDai, 9))
         }),
         addPoolTx({
           poolAddress: poolContract.address,
