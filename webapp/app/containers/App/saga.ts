@@ -114,7 +114,7 @@ function* getCDaiRates() {
         var exchangeRateStored : BigNumber= yield call([cdaiContract, cdaiContract.exchangeRateStored])
 
         var exchangeRateStoredValue = Number(formatEther(exchangeRateStored))/1e9;
-
+        
         exchangeRate = exchangeRateStoredValue;
       }
       
