@@ -75,7 +75,7 @@ const PoolListing: React.FunctionComponent<OwnProps> = ({ pools, classes }: OwnP
               label={(p.active) ? `Active` : `Terminated`} />
             </TableCell>
             <TableCell><Chip label={`${p.period} months`} /></TableCell>
-            <TableCell>{p.balance}</TableCell>
+            <TableCell>{(p.balance).toFixed(2)}</TableCell>
             <TableCell>{p.participants}</TableCell>
             <TableCell>{`${((p.interestRate || 0) * 100).toFixed(2)} %`}</TableCell>
           </TableRow>))}

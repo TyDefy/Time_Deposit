@@ -25,6 +25,7 @@ import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime, selectIsAdmin } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
 import { setTxContext, setTxHash } from "containers/TransactionModal/actions";
+import { selectPool } from "containers/PoolDetailsPage/selectors";
 
 function* terminatePoolListener(poolContract: Pool) {
   while (true) {
@@ -398,6 +399,9 @@ function* poolTransactionListener(poolContract: Pool) {
 function* getUserInfoListener(poolContract: Pool) {
   while (true) {
     const { ethAddress }: BlockchainContext = yield getContext('blockchain');
+    //@ts-ignore
+    const pool = yield select((state) => selectPool(state, {match:{params:{poolAddress: poolContract.address}}}))
+    console.log(pool);
     var lastDeposit, lastWithdraw;
 
     if (ethAddress) {
@@ -417,7 +421,7 @@ function* getUserInfoListener(poolContract: Pool) {
         console.log('There was an error getting the user info');
         console.log(e);
       }
-      yield delay(10000);
+      yield delay(15000);
     } else {
       console.log('waiting for user to connect')
       yield take(connectMetamask.success);
