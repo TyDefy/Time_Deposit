@@ -106,6 +106,15 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         }
       }
     }
+    case getType(AppActions.setPoolFeeAmount): {
+      return {
+        ...state,
+        [action.payload.poolAddress]: {
+          ...state[action.payload.poolAddress],
+          feeAmountCDai: action.payload.feeAmount,
+        }
+      }
+    }
     default:
       return state;
   }

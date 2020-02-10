@@ -7,20 +7,22 @@ import {
   deposit,
   withdraw,
   withdrawInterest,
-  terminatePool,
   setUserTotalBalanceAmount, 
   setUserInfo,
   setPoolPenaltyPotBalance,
-  setPoolFeeRate, 
+  setPoolFeeRate,
+  setPoolFeeAmount,
+  withdrawPoolFee,
+  terminatePool, 
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
 import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/BasicPool';
 import { Log } from "ethers/providers";
-import { formatEther, parseEther, BigNumber } from "ethers/utils";
+import { formatEther, parseEther, BigNumber, formatUnits } from "ethers/utils";
 import { eventChannel } from "redux-saga";
-import { selectLatestPoolTxTime } from "./selectors";
+import { selectLatestPoolTxTime, selectIsAdmin } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
 import { setTxContext, setTxHash } from "containers/TransactionModal/actions";
 
@@ -45,6 +47,47 @@ function* terminatePoolListener(poolContract: Pool) {
           }))
         } catch (error) {
           yield put(terminatePool.failure(error.message));
+          yield put(enqueueSnackbar({
+            message: 'Something went wrong processing the transaction',
+            options: {
+              variant: 'error',
+            }
+          }))
+        }
+      }
+    } else {
+      yield put(enqueueSnackbar({
+        message: 'Please connect with metamask to continue',
+        options: {
+          variant: 'error'
+        }
+      }))
+      yield put(deposit.failure('Please connect with metamask'));
+      yield take(getType(connectMetamask.success));
+    }
+  }
+}
+
+function* withdrawFeeListener(poolContract: Pool) {
+  while (true) {
+    const action = yield take(getType(withdrawPoolFee.request));
+    const { signer }: BlockchainContext = yield getContext('blockchain');
+    if (signer) {
+      if (action.payload.poolAddress === poolContract.address) {
+        //@ts-ignore
+        const writeableContract = poolContract.connect(signer);
+        try {
+          yield put(setTxContext('Terminating pool'));
+          const tx: ContractTransaction = yield call(
+            [writeableContract, writeableContract.withdrawAdminFee]);
+          yield put(setTxHash(tx.hash));
+          yield call([tx, tx.wait]);
+          yield put(withdrawPoolFee.success({ poolAddress: poolContract.address }));
+          yield put(enqueueSnackbar({
+            message: 'Pool terminated successfully'
+          }))
+        } catch (error) {
+          yield put(withdrawPoolFee.failure(error.message));
           yield put(enqueueSnackbar({
             message: 'Something went wrong processing the transaction',
             options: {
@@ -382,6 +425,17 @@ function* getUserInfoListener(poolContract: Pool) {
   }
 }
 
+function* poolFeeListener(poolContract: Pool) {
+  while (true) {
+    const isAdmin: Boolean = yield select(selectIsAdmin);
+    if (isAdmin) {
+      const poolFeeAmount = yield call([poolContract, poolContract.accumulativeFee]);
+      yield put(setPoolFeeAmount({poolAddress: poolContract.address, feeAmount: Number(formatUnits(poolFeeAmount, 9))}))
+    }
+    yield delay(15000);
+  }
+}
+
 function* poolWatcherSaga(action) {
   const { provider, signer }: BlockchainContext = yield getContext('blockchain');
 
@@ -478,7 +532,9 @@ function* poolWatcherSaga(action) {
   yield fork(terminatePoolListener, poolContract);
   yield fork(getUserInfoListener, poolContract);
   yield fork(getPoolTotalPenaltyPoolListener, poolContract);
-  
+  yield fork(poolFeeListener, poolContract)
+  yield fork(withdrawFeeListener, poolContract);
+
 }
 
 export default function* poolSaga() {

@@ -11,7 +11,7 @@ import { compose, Dispatch } from 'redux';
 import selectAdminPoolDetailsPage from './selectors';
 import AdminPoolDetails from 'components/AdminPoolDetails';
 import { Pool } from 'containers/App';
-import { terminatePool } from 'containers/App/actions';
+import { terminatePool, withdrawPoolFee } from 'containers/App/actions';
 import { RouteComponentProps } from 'react-router-dom';
 
 interface RouteParams {
@@ -23,6 +23,7 @@ export interface OwnProps extends RouteComponentProps<RouteParams>,
 
 interface DispatchProps {
   terminatePool(): void;
+  withdrawPoolFee(): void;
 }
 
 export interface StateProps {
@@ -38,14 +39,13 @@ export interface PoolParticipant {
 
 export interface PoolDetails extends Pool {
   totalInterest: number;
-  feeRate: number;
   participantDetails: Array<PoolParticipant>;
 }
 
 type Props = StateProps & DispatchProps & OwnProps;
 
-const AdminPoolDetailsPage: React.FunctionComponent<Props> = ({pool, terminatePool}: Props) => {
-  return <AdminPoolDetails {...pool} terminatePool={terminatePool} />
+const AdminPoolDetailsPage: React.FunctionComponent<Props> = ({pool, terminatePool, withdrawPoolFee}: Props) => {
+  return <AdminPoolDetails {...pool} terminatePool={terminatePool} withdrawPoolFee={withdrawPoolFee} />
 };
 
 const mapStateToProps = (state, props) => selectAdminPoolDetailsPage(state, props);
@@ -56,6 +56,7 @@ const mapDispatchToProps = (
 ): DispatchProps => {
   return {
     terminatePool: () => dispatch(terminatePool.request({poolAddress: ownProps.match.params.poolAddress})),
+    withdrawPoolFee: () => dispatch(withdrawPoolFee.request({poolAddress: ownProps.match.params.poolAddress})),
   };
 };
 
