@@ -17,9 +17,6 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
 
     const poolPenaltyBalance = p.penaltyPotBalance ? (p.penaltyPotBalance * exchangeRate): 0;
     
-    const cdaiByUser =  ethAddress ?
-    p.transactions?.filter(t => t.userAddress.toUpperCase() === ethAddress.toUpperCase())
-      .reduce((poolCdaiBalance, t) => t.type === 'Deposit' ? poolCdaiBalance += t.cdaiAmount : poolCdaiBalance -= t.cdaiAmount, 0) : 0;
 
     const contribution =  ethAddress ?
     p.transactions?.filter(t => t.userAddress.toUpperCase() === ethAddress.toUpperCase())
