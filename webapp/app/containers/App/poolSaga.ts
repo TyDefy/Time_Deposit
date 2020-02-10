@@ -20,7 +20,7 @@ import { Contract, ContractTransaction } from "ethers";
 import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
 import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/BasicPool';
 import { Log } from "ethers/providers";
-import { formatEther, parseEther, BigNumber } from "ethers/utils";
+import { formatEther, parseEther, BigNumber, formatUnits } from "ethers/utils";
 import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime, selectIsAdmin } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
@@ -430,7 +430,7 @@ function* poolFeeListener(poolContract: Pool) {
     const isAdmin: Boolean = yield select(selectIsAdmin);
     if (isAdmin) {
       const poolFeeAmount = yield call([poolContract, poolContract.accumulativeFee]);
-      yield put(setPoolFeeAmount({poolAddress: poolContract.address, feeAmount: Number(formatEther(poolFeeAmount))}))
+      yield put(setPoolFeeAmount({poolAddress: poolContract.address, feeAmount: Number(formatUnits(poolFeeAmount, 9))}))
     }
     yield delay(15000);
   }
