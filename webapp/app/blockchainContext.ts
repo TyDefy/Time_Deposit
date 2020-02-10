@@ -2,11 +2,13 @@ import { BaseProvider } from "ethers/providers";
 import { getDefaultProvider, Signer, ethers, Contract } from "ethers";
 import { getNetwork } from "ethers/utils";
 import DaiContractAbi from '../../blockchain/build/abis/pDai-abi.json';
+import CDaiContractAbi from '../../blockchain/build/abis/ICToken-abi.json';
 import PoolRegistryContractAbi from '../../blockchain/build/abis/BasicRegistry-abi.json';
 import PoolFactoryContractAbi from '../../blockchain/build/abis/BasicFactory-abi.json';
 import { pDai } from '../../blockchain/contractInterfaces/pDai';
 import { BasicFactory as PoolFactory } from '../../blockchain/contractInterfaces/BasicFactory';
 import { BasicRegistry as PoolRegistry } from '../../blockchain/contractInterfaces/BasicRegistry';
+import { ICToken } from "../../blockchain/contractInterfaces/ICToken.js";
 
 export interface BlockchainContext {
   isMetamaskInstalled: boolean
@@ -20,6 +22,7 @@ export interface BlockchainContext {
   signer?: Signer;
   signerAddress?: string;
   daiContract: pDai;
+  cdaiContract: ICToken;
   poolRegistryContract: PoolRegistry;
   poolFactoryContract: PoolFactory;
   ethAddress?: string;
@@ -38,6 +41,7 @@ export class blockchainContext implements BlockchainContext {
   signer?: Signer;
   ethAddress?: string;
   daiContract: pDai;
+  cdaiContract: ICToken;
   poolRegistryContract: PoolRegistry;
   poolFactoryContract: PoolFactory;
 
@@ -64,6 +68,10 @@ export class blockchainContext implements BlockchainContext {
       PoolFactoryContractAbi,
       this.provider);
     
+    this.cdaiContract = new Contract(`${process.env.CDAI_ADDRESS}`,
+      CDaiContractAbi,
+      this.provider);
+
     this.enableEthereum = this.enableEthereum.bind(this);
     const { ethereum } = window as any;
     if (ethereum && ethereum.isMetaMask) {
