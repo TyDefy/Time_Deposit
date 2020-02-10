@@ -284,7 +284,7 @@ function* getUserTotalBalanceListener(poolContract: Pool) {
     if (ethAddress) {
       try{
       const totalBalance = yield call([poolContract, poolContract.getTotalBalance], ethAddress);
-      totalBalanceValue  =  Number(formatEther(totalBalance));
+      totalBalanceValue  = Number(formatEther(totalBalance))*1e9;
        
       } catch (e){
         console.log('There was an error getting the user interest amount');
@@ -368,7 +368,7 @@ function* poolTransactionListener(poolContract: Pool) {
           txHash: newTx.transactionHash || '0x',
           time: new Date(txDate.timestamp * 1000),
           amount: Number(formatEther(newTx.daiAmount)),
-          cdaiAmount: Number(formatEther(newTx.cDaiAmount))
+          cdaiAmount: Number(formatEther(newTx.cDaiAmount))*1e9
         }));
       } else { 
         yield put(addPoolTx({
@@ -378,7 +378,7 @@ function* poolTransactionListener(poolContract: Pool) {
           txHash: newTx.transactionHash || '0x',
           time: new Date(txDate.timestamp * 1000),
           amount: Number(formatEther(newTx.withdrawAmount)),
-          cdaiAmount: Number(formatEther(newTx.cDaiAmount)),
+          cdaiAmount: Number(formatEther(newTx.cDaiAmount))*1e9,
         }))
         yield put(addPoolTx({
           poolAddress: poolContract.address,

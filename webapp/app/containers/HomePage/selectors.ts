@@ -11,6 +11,7 @@ import dayjs from 'dayjs';
 export const selectPools = createSelector((state: RootState) => state.pools, selectEthAddress, selectExchangeRate, selectInterestRate, (pools, ethAddress, exchangeRate, interestRate) =>
   Object.values(pools).map(p => {
 
+    
     const cdaiBalancePool = p.transactions?.reduce((poolCdaiBalance, t) =>
     t.type === 'Deposit' ? poolCdaiBalance += t.cdaiAmount : poolCdaiBalance -= t.cdaiAmount, 0) || 0;
 
@@ -28,7 +29,7 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
         t.type === 'Deposit' ? poolBalance += t.amount : poolBalance -= t.amount, 0) || 0;
     
     
-    const penaltyAmount = contribution > 0 && p.userTotalBalanceAndPenaltiesCDai ? (p.userTotalBalanceAndPenaltiesCDai - cdaiByUser): 0;
+    const totalAmountwithPenalties = contribution > 0 && p.userTotalBalanceAndPenaltiesCDai ? (p.userTotalBalanceAndPenaltiesCDai* exchangeRate): 0;
 
       var lastWithdrawDate = p.userLastWithdrawDate;
       var withdrawDate;
@@ -37,6 +38,7 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
         let withdrawDateValue = lastWithdrawDate;
         withdrawDate = withdrawDateValue.setMonth(getMonths);
       }
+
       
       const daysUntilAccess = lastWithdrawDate && p.period !== 0 ? Math.abs(dayjs(withdrawDate).diff(Date.now(), 'day')).toString() : '-';
 
@@ -47,8 +49,8 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
         cdaiBalance: cdaiBalancePool,
         participants: balance > 0 ? new Set(p.transactions?.map(t => t.userAddress)).size : 0,
         contribution: contribution,
-        interestAccrued: contribution > 0 ? ((cdaiByUser + penaltyAmount) * exchangeRate) - contribution : 0,
-        availableInterest: p.period === 0 ? ((cdaiByUser + penaltyAmount) * exchangeRate) - contribution : 0,
+        interestAccrued: contribution > 0 ? totalAmountwithPenalties - contribution : 0,
+        availableInterest: p.period === 0 ? totalAmountwithPenalties - contribution : 0,
         daysUntilAccess: contribution > 0 ? daysUntilAccess : '-',
       }
     })
