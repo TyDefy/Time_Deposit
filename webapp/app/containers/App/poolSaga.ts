@@ -297,7 +297,7 @@ function* getUserTotalBalanceListener(poolContract: Pool) {
       }));
     }
 
-    yield delay(30000);
+    yield delay(15000);
   }
 }
 
