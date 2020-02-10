@@ -4,6 +4,7 @@ import { StateProps } from '.';
 import { OwnProps } from 'containers/PoolDetailsPage';
 import { selectPools } from 'containers/HomePage/selectors';
 import { selectSelectedPoolAddress } from 'containers/PoolDetailsPage/selectors';
+import { selectExchangeRate } from 'containers/App/selectors';
 
 /**
  * Default selector used by AdminPoolDetailsPage
@@ -11,8 +12,9 @@ import { selectSelectedPoolAddress } from 'containers/PoolDetailsPage/selectors'
 
 const selectAdminPoolDetails = createSelector(
   selectPools,
+  selectExchangeRate,
   selectSelectedPoolAddress,
-  (pools, poolAddress) => {
+  (pools, exchangeRate, poolAddress) => {
     const pool = pools.filter(p => p.address === poolAddress)[0];
     const participants = new Set(pool.transactions?.map(p => p.userAddress))
     const poolParticipants = [...participants]
@@ -30,6 +32,7 @@ const selectAdminPoolDetails = createSelector(
       });
     return {
       ...pool,
+      feeAmountInDai: (pool.feeAmountCDai || 0) * exchangeRate,
       participantDetails: poolParticipants,
       totalInterest: poolParticipants.reduce((totalInterest, participant) => totalInterest += participant.interest, 0), 
     }

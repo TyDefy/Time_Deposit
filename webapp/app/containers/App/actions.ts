@@ -110,6 +110,11 @@ export const setPoolInterestAccrued = createStandardAction('SET_POOL_INTEREST_AC
   interestAccrued: number;
 }>()
 
+export const setPoolFeeAmount = createStandardAction('SET_POOL_FEE_AMOUNT')<{
+  poolAddress: string;
+  feeAmount: number;
+}>()
+
 export const deposit = createAsyncAction(
   '@TX_REQUEST/POOL_DEPOSIT',
   '@TX_SUCCESS/POOL_DEPOSIT',
@@ -143,4 +148,10 @@ export const terminatePool = createAsyncAction(
   '@TX_REQUEST/TERMINATE_POOL',
   '@TX_SUCCESS/TERMINATE_POOL',
   '@TX_FAILURE/TERMINATE_POOL',
+)<{poolAddress: string}, {poolAddress: string}, string>();
+
+export const withdrawPoolFee = createAsyncAction(
+  '@TX_REQUEST/WITHDRAW_POOL_FEE',
+  '@TX_SUCCESS/WITHDRAW_POOL_FEE',
+  '@TX_FAILURE/WITHDRAW_POOL_FEE',
 )<{poolAddress: string}, {poolAddress: string}, string>();
