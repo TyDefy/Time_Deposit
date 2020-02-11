@@ -202,7 +202,7 @@ contract BasicPool is WhitelistAdminRole {
                 users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - penaltyAmount;
                 // Updates the balance of the penalty pot
                 penaltyPot_ = penaltyPot_ + (penaltyAmountInCdai - fee);
-                totalCCollateral_ = totalCCollateral_ - penaltyAmountInCdai;
+                totalCCollateral_ = totalCCollateral_ - (penaltyAmountInCdai + fee);
             }
         }
 
@@ -361,7 +361,7 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     function getTotalBalance(address _user) public view returns(uint256) {
-        uint256 penaltyPortion = yes(_user);
+        uint256 penaltyPortion = _getPenaltyPotPortion(_user);
         return (users_[_user].balance + penaltyPortion);
     }
 
@@ -502,9 +502,10 @@ contract BasicPool is WhitelistAdminRole {
                 uint256 unclaimedPenalty = users_[_user]
                     .totalInvestment - users_[_user].totalPenaltyClaimed;
                 users_[_user].totalPenaltyClaimed += unclaimedPenalty;
-                return (((unclaimedPenalty*1e18)/totalCCollateral_
+                uint256 penaltyPortion = (((unclaimedPenalty*1e18)/totalCCollateral_
                         )*penaltyPot_
                     )/1e18;
+                return penaltyPortion;
             }
         }
         return 0;

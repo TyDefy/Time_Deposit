@@ -266,8 +266,16 @@ describe("Basic Pool Tests", async () => {
             let userPenaltyShare = await basicPoolInstance.getTotalBalance(user1.signer.address);
             console.log("User 1 tb:\t" + userPenaltyShare.toString())
 
+            userPenaltyShare = await basicPoolInstance.getUserInfo(user1.signer.address);
+            console.log("User 1 tb:\t" + userPenaltyShare[0].toString())
+            console.log("User 1 tb:\t" + userPenaltyShare[1].toString())
+
             let user2PenaltyShare = await basicPoolInstance.getTotalBalance(user2.signer.address);
             console.log("User 2 tb:\t" + user2PenaltyShare.toString())
+
+            user2PenaltyShare = await basicPoolInstance.getUserInfo(user2.signer.address);
+            console.log("User 2 tb:\t" + user2PenaltyShare[0].toString())
+            console.log("User 2 tb:\t" + user2PenaltyShare[1].toString())
 
             let user3PenaltyShare = await basicPoolInstance.getTotalBalance(user3.signer.address);
             console.log("User 3 tb:\t" + user3PenaltyShare.toString())
@@ -281,8 +289,16 @@ describe("Basic Pool Tests", async () => {
             userPenaltyShare = await basicPoolInstance.getTotalBalance(user1.signer.address);
             console.log("User 1 tb:\t" + userPenaltyShare.toString())
 
+            userPenaltyShare = await basicPoolInstance.getUserInfo(user1.signer.address);
+            console.log("User 1 tb:\t" + userPenaltyShare[0].toString())
+            console.log("User 1 tb:\t" + userPenaltyShare[1].toString())
+
             user2PenaltyShare = await basicPoolInstance.getTotalBalance(user2.signer.address);
             console.log("User 2 tb:\t" + user2PenaltyShare.toString())
+
+            user2PenaltyShare = await basicPoolInstance.getUserInfo(user2.signer.address);
+            console.log("User 2 tb:\t" + user2PenaltyShare[0].toString())
+            console.log("User 2 tb:\t" + user2PenaltyShare[1].toString())
 
             // User 1 withdraws more than their share of the penalty pot
             await basicPoolInstance.from(user1).withdrawInterest();
@@ -306,6 +322,32 @@ describe("Basic Pool Tests", async () => {
             User 1 tb:	    473712970092
             User 2 tb:	    492169319576 //and this call???????
             User one trys to withdraw interest again
+            Penalty Pot:	35528472757
+            User 1 tb:	    473712970092
+            User 2 tb:	    492169319576
+
+            Penalty Pot:	71056945513
+
+            User 1 tb:	    509241442848
+            User 1 tb:	    100000000000000000000
+            User 1 tb:	    473712970092
+
+            User 2 tb:	    509241442848 
+            User 2 tb:	    100000000000000000000
+            User 2 tb:	    473712970092
+
+            user 1 withdraws
+
+            Penalty Pot:	35528472757
+
+            User 1 tb:	    473712970092
+            User 1 tb:	    100000000000000000000
+            User 1 tb:	    473712970092
+
+            User 2 tb:	    492169319576
+            User 2 tb:	    100000000000000000000
+            User 2 tb:	    473712970092
+
             Penalty Pot:	35528472757
             User 1 tb:	    473712970092
             User 2 tb:	    492169319576
