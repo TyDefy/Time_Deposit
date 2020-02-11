@@ -25,7 +25,6 @@ import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime, selectIsAdmin, selectEthAddress } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
 import { setTxContext, setTxHash } from "containers/TransactionModal/actions";
-import { selectPool } from "containers/PoolDetailsPage/selectors";
 
 function* terminatePoolListener(poolContract: Pool) {
   while (true) {
@@ -277,29 +276,6 @@ function* poolWithdrawInterestListener(poolContract: Pool) {
     }
   }
 }
-// Total Balance + Penalties
-// function* getUserTotalBalanceListener(poolContract: Pool) {
-//   while (true) {
-//     const { ethAddress }: BlockchainContext = yield getContext('blockchain');
-//     var totalBalanceValue;
-//     if (ethAddress) {
-//       try {
-//         const totalBalance = yield call([poolContract, poolContract.getTotalBalance], ethAddress);
-//         totalBalanceValue = Number(formatUnits(totalBalance, 9));
-
-//       } catch (e) {
-//         console.log('There was an error getting the user interest amount');
-//       }
-
-//       yield put(setUserTotalBalanceAmount({
-//         poolAddress: poolContract.address,
-//         totalBalance: totalBalanceValue
-//       }));
-//     }
-
-//     yield delay(15000);
-//   }
-// }
 
 function* getPoolTotalPenalty(poolContract: Pool) {
   try {
@@ -386,35 +362,22 @@ function* poolTransactionListener(poolContract: Pool) {
 }
 
 
-function* getUserInfoListener(poolContract: Pool) {
-  while (true) {
-    const { ethAddress }: BlockchainContext = yield getContext('blockchain');
-    //@ts-ignore
-    const pool = yield select((state) => selectPool(state, { match: { params: { poolAddress: poolContract.address } } }))
-    var lastDeposit, lastWithdraw;
+function* getUserInfo(poolContract: Pool, ethAddress: string) {
+  try {
+    const userInfo = yield call([poolContract, poolContract.getUserInfo], ethAddress);
+    const lastDepositRaw = formatEther(userInfo[2]);
+    const lastWithdrawRaw = formatEther(userInfo[3]);
 
-    if (ethAddress) {
-      try {
-        const userInfo = yield call([poolContract, poolContract.getUserInfo], ethAddress);
-        lastDeposit = formatEther(userInfo[2]);
-        lastWithdraw = formatEther(userInfo[3]);
-
-        if (lastDeposit !== "0.0" && lastWithdraw !== "0.0") {
-          yield put(setUserInfo({
-            lastDepositDate: new Date(parseInt(lastDeposit.substr(10, 20)) * 1000),
-            lastWithdrawDate: new Date(parseInt(lastWithdraw.substr(10, 20)) * 1000),
-            poolAddress: poolContract.address
-          }));
-        }
-      } catch (e) {
-        console.log('There was an error getting the user info');
-        console.log(e);
-      }
-      yield delay(15000);
-    } else {
-      console.log('waiting for user to connect')
-      yield take(connectMetamask.success);
+    if (lastDepositRaw !== "0.0" && lastWithdrawRaw !== "0.0") {
+      yield put(setUserInfo({
+        lastDepositDate: new Date(parseInt(lastDepositRaw.substr(10, 20)) * 1000),
+        lastWithdrawDate: new Date(parseInt(lastDepositRaw.substr(10, 20)) * 1000),
+        poolAddress: poolContract.address
+      }));
     }
+  } catch (e) {
+    console.log('There was an error getting the user info');
+    console.log(e);
   }
 }
 
@@ -425,7 +388,7 @@ function* getPoolFeeBalance(poolContract: Pool) {
 
 function* getPoolUserBalance(poolContract: Pool, ethAddress: string) {
   const userBalance = yield call([poolContract, poolContract.getUserBalance], ethAddress);
-  yield put(setUserPoolBalance({ poolAddress: poolContract.address, userBalance: Number(formatUnits(userBalance, 9))}))
+  yield put(setUserPoolBalance({ poolAddress: poolContract.address, userBalance: Number(formatUnits(userBalance, 9)) }))
 }
 
 function* poolPoller(poolContract: Pool) {
@@ -437,6 +400,7 @@ function* poolPoller(poolContract: Pool) {
 
     if (ethAddress) {
       yield call(getPoolUserBalance, poolContract, ethAddress);
+      yield call(getUserInfo, poolContract, ethAddress)
     }
 
     if (ethAddress && isAdmin) {
@@ -541,9 +505,7 @@ function* poolWatcherSaga(action) {
   yield fork(poolWithdrawListener, poolContract);
   yield fork(poolWithdrawInterestListener, poolContract);
   yield fork(poolTerminatedListener, poolContract);
-  // yield fork(getUserTotalBalanceListener, poolContract);
   yield fork(terminatePoolListener, poolContract);
-  yield fork(getUserInfoListener, poolContract);
   yield fork(getPoolTotalPenalty, poolContract);
   yield fork(getPoolFeeBalance, poolContract)
   yield fork(withdrawFeeListener, poolContract);
