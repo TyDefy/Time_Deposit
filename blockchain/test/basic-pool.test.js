@@ -295,6 +295,21 @@ describe("Basic Pool Tests", async () => {
 
             user2PenaltyShare = await basicPoolInstance.getTotalBalance(user2.signer.address);
             console.log("User 2 tb:\t" + user2PenaltyShare.toString())
+
+            /**
+            Penalty Pot:	71056945513
+            User 1 tb:	    509241442848
+            User 2 tb:	    509241442848 //User 2's balance should not change between this call 
+            User 3 tb:	    1
+            User one withdraw's their interest
+            Penalty Pot:	35528472757
+            User 1 tb:	    473712970092
+            User 2 tb:	    492169319576 //and this call???????
+            User one trys to withdraw interest again
+            Penalty Pot:	35528472757
+            User 1 tb:	    473712970092
+            User 2 tb:	    492169319576
+             */
         });
     });
 

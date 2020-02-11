@@ -361,7 +361,7 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     function getTotalBalance(address _user) public view returns(uint256) {
-        uint256 penaltyPortion = _getPenaltyPotPortion(_user);
+        uint256 penaltyPortion = yes(_user);
         return (users_[_user].balance + penaltyPortion);
     }
 
