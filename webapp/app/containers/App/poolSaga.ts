@@ -7,13 +7,13 @@ import {
   deposit,
   withdraw,
   withdrawInterest,
-  setUserTotalBalanceAmount, 
+  setUserPoolBalance,
   setUserInfo,
   setPoolPenaltyPotBalance,
   setPoolFeeRate,
   setPoolFeeAmount,
   withdrawPoolFee,
-  terminatePool, 
+  terminatePool,
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
@@ -22,7 +22,7 @@ import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/Bas
 import { Log } from "ethers/providers";
 import { formatEther, parseEther, BigNumber, formatUnits } from "ethers/utils";
 import { eventChannel } from "redux-saga";
-import { selectLatestPoolTxTime, selectIsAdmin } from "./selectors";
+import { selectLatestPoolTxTime, selectIsAdmin, selectEthAddress } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
 import { setTxContext, setTxHash } from "containers/TransactionModal/actions";
 import { selectPool } from "containers/PoolDetailsPage/selectors";
@@ -278,51 +278,41 @@ function* poolWithdrawInterestListener(poolContract: Pool) {
   }
 }
 // Total Balance + Penalties
-function* getUserTotalBalanceListener(poolContract: Pool) {
-  while (true) {
-    const { ethAddress }: BlockchainContext = yield getContext('blockchain');
-    var totalBalanceValue;
-    if (ethAddress) {
-      try{
-      const totalBalance = yield call([poolContract, poolContract.getTotalBalance], ethAddress);
-      totalBalanceValue  = Number(formatUnits(totalBalance, 9));
-       
-      } catch (e){
-        console.log('There was an error getting the user interest amount');
-      }
+// function* getUserTotalBalanceListener(poolContract: Pool) {
+//   while (true) {
+//     const { ethAddress }: BlockchainContext = yield getContext('blockchain');
+//     var totalBalanceValue;
+//     if (ethAddress) {
+//       try {
+//         const totalBalance = yield call([poolContract, poolContract.getTotalBalance], ethAddress);
+//         totalBalanceValue = Number(formatUnits(totalBalance, 9));
 
-      yield put(setUserTotalBalanceAmount({
-        poolAddress: poolContract.address,
-        totalBalance: totalBalanceValue
-      }));
-    }
+//       } catch (e) {
+//         console.log('There was an error getting the user interest amount');
+//       }
 
-    yield delay(15000);
+//       yield put(setUserTotalBalanceAmount({
+//         poolAddress: poolContract.address,
+//         totalBalance: totalBalanceValue
+//       }));
+//     }
+
+//     yield delay(15000);
+//   }
+// }
+
+function* getPoolTotalPenalty(poolContract: Pool) {
+  try {
+    const penaltyPotValue = yield call([poolContract, poolContract.penaltyPotBalance]);
+    yield put(setPoolPenaltyPotBalance({
+      poolAddress: poolContract.address,
+      penaltyPotBalance: Number(formatEther(penaltyPotValue)),
+    }));
+  } catch (e) {
+    console.log('There was an error getting the penaltyPoolBalance amount');
   }
 }
 
-function* getPoolTotalPenaltyPoolListener(poolContract: Pool) {
-  while (true) {
-      var penaltyPotBalance;
-      try{
-      const penaltyPotValue = yield call([poolContract, poolContract.penaltyPotBalance]);
-      penaltyPotBalance  =  Number(formatEther(penaltyPotValue));
-       
-      } catch (e){
-        console.log('There was an error getting the penaltyPoolBalance amount');
-      }
-
-      yield put(setPoolPenaltyPotBalance({
-        poolAddress: poolContract.address,
-        penaltyPotBalance: penaltyPotBalance
-      }));
-      yield delay(100000);
-    }
-}
-
-
-
- 
 function* poolTransactionListener(poolContract: Pool) {
   const { provider }: BlockchainContext = yield getContext('blockchain');
 
@@ -371,7 +361,7 @@ function* poolTransactionListener(poolContract: Pool) {
           amount: Number(formatEther(newTx.daiAmount)),
           cdaiAmount: Number(formatUnits(newTx.cDaiAmount, 9))
         }));
-      } else { 
+      } else {
         yield put(addPoolTx({
           poolAddress: poolContract.address,
           userAddress: newTx.address,
@@ -400,7 +390,7 @@ function* getUserInfoListener(poolContract: Pool) {
   while (true) {
     const { ethAddress }: BlockchainContext = yield getContext('blockchain');
     //@ts-ignore
-    const pool = yield select((state) => selectPool(state, {match:{params:{poolAddress: poolContract.address}}}))
+    const pool = yield select((state) => selectPool(state, { match: { params: { poolAddress: poolContract.address } } }))
     var lastDeposit, lastWithdraw;
 
     if (ethAddress) {
@@ -428,13 +418,31 @@ function* getUserInfoListener(poolContract: Pool) {
   }
 }
 
-function* poolFeeListener(poolContract: Pool) {
+function* getPoolFeeBalance(poolContract: Pool) {
+  const poolFeeAmount = yield call([poolContract, poolContract.accumulativeFee]);
+  yield put(setPoolFeeAmount({ poolAddress: poolContract.address, feeAmount: Number(formatUnits(poolFeeAmount, 9)) }))
+}
+
+function* getPoolUserBalance(poolContract: Pool, ethAddress: string) {
+  const userBalance = yield call([poolContract, poolContract.getUserBalance], ethAddress);
+  yield put(setUserPoolBalance({ poolAddress: poolContract.address, userBalance: Number(formatUnits(userBalance, 9))}))
+}
+
+function* poolPoller(poolContract: Pool) {
   while (true) {
+    const ethAddress: string = yield select(selectEthAddress);
     const isAdmin: Boolean = yield select(selectIsAdmin);
-    if (isAdmin) {
-      const poolFeeAmount = yield call([poolContract, poolContract.accumulativeFee]);
-      yield put(setPoolFeeAmount({poolAddress: poolContract.address, feeAmount: Number(formatUnits(poolFeeAmount, 9))}))
+
+    yield call(getPoolTotalPenalty, poolContract)
+
+    if (ethAddress) {
+      yield call(getPoolUserBalance, poolContract, ethAddress);
     }
+
+    if (ethAddress && isAdmin) {
+      yield call(getPoolFeeBalance, poolContract)
+    }
+
     yield delay(15000);
   }
 }
@@ -493,7 +501,8 @@ function* poolWatcherSaga(action) {
           amount: Number(formatEther(parsedWithdraw.penalty)),
           cdaiAmount: 0
         }),
-      ]}));
+        ]
+      }));
 
     const actions = depositTxActions.concat(withdrawTxActions.flat()).sort((a, b) => a.time - b.time);
 
@@ -532,13 +541,13 @@ function* poolWatcherSaga(action) {
   yield fork(poolWithdrawListener, poolContract);
   yield fork(poolWithdrawInterestListener, poolContract);
   yield fork(poolTerminatedListener, poolContract);
-  yield fork(getUserTotalBalanceListener, poolContract);
+  // yield fork(getUserTotalBalanceListener, poolContract);
   yield fork(terminatePoolListener, poolContract);
   yield fork(getUserInfoListener, poolContract);
-  yield fork(getPoolTotalPenaltyPoolListener, poolContract);
-  yield fork(poolFeeListener, poolContract)
+  yield fork(getPoolTotalPenalty, poolContract);
+  yield fork(getPoolFeeBalance, poolContract)
   yield fork(withdrawFeeListener, poolContract);
-
+  yield fork(poolPoller, poolContract);
 }
 
 export default function* poolSaga() {

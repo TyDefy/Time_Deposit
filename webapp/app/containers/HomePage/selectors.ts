@@ -22,7 +22,7 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
         t.type === 'Deposit' ? poolBalance += t.amount : poolBalance -= t.amount, 0) || 0;
     
     
-    const totalAmountwithPenalties = contribution > 0 && p.userTotalBalanceAndPenaltiesCDai ? (p.userTotalBalanceAndPenaltiesCDai* exchangeRate): 0;
+    const totalAmountwithPenalties = contribution > 0 && p.userBalanceCDai ? (p.userBalanceCDai * exchangeRate): 0;
 
       var lastWithdrawDate = p.userLastWithdrawDate;
       var withdrawDate;
