@@ -401,7 +401,6 @@ function* getUserInfoListener(poolContract: Pool) {
     const { ethAddress }: BlockchainContext = yield getContext('blockchain');
     //@ts-ignore
     const pool = yield select((state) => selectPool(state, {match:{params:{poolAddress: poolContract.address}}}))
-    console.log(pool);
     var lastDeposit, lastWithdraw;
 
     if (ethAddress) {
