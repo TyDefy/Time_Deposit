@@ -45,11 +45,11 @@ export const setCDaiRates = createAsyncAction(
 },
 string>();
 
-export const setUserTotalBalanceAmount = createStandardAction(
-  'SET_USER_TOTAL_BALANCE_AMOUNT')
+export const setUserPoolBalance = createStandardAction(
+  'SET_USER_POOL_BALANCE')
   <{
     poolAddress: string,
-    totalBalance: number
+    userBalance: number
   }>();
 
   export const setPoolPenaltyPotBalance = createStandardAction(

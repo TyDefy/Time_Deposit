@@ -3,6 +3,7 @@ import { RootState } from 'containers/App/types';
 import { StateProps, OwnProps } from '.';
 import { selectPools } from 'containers/HomePage/selectors';
 import { selectDaiBalance, selectEthAddress, selectExchangeRate, selectInterestRate } from 'containers/App/selectors';
+import dayjs from 'dayjs';
 
 export const selectSelectedPoolAddress = (state: RootState, props: OwnProps) => {
   return props.match.params.poolAddress
@@ -25,12 +26,10 @@ export const selectPool = createSelector(
       (transaction.type === 'Deposit') ? total += transaction.amount : total -= transaction.amount, 0);
 
     if(pool.contribution > 0 && pool.period !== 0){
-      pool.nextWithdrawDate = pool.userLastWithdrawDate; 
+      pool.nextWithdrawDate = pool.userLastWithdrawDate; //TODO: I think this is where everything is going wrong
     
     }else if(pool.period !== 0){
-      var periodMonthsFromNow = new Date();
-      periodMonthsFromNow.setMonth(periodMonthsFromNow.getMonth() + pool.period);
-      pool.nextWithdrawDate = periodMonthsFromNow
+      pool.nextWithdrawDate = dayjs(new Date()).add(pool.period, 'month').toDate()
     }
 
     return pool;
