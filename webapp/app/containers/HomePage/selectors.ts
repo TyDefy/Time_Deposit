@@ -10,16 +10,12 @@ import dayjs from 'dayjs';
 
 export const selectPools = createSelector((state: RootState) => state.pools, selectEthAddress, selectExchangeRate, selectInterestRate, (pools, ethAddress, exchangeRate, interestRate) =>
   Object.values(pools).map(p => {
-
-    
     const cdaiBalancePool = p.transactions?.reduce((poolCdaiBalance, t) =>
     t.type === 'Deposit' ? poolCdaiBalance += t.cdaiAmount : poolCdaiBalance -= t.cdaiAmount, 0) || 0;
 
     const poolPenaltyBalance = p.penaltyPotBalance ? (p.penaltyPotBalance * exchangeRate): 0;
-    
-
     const contribution =  ethAddress ?
-    p.transactions?.filter(t => t.userAddress.toUpperCase() === ethAddress.toUpperCase())
+    p.transactions?.filter(t => t.userAddress.toLowerCase() === ethAddress.toLowerCase())
       .reduce((contribution, t) => t.type === 'Deposit' ? contribution += t.amount : contribution -= t.amount, 0) : 0;
 
     const balance = p.transactions?.reduce((poolBalance, t) =>
