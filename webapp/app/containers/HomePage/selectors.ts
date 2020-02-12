@@ -11,42 +11,47 @@ import dayjs from 'dayjs';
 export const selectPools = createSelector((state: RootState) => state.pools, selectEthAddress, selectExchangeRate, selectInterestRate, (pools, ethAddress, exchangeRate, interestRate) =>
   Object.values(pools).map(p => {
     const cdaiBalancePool = p.transactions?.reduce((poolCdaiBalance, t) =>
-    t.type === 'Deposit' ? poolCdaiBalance += t.cdaiAmount : poolCdaiBalance -= t.cdaiAmount, 0) || 0;
+      t.type === 'Deposit' ? poolCdaiBalance += t.cdaiAmount : poolCdaiBalance -= t.cdaiAmount, 0) || 0;
 
-    const poolPenaltyBalance = p.penaltyPotBalance ? (p.penaltyPotBalance * exchangeRate): 0;
-    const contribution =  ethAddress ?
-    p.transactions?.filter(t => t.userAddress.toLowerCase() === ethAddress.toLowerCase())
-      .reduce((contribution, t) => t.type === 'Deposit' ? contribution += t.amount : contribution -= t.amount, 0) : 0;
+    const poolPenaltyBalance = p.penaltyPotBalance ? (p.penaltyPotBalance * exchangeRate) : 0;
+    const contribution = ethAddress ?
+      p.transactions?.filter(t => t.userAddress.toLowerCase() === ethAddress.toLowerCase())
+        .reduce((contribution, t) => t.type === 'Deposit' ? contribution += t.amount : contribution -= t.amount, 0) : 0;
 
     const balance = p.transactions?.reduce((poolBalance, t) =>
-        t.type === 'Deposit' ? poolBalance += t.amount : poolBalance -= t.amount, 0) || 0;
+      t.type === 'Deposit' ? poolBalance += t.amount : poolBalance -= t.amount, 0) || 0;
+
+
+    const totalAmountwithPenalties = contribution > 0 && p.userBalanceCDai ? (p.userBalanceCDai * exchangeRate) : 0;
+
+    const lastWithdrawDate = p.transactions
+      .filter(t => t.userAddress.toLowerCase() === ethAddress?.toLowerCase() && t.type === 'Withdraw')
+      .map(t => t.time)
+      .reduce((a, b) => a > b ? a : b, new Date('01/01/1970'));
+
+    const lastDepositDate = p.transactions
+      .filter(t => t.userAddress.toLowerCase() === ethAddress?.toLowerCase() && t.type === 'Deposit')
+      .map(t => t.time)
+      .reduce((a, b) => a > b ? a : b, new Date('01/01/1970'));
+
     
-    
-    const totalAmountwithPenalties = contribution > 0 && p.userBalanceCDai ? (p.userBalanceCDai * exchangeRate): 0;
+    //  = (lastDepositDate && !lastWithdrawDate) ? 
+    const daysUntilAccess = dayjs(lastDepositDate).add(p.period, 'month').diff(Date.now(), 'day').toString();
+    // const daysUntilAccess = lastWithdrawDate && p.period !== 0 ? Math.abs(dayjs(withdrawDate).diff(Date.now(), 'day')).toString() : '-';
+    debugger;
 
-      var lastWithdrawDate = p.userLastWithdrawDate;
-      var withdrawDate;
-      if (p.period !== 0 && lastWithdrawDate) {
-        let getMonths = lastWithdrawDate.getMonth() + p.period;
-        let withdrawDateValue = lastWithdrawDate;
-        withdrawDate = withdrawDateValue.setMonth(getMonths);
-      }
-
-      
-      const daysUntilAccess = lastWithdrawDate && p.period !== 0 ? Math.abs(dayjs(withdrawDate).diff(Date.now(), 'day')).toString() : '-';
-
-      return {
-        ...p,
-        interestRate: interestRate,
-        balance: (cdaiBalancePool * exchangeRate) + poolPenaltyBalance,
-        cdaiBalance: cdaiBalancePool,
-        participants: balance > 0 ? new Set(p.transactions?.map(t => t.userAddress)).size : 0,
-        contribution: contribution,
-        interestAccrued: contribution > 0 && totalAmountwithPenalties ? Math.abs(totalAmountwithPenalties - contribution) : 0,
-        availableInterest: p.period === 0 && totalAmountwithPenalties ?  Math.abs(totalAmountwithPenalties - contribution) : 0,
-        daysUntilAccess: contribution > 0 ? daysUntilAccess : '-',
-      }
-    })
+    return {
+      ...p,
+      interestRate: interestRate,
+      balance: (cdaiBalancePool * exchangeRate) + poolPenaltyBalance,
+      cdaiBalance: cdaiBalancePool,
+      participants: balance > 0 ? new Set(p.transactions?.map(t => t.userAddress)).size : 0,
+      contribution: contribution,
+      interestAccrued: contribution > 0 && totalAmountwithPenalties ? Math.abs(totalAmountwithPenalties - contribution) : 0,
+      availableInterest: p.period === 0 && totalAmountwithPenalties ? Math.abs(totalAmountwithPenalties - contribution) : 0,
+      daysUntilAccess: contribution > 0 ? daysUntilAccess : '-',
+    }
+  })
 );
 
 const selectActivePools = createSelector(selectPools, allPools => allPools.filter(p => p.active));
