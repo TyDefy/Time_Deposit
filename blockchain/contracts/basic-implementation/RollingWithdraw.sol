@@ -25,8 +25,8 @@ contract RollingWithdraw is IWithdraw {
         penaltyInstance_ = IPenalty(_penalty);
         // If true, a user can withdraw in violation, but pay a fee.
         // if false, a user cannot withdraw in violation.
-        violationWithdraw_ = _canWithdrawInViolation;
-        interestViolationWithdraw_ = _canWithdrawInterestInViolation;
+        violationWithdraw_ = true;
+        interestViolationWithdraw_ = true;
     }
 
     function canWithdrawInterest(uint256 _lastWithdraw) public view returns(bool) {

@@ -16,6 +16,7 @@ contract BasicPenalty is IPenalty {
       * @dev    This function does not check if the penality applies, it only
       *         applies it. It is the withdraw library that checks if the
       *         penality applies.
+      * @dev    Here is where a variable penalty would be implemented 
       */
     function penalize(uint256 _amount) public view returns(uint256, uint256) {
         uint256 penalty = (_amount*penalty_)/100;
