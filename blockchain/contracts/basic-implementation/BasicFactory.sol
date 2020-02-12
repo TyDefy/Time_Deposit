@@ -8,6 +8,14 @@ import { IWithdraw } from "../interfaces/IWithdraw.sol";
 import { BasicPenalty } from "./BasicPenalty.sol";
 import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
 
+/**
+  * @author Veronica Coutts (@VeronicaLC)
+  * @title  Basic Factory
+  * @notice This is the factory for the basic pool. This factory is designed
+  *         following the hub and spoke method. The factory will register all 
+  *         deployed pools and utilities with the registry, in order to enable
+  *         the hub and spoke upgradablity pattern.
+  */
 contract BasicFactory is WhitelistAdminRole {
     address internal collateral_;
     string internal collateralSymbol_;
@@ -58,6 +66,15 @@ contract BasicFactory is WhitelistAdminRole {
         registryInstance_ = BasicRegistry(_registry);
     }
 
+    /**
+      * @notice Allows an admin to deploy a basic pool
+      * @param  _withdraw The address of the withdraw library to be used. Note:
+      *         this can be a 0 address should the pool not need the withdraw
+      *         library.
+      * @param  _poolName The name of the pool
+      * @param  _poolDescription A description of the pool
+      * @return The address of the deployed pool
+      */
     function deployBasicPool(
         address _withdraw,
         string memory _poolName,
@@ -114,6 +131,29 @@ contract BasicFactory is WhitelistAdminRole {
         return(address(newPool));
     }
 
+    /**
+      * @notice Allows an admin to deploy a utility pair. This pair consists of
+      *         a withdraw library and a penalty library
+      * @param  _penaltyPercentage The percentage (as a whole number) the 
+      *         penalty will be. Note: The penalty must be within th 1 - 99 
+      *         range
+      * @param  _cycleLength The length (in months) of the cyclic withdraw.
+      *         Note: If this is 0 a rolling withdraw library will be deployed
+      *         instead of the cyclic
+      * @param  _canWithdrawInViolation This switch (if true) allows a user to 
+      *         withdraw their funds in violation (of the cycle or rolling), and
+      *         have the penalty applied. 
+      *         If false, a user will be blocked from withdrawing in violation.
+      *         Note: If this is set to false in a rolling withdraw the user
+      *         will never be able to withdraw their underlying investment.
+      * @param  _canWithdrawInterestInViolation Much like the above switch, this
+      *         switch will do the same blocking action in violation but for any
+      *         interest earned.
+      * @param  _penaltyName The name the penalty library should be called
+      * @param  _withdrawName The name the withdraw library should be called
+      * @return address The address of the withdraw library
+      * @return address The address of the penalty library
+      */
     function deployUtility(
         uint8 _penaltyPercentage,
         uint8 _cycleLength,
@@ -126,6 +166,11 @@ contract BasicFactory is WhitelistAdminRole {
         onlyWhitelistAdmin()
         returns(address, address)
     {
+        require(
+            _penaltyPercentage > 0 && _penaltyPercentage < 100,
+            "Penalty invalid"
+        );
+
         BasicPenalty newPenalty = new BasicPenalty(
             _penaltyPercentage
         );

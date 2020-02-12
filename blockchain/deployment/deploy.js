@@ -103,6 +103,7 @@ const deploy = async (network, secret) => {
 
 		const CONTRACT_ADDRESSES = `
 			DAI_ADDRESS=${pDaiInstance.contract.address}
+			CDAI_ADDRESS=${pcDaiInstance.contract.address}
 			POOL_REGISTRY_ADDRESS=${poolRegistryInstance.contract.address}
 			POOL_FACTORY_ADDRESS=${poolFactoryInstance.contract.address}
 		`;
@@ -155,6 +156,7 @@ const deploy = async (network, secret) => {
 
 		const CONTRACT_ADDRESSES = `
 			DAI_ADDRESS=${dai}
+			CDAI_ADDRESS=${cDai}
 			POOL_REGISTRY_ADDRESS=${poolRegistryInstance.contract.address}
 			POOL_FACTORY_ADDRESS=${poolFactoryInstance.contract.address}
 		`;

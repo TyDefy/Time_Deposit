@@ -6,7 +6,6 @@ import { eventChannel } from "redux-saga";
 import { BigNumber, formatEther, formatUnits } from "ethers/utils";
 import poolFactorySaga, { deployedUtilityWatcher } from "./poolFactorySaga";
 import poolSaga from "./poolSaga";
-import { ICToken } from '../../../../blockchain/contractInterfaces/ICToken';
 
 export function* daiBalanceListener() {
   const { daiContract, ethAddress = '0x' }: BlockchainContext = yield getContext('blockchain');
@@ -92,7 +91,7 @@ function* connectMetamaskSaga() {
 
 function* getCDaiRates() {
   const environment = parseInt(`${process.env.CHAIN_ID}`);
-  const blockchainContext: BlockchainContext = yield getContext('blockchain');
+  const {cdaiContract}: BlockchainContext = yield getContext('blockchain');
 
   while(true) {
     
@@ -108,14 +107,11 @@ function* getCDaiRates() {
         interestRate = responseBody.cToken[0].supply_rate.value;
       }
       else if(environment == 1337 || environment == 4){
-
-        var cdaiContract : ICToken = blockchainContext.cdaiContract;
-        //@ts-ignore
-        var exchangeRateStored : BigNumber= yield call([cdaiContract, cdaiContract.exchangeRateStored])
-
-        var exchangeRateStoredValue = Number(formatUnits(exchangeRateStored, 27));
-
-        exchangeRate = exchangeRateStoredValue;
+        var exchangeRateStored: BigNumber= yield call([cdaiContract, cdaiContract.exchangeRateStored])
+        exchangeRate = Number(formatUnits(exchangeRateStored, 27));;
+        const interestRatePerBlockUnscaled = yield call([cdaiContract, cdaiContract.supplyRatePerBlock]);
+        const interestRatePerBlock = Number(formatUnits(interestRatePerBlockUnscaled, 18)); 
+        interestRate = interestRatePerBlock*(60/15)*60*24*365;
       }
       
     } catch (e) {

@@ -8,7 +8,7 @@ const selectPortfolioPools = createSelector(selectPools,
   (allPools) => allPools.filter(p => p.contribution && p.contribution > 0))
 
 const selectPortfolioTotalHoldings = createSelector(selectPortfolioPools, selectExchangeRate, (pools, exchangeRate) => 
-  pools.reduce((total, pool) => total += pool.userTotalBalanceAndPenaltiesCDai ?  pool.userTotalBalanceAndPenaltiesCDai * exchangeRate : 0, 0)
+  pools.reduce((total, pool) => total += pool.userBalanceCDai ?  pool.userBalanceCDai * exchangeRate : 0, 0)
 );
 
 const selectPortfolioContributed = createSelector(selectPortfolioPools,
