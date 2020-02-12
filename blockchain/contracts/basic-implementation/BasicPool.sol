@@ -31,7 +31,8 @@ contract BasicPool is WhitelistAdminRole {
         uint256 balance;
         uint256 lastDeposit;
         uint256 lastWtihdraw;
-        uint256 collateralPenaltyClaimed;
+        uint256 totalPenaltyClaimed;    // underlying interest earning
+        uint256 totalInvestment;        // underlying interest earning
     }
     // A mapping of all active suers
     mapping(address => UserInfo) internal users_;
@@ -100,7 +101,7 @@ contract BasicPool is WhitelistAdminRole {
         emit PoolTerminated(
             msg.sender
         );
-    }//4611
+    }
 
     /**
       * @notice Allows a user to deposit raw collateral (DAI) into
@@ -146,10 +147,11 @@ contract BasicPool is WhitelistAdminRole {
         users_[msg.sender].collateralInvested += _amount;
         users_[msg.sender].balance += mintedTokens;
         users_[msg.sender].lastDeposit = now;
+        users_[msg.sender].totalInvestment += mintedTokens;
         // If its a new user, last withdraw set to now
         if(users_[msg.sender].lastWtihdraw == 0) {
             users_[msg.sender].lastWtihdraw = now;
-            users_[msg.sender].collateralPenaltyClaimed = 0;
+            users_[msg.sender].totalPenaltyClaimed = 0;
         }
         
         emit Deposit(
@@ -171,7 +173,7 @@ contract BasicPool is WhitelistAdminRole {
         bool withdrawAllowed;
         uint256 withdrawAmount;
         uint256 penaltyAmount;
-        uint256 fee = 0;
+        uint256 fee;
 
         if(address(withdrawInstance_) == address(0)) { 
             withdrawAmount = _amount;
@@ -200,7 +202,7 @@ contract BasicPool is WhitelistAdminRole {
                 users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - penaltyAmount;
                 // Updates the balance of the penalty pot
                 penaltyPot_ = penaltyPot_ + (penaltyAmountInCdai - fee);
-                totalCCollateral_ = totalCCollateral_ - penaltyAmountInCdai;
+                totalCCollateral_ = totalCCollateral_ - (penaltyAmountInCdai + fee);
             }
         }
 
@@ -222,8 +224,7 @@ contract BasicPool is WhitelistAdminRole {
         users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - withdrawAmount;
         users_[msg.sender].balance = users_[msg.sender].balance - cDaiBurnt;
         users_[msg.sender].lastWtihdraw = now;
-
-        // TODO penalty leak fix (collateral removed from balance)
+        users_[msg.sender].totalPenaltyClaimed += withdrawAmount;
 
         require(
             collateralInstance_.transfer(
@@ -253,12 +254,12 @@ contract BasicPool is WhitelistAdminRole {
         
         uint256 interestInCdai;
         uint256 penaltyPotPortion;
-        (interestInCdai, penaltyPotPortion) = getInterestAmount(msg.sender);
+        (interestInCdai, penaltyPotPortion) = _claimInterestAmount(msg.sender);
         uint256 totalRewardInCdai = interestInCdai + penaltyPotPortion;
 
         totalCCollateral_ = totalCCollateral_ - totalRewardInCdai;
         users_[msg.sender].balance = users_[msg.sender].balance - interestInCdai;
-        users_[msg.sender].collateralPenaltyClaimed = users_[msg.sender].collateralInvested;
+        users_[msg.sender].totalPenaltyClaimed = users_[msg.sender].collateralInvested;
 
         uint256 balanceBefore = collateralInstance_.balanceOf(address(this));
 
@@ -339,6 +340,9 @@ contract BasicPool is WhitelistAdminRole {
         return (_getInterestEarned(_user), _getPenaltyPotPortion(_user));
     }
 
+    function _claimInterestAmount(address _user) internal returns(uint256, uint256) {
+        return (_getInterestEarned(_user), _claimPenaltyAmount(_user));
+    }
     
     /**
       * @param  _user Address of the user
@@ -451,8 +455,9 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     /**
-      * -----------------------------------------------
+      * ------------------------------------------------------------------------
       * INTERNAL FUNCTIONS
+      * ------------------------------------------------------------------------
       */
 
     /**
@@ -479,16 +484,31 @@ contract BasicPool is WhitelistAdminRole {
       * @return uint256 The users portion of the penalty pot
       */ 
     function _getPenaltyPotPortion(address _user) internal view returns(uint256) {
-        // if(users_[msg.sender].collateralPenaltyClaimed < users_[_user].collateralInvested) {
-        //     uint256 claimPortion = users_[_user].collateralInvested - users_[msg.sender].collateralPenaltyClaimed;
-        // } TODO penalty repeat withdraw catch
         if(penaltyPot_ != 0) {
-            return (((users_[_user].balance*1e18)/totalCCollateral_
-                    )*penaltyPot_
-                )/1e18;
-        } else {
-            return 0;
+            if(users_[_user].totalPenaltyClaimed < users_[_user].totalInvestment) {
+                uint256 unclaimedPenalty = users_[_user]
+                    .totalInvestment - users_[_user].totalPenaltyClaimed;
+                return (((unclaimedPenalty*1e18)/totalCCollateral_
+                        )*penaltyPot_
+                    )/1e18;
+            }
         }
+        return 0;
+    }
+
+    function _claimPenaltyAmount(address _user) internal returns(uint256) {
+        if(penaltyPot_ != 0) {
+            if(users_[_user].totalPenaltyClaimed < users_[_user].totalInvestment) {
+                uint256 unclaimedPenalty = users_[_user]
+                    .totalInvestment - users_[_user].totalPenaltyClaimed;
+                users_[_user].totalPenaltyClaimed += unclaimedPenalty;
+                uint256 penaltyPortion = (((unclaimedPenalty*1e18)/totalCCollateral_
+                        )*penaltyPot_
+                    )/1e18;
+                return penaltyPortion;
+            }
+        }
+        return 0;
     }
     
     /**
@@ -523,7 +543,7 @@ contract BasicPool is WhitelistAdminRole {
         uint256 interestInDai = _getCurrentDaiValue(interestEarned);
         
         users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested + interestInDai;
-    } 
+    }
 
     /**
       * @notice Takes a Dai value and returns the current cDai value of that
