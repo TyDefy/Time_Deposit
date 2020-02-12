@@ -101,7 +101,7 @@ contract BasicPool is WhitelistAdminRole {
         emit PoolTerminated(
             msg.sender
         );
-    }//4611
+    }
 
     /**
       * @notice Allows a user to deposit raw collateral (DAI) into
@@ -173,7 +173,7 @@ contract BasicPool is WhitelistAdminRole {
         bool withdrawAllowed;
         uint256 withdrawAmount;
         uint256 penaltyAmount;
-        uint256 fee = 0;
+        uint256 fee;
 
         if(address(withdrawInstance_) == address(0)) { 
             withdrawAmount = _amount;
@@ -543,7 +543,7 @@ contract BasicPool is WhitelistAdminRole {
         uint256 interestInDai = _getCurrentDaiValue(interestEarned);
         
         users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested + interestInDai;
-    } 
+    }
 
     /**
       * @notice Takes a Dai value and returns the current cDai value of that
