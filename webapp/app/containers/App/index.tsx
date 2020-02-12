@@ -77,7 +77,7 @@ export interface Pool {
   penaltyPotBalance?: number;
   daysUntilAccess?: string;
   transactions: Array<Transaction>;
-  userTotalBalanceAndPenaltiesCDai?: number;
+  userBalanceCDai?: number;
   cdaiBalance: number;
   userLastDepositDate?: Date,
   userLastWithdrawDate?: Date,
