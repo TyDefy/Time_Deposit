@@ -34,11 +34,12 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
       .map(t => t.time)
       .reduce((a, b) => a > b ? a : b, new Date('01/01/1970'));
 
-    
+    console.log(`last Withdraw: ${lastWithdrawDate}`);
+    console.log(`last Deposit: ${lastDepositDate}`);
+
     //  = (lastDepositDate && !lastWithdrawDate) ? 
     const daysUntilAccess = dayjs(lastDepositDate).add(p.period, 'month').diff(Date.now(), 'day').toString();
     // const daysUntilAccess = lastWithdrawDate && p.period !== 0 ? Math.abs(dayjs(withdrawDate).diff(Date.now(), 'day')).toString() : '-';
-    debugger;
 
     return {
       ...p,
