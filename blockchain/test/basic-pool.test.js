@@ -15,6 +15,7 @@ describe("Basic Pool Tests", async () => {
     let admin = accounts[2];
     let user1 = accounts[3];
     let user2 = accounts[4];
+    let user3 = accounts[5];
     let deployer = new etherlime.EtherlimeGanacheDeployer(deployerInsecure.secretKey);
     
     let basicPoolInstance, 
@@ -88,6 +89,18 @@ describe("Basic Pool Tests", async () => {
         );
         // Approving dai as a spender
         await cDaiInstance.from(user2).approve(
+            pDaiInstance.contract.address,
+            test_settings.basicPool.deposit
+        );
+        // Minting dai for user 3
+        await pDaiInstance.from(user3).mint();
+        // Approving cDai as a spender
+        await pDaiInstance.from(user3).approve(
+            cDaiInstance.contract.address,
+            test_settings.basicPool.deposit
+        );
+        // Approving dai as a spender
+        await cDaiInstance.from(user3).approve(
             pDaiInstance.contract.address,
             test_settings.basicPool.deposit
         );
@@ -216,6 +229,129 @@ describe("Basic Pool Tests", async () => {
 
         it("Kill switch on pool", async () => {
             //TODO
+        });
+
+        it("Penalty is distributed evenly", async () => {
+            // User 1 will now have a steak in the penalty pot
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+            // User 2 now has a steak in the penalty pot
+            await pDaiInstance.from(user2).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user2).deposit(
+                test_settings.basicPool.deposit
+            );
+            // User 3 will now populate the penalty pot
+            await pDaiInstance.from(user3).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user3).deposit(
+                test_settings.basicPool.deposit
+            );
+            let tx = await(await basicPoolInstance.from(user3).withdraw(
+                test_settings.basicPool.deposit
+            )).wait();
+
+            let penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
+            console.log("Penalty Pot:\t" + penaltyPotBalance.toString());
+
+            let userPenaltyShare = await basicPoolInstance.getTotalBalance(user1.signer.address);
+            console.log("User 1 tb:\t" + userPenaltyShare.toString())
+
+            userPenaltyShare = await basicPoolInstance.getUserInfo(user1.signer.address);
+            console.log("User 1 tb:\t" + userPenaltyShare[0].toString())
+            console.log("User 1 tb:\t" + userPenaltyShare[1].toString())
+
+            let user2PenaltyShare = await basicPoolInstance.getTotalBalance(user2.signer.address);
+            console.log("User 2 tb:\t" + user2PenaltyShare.toString())
+
+            user2PenaltyShare = await basicPoolInstance.getUserInfo(user2.signer.address);
+            console.log("User 2 tb:\t" + user2PenaltyShare[0].toString())
+            console.log("User 2 tb:\t" + user2PenaltyShare[1].toString())
+
+            let user3PenaltyShare = await basicPoolInstance.getTotalBalance(user3.signer.address);
+            console.log("User 3 tb:\t" + user3PenaltyShare.toString())
+
+            // User 1 withdraws their portion of the penalty pot
+            await basicPoolInstance.from(user1).withdrawInterest();
+
+            penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
+            console.log("Penalty Pot:\t" + penaltyPotBalance.toString());
+
+            userPenaltyShare = await basicPoolInstance.getTotalBalance(user1.signer.address);
+            console.log("User 1 tb:\t" + userPenaltyShare.toString())
+
+            userPenaltyShare = await basicPoolInstance.getUserInfo(user1.signer.address);
+            console.log("User 1 tb:\t" + userPenaltyShare[0].toString())
+            console.log("User 1 tb:\t" + userPenaltyShare[1].toString())
+
+            user2PenaltyShare = await basicPoolInstance.getTotalBalance(user2.signer.address);
+            console.log("User 2 tb:\t" + user2PenaltyShare.toString())
+
+            user2PenaltyShare = await basicPoolInstance.getUserInfo(user2.signer.address);
+            console.log("User 2 tb:\t" + user2PenaltyShare[0].toString())
+            console.log("User 2 tb:\t" + user2PenaltyShare[1].toString())
+
+            // User 1 withdraws more than their share of the penalty pot
+            await basicPoolInstance.from(user1).withdrawInterest();
+
+            penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
+            console.log("Penalty Pot:\t" + penaltyPotBalance.toString());
+
+            userPenaltyShare = await basicPoolInstance.getTotalBalance(user1.signer.address);
+            console.log("User 1 tb:\t" + userPenaltyShare.toString())
+
+            user2PenaltyShare = await basicPoolInstance.getTotalBalance(user2.signer.address);
+            console.log("User 2 tb:\t" + user2PenaltyShare.toString())
+
+            /**
+            Penalty Pot:	71056945513
+            User 1 tb:	    509241442848
+            User 2 tb:	    509241442848 //User 2's balance should not change between this call 
+            User 3 tb:	    1
+            User one withdraw's their interest
+            Penalty Pot:	35528472757
+            User 1 tb:	    473712970092
+            User 2 tb:	    492169319576 //and this call???????
+            User one trys to withdraw interest again
+            Penalty Pot:	35528472757
+            User 1 tb:	    473712970092
+            User 2 tb:	    492169319576
+
+            Penalty Pot:	71056945513
+
+            User 1 tb:	    509241442848
+            User 1 tb:	    100000000000000000000
+            User 1 tb:	    473712970092
+
+            User 2 tb:	    509241442848 
+            User 2 tb:	    100000000000000000000
+            User 2 tb:	    473712970092
+
+            user 1 withdraws
+
+            Penalty Pot:	35528472757
+
+            User 1 tb:	    473712970092
+            User 1 tb:	    100000000000000000000
+            User 1 tb:	    473712970092
+
+            User 2 tb:	    492169319576
+            User 2 tb:	    100000000000000000000
+            User 2 tb:	    473712970092
+
+            Penalty Pot:	35528472757
+            User 1 tb:	    473712970092
+            User 2 tb:	    492169319576
+             */
         });
     });
 
