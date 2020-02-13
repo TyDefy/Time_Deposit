@@ -49,12 +49,16 @@ contract BasicRegistry is WhitelistAdminRole {
         uint8 typeOfUtil
     );
 
+    /**
+      * @param  _admin The address of the admin
+      */
     constructor(
         address _admin
     )
         public
     {
         addWhitelistAdmin(_admin);
+        //TODO  remove msg.sender as admin
     }
 
     modifier onlyDeployer() {
