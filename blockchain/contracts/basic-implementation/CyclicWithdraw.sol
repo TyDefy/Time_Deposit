@@ -4,6 +4,11 @@ import { IWithdraw } from "../interfaces/IWithdraw.sol";
 import { IPenalty } from "../interfaces/IPenalty.sol";
 import { BokkyPooBahsDateTimeLibrary } from "../BokkyPooBahsDateTimeLibrary.sol";
 
+/**
+  * @author Veronica Coutts @veronicaLC
+  * @title  Cyclic withdraw library
+  * @notice The cyclic withdraw library is a utility to the basic pool. 
+  */
 contract CyclicWithdraw is IWithdraw {
     // How long each user must wait to withdraw legally again.
     uint256 internal cycleLength_;
@@ -18,6 +23,14 @@ contract CyclicWithdraw is IWithdraw {
 
     using BokkyPooBahsDateTimeLibrary for uint256;
 
+    /**
+      * @param  _penalty The peanlty library address
+      * @param  _cycleLength The length for the cycle in months
+      * @param  _canWithdrawInViolation If the user can withdraw in violation
+      *         of the cycle
+      * @param  _canWithdrawInterestInViolation If the user can wtihdraw 
+      *         interest in vionlation of the cycle
+      */
     constructor(
         address _penalty,
         uint8 _cycleLength,
@@ -35,7 +48,17 @@ contract CyclicWithdraw is IWithdraw {
         canWithdrawInterestInViolation_ = _canWithdrawInterestInViolation;
     }
 
-    function canWithdrawInterest(uint256 _lastWithdraw) public view returns(bool) {
+    /**
+      * @param  _lastWithdraw The time stamp of the last withdraw
+      * @return bool If the user can withdraw or not
+      */
+    function canWithdrawInterest(
+        uint256 _lastWithdraw
+    ) 
+        public 
+        view 
+        returns(bool) 
+    {
         if(!canWithdrawInterestInViolation_) {
             if(_lastWithdraw + cycleLength_ > now) {
                 return false;
@@ -45,6 +68,15 @@ contract CyclicWithdraw is IWithdraw {
         }
     }
 
+    /**
+      * @param  _amount The amount the user would like to withdraw
+      * @param  _lastWithdraw The time stamp of the users last withdraw
+      * @return bool If the user can withdraw in violation at all
+      * @return uint256 The withdraw amount (if there is no penalty this amount
+      *         will be the full amount the user wanted to withdraw)
+      * @return uint256 The penalty amount (if no peanlty is applied this will 
+      *         be 0)
+      */
     function canWithdraw(
         uint256 _amount,
         uint256 _lastWithdraw
@@ -67,6 +99,16 @@ contract CyclicWithdraw is IWithdraw {
         }
     }
 
+    /**
+      * @notice This function will revert if the user cannot withdraw in 
+      *         voliation and the user is still within the violation period
+      * @param  _amount The amount the user would like to withdraw
+      * @param  _lastWithdraw The time stamp of the users last withdraw
+      * @return uint256 The withdraw amount (if there is no penalty this amount
+      *         will be the full amount the user wanted to withdraw)
+      * @return uint256 The penalty amount (if no peanlty is applied this will 
+      *         be 0)
+      */
     function calculateWithdraw(
         uint256 _amount,
         uint256 _lastWithdraw
@@ -93,18 +135,30 @@ contract CyclicWithdraw is IWithdraw {
         }
     }
 
+    /**
+      * @return bool If users can withdraw in voilation of the cycle
+      */
     function canWithdrawInViolation() public view returns(bool) {
         return canWithdrawInViolation_;
     }
 
+    /**
+      * @return bool If users can withdraw interest in violation of the cycle
+      */
     function canWithdrawInterestInViolation() public view returns(bool) {
         return canWithdrawInterestInViolation_;
     }
 
+    /**
+      * @return uint8 The cycle lenght of the cycle
+      */
     function getCycle() public view returns(uint8) {
         return cycleLenghtInMonths_;
     } 
 
+    /**
+      * @return address The address of the penalty contract
+      */
     function getPenalty() public view returns(address) {
         return address(penaltyInstance_);
     }
