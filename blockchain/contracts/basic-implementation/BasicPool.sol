@@ -20,6 +20,8 @@ contract BasicPool is WhitelistAdminRole {
     ICToken internal iUnitInstance_;
     // The total amount of collateral in this pool
     uint256 internal iUnitTotalCollateral_;
+    // Internal counter for penalty claim pool
+    uint256 internal iUnitTotalPenaltyCollateral;
     // The amount of cToken allocated to the penalty pool
     uint256 internal penaltyPot_;
     // A non-reversable switch to kill the contract
@@ -143,6 +145,7 @@ contract BasicPool is WhitelistAdminRole {
         
         uint256 mintedTokens = iUnitPoolBalanceAfter - iUnitPoolBanalce;
         iUnitTotalCollateral_ += mintedTokens;
+        iUnitTotalPenaltyCollateral += mintedTokens;
 
         users_[msg.sender].collateralInvested += _amount;
         users_[msg.sender].balance += mintedTokens;
@@ -195,14 +198,15 @@ contract BasicPool is WhitelistAdminRole {
                     // Gets the fee amount of the penalty
                     fee = ((iUnitPenaltyAmount*feePercentage_)/100);
                     // Updates the admin balances with the fee   
-                    accumulativeFeeCollection_ = accumulativeFeeCollection_ + fee;
+                    accumulativeFeeCollection_ += fee;
                 }
                 // Updates the balance of the user
-                users_[msg.sender].balance = users_[msg.sender].balance - iUnitPenaltyAmount;
-                users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - penaltyAmount;
+                users_[msg.sender].balance -= iUnitPenaltyAmount;
+                users_[msg.sender].collateralInvested -= penaltyAmount;
                 // Updates the balance of the penalty pot
-                penaltyPot_ = penaltyPot_ + (iUnitPenaltyAmount - fee);
-                iUnitTotalCollateral_ = iUnitTotalCollateral_ - (iUnitPenaltyAmount + fee);
+                penaltyPot_ += (iUnitPenaltyAmount - fee);
+                iUnitTotalCollateral_ -= (iUnitPenaltyAmount + fee);
+                iUnitTotalPenaltyCollateral -= (iUnitPenaltyAmount + fee);
             }
         }
 
@@ -220,9 +224,10 @@ contract BasicPool is WhitelistAdminRole {
         uint256 iUnitBurnt = iUnitBalanceBefore - iUnitBalanceAfter; 
         uint256 unitRecived = balanceAfter - balanceBefore; 
 
-        iUnitTotalCollateral_ = iUnitTotalCollateral_ - iUnitBurnt;
-        users_[msg.sender].collateralInvested = users_[msg.sender].collateralInvested - withdrawAmount;
-        users_[msg.sender].balance = users_[msg.sender].balance - iUnitBurnt;
+        iUnitTotalCollateral_ -= iUnitBurnt;
+        iUnitTotalPenaltyCollateral -= iUnitBurnt;
+        users_[msg.sender].collateralInvested -= withdrawAmount;
+        users_[msg.sender].balance -= iUnitBurnt;
         users_[msg.sender].lastWtihdraw = now;
         users_[msg.sender].totalPenaltyClaimed += withdrawAmount;
 
@@ -257,8 +262,9 @@ contract BasicPool is WhitelistAdminRole {
         (iUnitInterest, penaltyPotPortion) = _claimInterestAmount(msg.sender);
         uint256 iUnitTotalReward = iUnitInterest + penaltyPotPortion; 
 
-        iUnitTotalCollateral_ = iUnitTotalCollateral_ - iUnitTotalReward;
-        users_[msg.sender].balance = users_[msg.sender].balance - iUnitInterest;
+        iUnitTotalCollateral_ -= iUnitTotalReward;
+        iUnitTotalPenaltyCollateral -= iUnitTotalReward;
+        users_[msg.sender].balance -= iUnitInterest;
         users_[msg.sender].totalPenaltyClaimed = users_[msg.sender].collateralInvested;
 
         uint256 balanceBefore = unitInstance_.balanceOf(address(this));
@@ -291,6 +297,10 @@ contract BasicPool is WhitelistAdminRole {
         withdrawInterest();
         uint256 fullUserBalance = users_[msg.sender].collateralInvested;
         withdraw(fullUserBalance);
+    }
+
+    function getInternalIunitCounter() public view returns(uint256) {
+        return iUnitTotalCollateral_;
     }
 
     function finalWithdraw() public {
@@ -512,7 +522,7 @@ contract BasicPool is WhitelistAdminRole {
             if(users_[_user].totalPenaltyClaimed < users_[_user].totalInvestment) {
                 uint256 unclaimedPenalty = users_[_user]
                     .totalInvestment - users_[_user].totalPenaltyClaimed;
-                return (((unclaimedPenalty*1e18)/iUnitTotalCollateral_
+                return (((unclaimedPenalty*1e18)/iUnitTotalPenaltyCollateral
                         )*penaltyPot_
                     )/1e18;
             }
@@ -567,9 +577,11 @@ contract BasicPool is WhitelistAdminRole {
                 // Works out the users portion of the penalty pot from their
                 // unclaimed penalty portion amount
                 uint256 penaltyPortion = ((
-                            (unclaimedPenalty*1e18)/iUnitTotalCollateral_
+                            (unclaimedPenalty*1e18)/iUnitTotalPenaltyCollateral
                         )*penaltyPot_
                     )/1e18;
+                // Removing the claimed colatteral from the balance
+                iUnitTotalPenaltyCollateral -= unclaimedPenalty;
                 return penaltyPortion;
             }
         }

@@ -266,8 +266,10 @@ describe("Basic Pool Tests", async () => {
             let user2PenaltyShareTB = await basicPoolInstance.getTotalBalance(user2.signer.address);
             let user2PenaltyShareUI = await basicPoolInstance.getUserInfo(user2.signer.address);
             let user3PenaltyShareTB = await basicPoolInstance.getTotalBalance(user3.signer.address);
+            let internalCounter = await basicPoolInstance.getInternalIunitCounter();
 
             console.log("Penalty Pot:\t" + penaltyPotBalance.toString());
+            console.log("Internal counter:\t" + internalCounter.toString());
             console.log("User 1 total balance:\t" + userPenaltyShareTB.toString())
             console.log("User 1 cDai balance:\t" + userPenaltyShareUI[1].toString())
             console.log("User 2 total balance:\t" + user2PenaltyShareTB.toString())
@@ -284,8 +286,8 @@ describe("Basic Pool Tests", async () => {
                 "User 1 has inccorect dia deposit balance"
             );
             assert.equal(
-                userPenaltyShare[1].toString(),
-                user2PenaltyShare[1].toString(),
+                userPenaltyShareUI[1].toString(),
+                user2PenaltyShareUI[1].toString(),
                 "Users cDai balances do not match"
             );
             assert.equal(
@@ -312,67 +314,71 @@ describe("Basic Pool Tests", async () => {
             userPenaltyShareUI = await basicPoolInstance.getUserInfo(user1.signer.address);
             user2PenaltyShareTB = await basicPoolInstance.getTotalBalance(user2.signer.address);
             user2PenaltyShareUI = await basicPoolInstance.getUserInfo(user2.signer.address);
+            internalCounter = await basicPoolInstance.getInternalIunitCounter();
 
             console.log("Penalty Pot:\t" + penaltyPotBalance.toString());
-            console.log("User 1 tb:\t" + userPenaltyShareTB.toString())
-            console.log("User 1 tb:\t" + userPenaltyShareUI[0].toString())
-            console.log("User 1 tb:\t" + userPenaltyShareUI[1].toString())
-            console.log("User 2 tb:\t" + user2PenaltyShareTB.toString())
-            console.log("User 2 tb:\t" + user2PenaltyShareUI[0].toString())
-            console.log("User 2 tb:\t" + user2PenaltyShareUI[1].toString())
+            console.log("Internal counter:\t" + internalCounter.toString());
+            console.log("User 1 total balance:\t" + userPenaltyShareTB.sub(userPenaltyShareUI[1]).toString())
+            console.log("User 2 total balance:\t" + user2PenaltyShareTB.toString())
+
+            assert.equal(
+                userPenaltyShareUI[0].toString(),
+                test_settings.basicPool.deposit.toString(),
+                "User 2 has incorrect dai deposited balance"
+            );
+            assert.equal(
+                userPenaltyShareUI[1].toString(),
+                user2PenaltyShareUI[1].toString(),
+                "Users cDai balances do not match"
+            );
+            assert.equal(
+                user2PenaltyShareUI[0].toString(),
+                test_settings.basicPool.deposit.toString(),
+                "User 2 has incorrect dai deposited balance"
+            );
 
             // User 1 withdraws more than their share of the penalty pot
             await basicPoolInstance.from(user1).withdrawInterest();
 
-            penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
-            console.log("Penalty Pot:\t" + penaltyPotBalance.toString());
+            let penaltyPotBalanceAfter = await basicPoolInstance.penaltyPotBalance();
+            console.log("Penalty Pot:\t" + penaltyPotBalanceAfter.toString());
+            internalCounter = await basicPoolInstance.getInternalIunitCounter();
+            console.log("Internal counter:\t" + internalCounter.toString());
 
             userPenaltyShareTB = await basicPoolInstance.getTotalBalance(user1.signer.address);
-            console.log("User 1 tb:\t" + userPenaltyShareTB.toString())
+            console.log("User 1 total balance:\t" + userPenaltyShareTB.toString())
 
             user2PenaltyShareTB = await basicPoolInstance.getTotalBalance(user2.signer.address);
-            console.log("User 2 tb:\t" + user2PenaltyShareTB.toString())
+            console.log("User 2 total balance:\t" + user2PenaltyShareTB.toString())
+
+            assert.equal(
+                penaltyPotBalance.toString(),
+                penaltyPotBalanceAfter.toString(),
+                "Penalty pot has incorrectly changed between user interest withdraws"
+            );
+            
 
             /**
-            Penalty Pot:	71056945513
-            User 1 tb:	    509241442848
-            User 2 tb:	    509241442848 //User 2's balance should not change between this call 
-            User 3 tb:	    1
-            User one withdraw's their interest
-            Penalty Pot:	35528472757
-            User 1 tb:	    473712970092
-            User 2 tb:	    492169319576 //and this call???????
-            User one trys to withdraw interest again
-            Penalty Pot:	35528472757
-            User 1 tb:	    473712970092
-            User 2 tb:	    492169319576
+             *  Penalty Pot:	        71056945513
+                Internal counter:	    947425940185
+                User 1 total balance:	509241442848
+                User 1 cDai balance:	473712970092      A1
+                User 2 total balance:	509241442848
+                User 2 cDai balance:	473712970092     A1
 
-            Penalty Pot:	71056945513
+                Penalty Pot:	        35528472757
+                Internal counter:	    911897467429
+                User 1 total balance:	473712970092    A1
+                User 2 total balance:	512122129829      A2
 
-            User 1 tb:	    509241442848
-            User 1 tb:	    100000000000000000000
-            User 1 tb:	    473712970092
-
-            User 2 tb:	    509241442848 
-            User 2 tb:	    100000000000000000000
-            User 2 tb:	    473712970092
-
-            user 1 withdraws
-
-            Penalty Pot:	35528472757
-
-            User 1 tb:	    473712970092
-            User 1 tb:	    100000000000000000000
-            User 1 tb:	    473712970092
-
-            User 2 tb:	    492169319576
-            User 2 tb:	    100000000000000000000
-            User 2 tb:	    473712970092
-
-            Penalty Pot:	35528472757
-            User 1 tb:	    473712970092
-            User 2 tb:	    492169319576
+                Penalty Pot:	      35528472757
+                Internal counter:	    911897467429
+                User 1 total balance:	473712970092      A1
+                User 2 total balance:	512122129829      A2
              */
+            
+
+
         });
     });
 
