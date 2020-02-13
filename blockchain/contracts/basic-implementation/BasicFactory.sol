@@ -45,6 +45,14 @@ contract BasicFactory is WhitelistAdminRole {
         bool canWithdrawInterestInViolation
     );
 
+    /**
+      * @param  _admin The address of the admin for this factory
+      * @param  _registry The address of the registery contract
+      * @param  _collateral The address of the underlying collateral
+      * @param  _collateralSymbol The symbol for the underlying collateral
+      * @param  _interestToken The address for the interest earning collateral
+      * @param  _tokenSymbol The symbol for the inerest earning collateral
+      */
     constructor(
         address _admin,
         address _registry,
@@ -64,6 +72,8 @@ contract BasicFactory is WhitelistAdminRole {
         tokenSymbol_ = _tokenSymbol;
 
         registryInstance_ = BasicRegistry(_registry);
+
+        //TODO remove msg.sender from admin
     }
 
     /**
