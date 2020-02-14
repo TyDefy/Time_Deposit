@@ -72,8 +72,13 @@ contract BasicFactory is WhitelistAdminRole {
         tokenSymbol_ = _tokenSymbol;
 
         registryInstance_ = BasicRegistry(_registry);
-
-        //TODO remove msg.sender from admin
+    }
+    /**
+      * @notice Removes insecure deployer as admin after the registry has been
+      *         set up.
+      */
+    function init() public onlyWhitelistAdmin() {
+        renounceWhitelistAdmin();
     }
 
     /**

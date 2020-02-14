@@ -79,7 +79,6 @@ contract BasicPool is WhitelistAdminRole {
     );
 
     /**
-      * @notice TODO remove the msg.sender from the whitelist admin role
       * @param  _admin The address of the admin for this pool
       * @param  _withdraw The address of the withdraw contract. This can be a 
       *         0 address, and will not break the pool
@@ -98,6 +97,7 @@ contract BasicPool is WhitelistAdminRole {
         withdrawInstance_ = IWithdraw(_withdraw);
         unitInstance_ = IERC20(_collateralToken);
         iUnitInstance_ = ICToken(_cToken);
+        renounceWhitelistAdmin();
     }
 
     /**
