@@ -169,9 +169,23 @@ const deploy = async (network, secret) => {
 			"cDai"
 		);
 
+		let removingAdminFactory = await poolFactoryInstance.init();
+
+		await poolFactoryInstance.verboseWaitForTransaction(
+			removingAdminFactory, 
+			"Removing insecure deployer as admin in factory"
+		);
+
 		await poolRegistryInstance.registerDeployer(
 			poolFactoryInstance.contract.address,
 			true
+		);
+
+		let removingAdminRegistry = await poolRegistryInstance.init();
+
+		await poolRegistryInstance.verboseWaitForTransaction(
+			removingAdminRegistry, 
+			"Removing insecure deployer as admin in registry"
 		);
 
 		const CONTRACT_ADDRESSES = `
