@@ -96,8 +96,11 @@ contract BasicPool is WhitelistAdminRole {
         withdrawInstance_ = IWithdraw(_withdraw);
         unitInstance_ = IERC20(_collateralToken);
         iUnitInstance_ = ICToken(_cToken);
-        renounceWhitelistAdmin();
         addWhitelistAdmin(_admin);
+    }
+
+    function removeFacotryAsAdmin() public onlyWhitelistAdmin() {
+        renounceWhitelistAdmin();
     }
 
     /**

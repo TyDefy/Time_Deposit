@@ -106,6 +106,8 @@ contract BasicFactory is WhitelistAdminRole {
             interestToken_
         );
 
+        newPool.removeFacotryAsAdmin();
+
         require(
             registryInstance_.registerPool(
                 msg.sender,
