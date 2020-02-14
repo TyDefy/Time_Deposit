@@ -57,7 +57,7 @@ const WithdrawInterestModal: React.FC<OwnProps> = ({
       <Typography className={classes.label}>Available Interest</Typography>
       <Typography className={classes.value}>{availableInterest.toFixed(2)}</Typography>
       <Typography className={classes.label}>Amount</Typography>
-      <TextField type='number' value={value} onChange={(e) => setValue(parseInt(e.target.value))}/>
+      <TextField type='number' value={value} onChange={(e) => setValue(parseFloat(e.target.value))}/>
       <Grid container direction='row' justify='space-around' className={classes.buttonBar}>
       <Button color='primary' onClick={onClose}>Cancel</Button>
       <Button color='primary' onClick={submit}>Submit</Button>

@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 
 export const selectPools = createSelector((state: RootState) => state.pools, selectEthAddress, selectExchangeRate, selectInterestRate, (pools, ethAddress, exchangeRate, interestRate) =>
   Object.values(pools).map(p => {
+
     const cdaiBalancePool = p.transactions?.reduce((poolCdaiBalance, t) =>
     t.type === 'Deposit' ? poolCdaiBalance += t.cdaiAmount : poolCdaiBalance -= t.cdaiAmount, 0) || 0;
 
@@ -24,16 +25,16 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
     
     const totalAmountwithPenalties = contribution > 0 && p.userBalanceCDai ? (p.userBalanceCDai * exchangeRate): 0;
 
-      var lastWithdrawDate = p.userLastWithdrawDate;
+      var lastWithdrawDateObject = Object.assign({}, {userWithdrawDate:  p.userLastWithdrawDate });
+
       var withdrawDate;
-      if (p.period !== 0 && lastWithdrawDate) {
-        let getMonths = lastWithdrawDate.getMonth() + p.period;
-        let withdrawDateValue = lastWithdrawDate;
+      if (p.period !== 0 && lastWithdrawDateObject.userWithdrawDate) {
+        let getMonths = lastWithdrawDateObject.userWithdrawDate.getMonth() + p.period;
+        let withdrawDateValue = lastWithdrawDateObject.userWithdrawDate;
         withdrawDate = withdrawDateValue.setMonth(getMonths);
       }
 
-      
-      const daysUntilAccess = lastWithdrawDate && p.period !== 0 ? Math.abs(dayjs(withdrawDate).diff(Date.now(), 'day')).toString() : '-';
+      const daysUntilAccess = lastWithdrawDateObject.userWithdrawDate && p.period !== 0 ? Math.abs(dayjs(withdrawDate).diff(Date.now(), 'day')).toString() : '-';
 
       return {
         ...p,

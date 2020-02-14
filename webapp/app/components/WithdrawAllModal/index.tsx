@@ -74,7 +74,7 @@ const WithdrawAllModal: React.FC<OwnProps> = ({
       <Typography className={classes.label}>Available Funds</Typography>
       <Typography className={classes.value}>{availableFunds.toFixed(2)}</Typography>
       <Typography className={classes.label}>Amount</Typography>
-      <TextField type='number' value={value} onChange={(e) => setValue(parseInt(e.target.value))}/>
+      <TextField type='number' value={value} onChange={(e) => setValue(parseFloat(e.target.value))}/>
       <Typography className={classes.label}>Penalty</Typography>
       <Typography className={classes.value}>{penaltyAmount.toFixed(2)}</Typography>
       <Typography className={classes.label}>Total to Receive</Typography>

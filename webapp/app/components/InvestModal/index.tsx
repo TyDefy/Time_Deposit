@@ -72,7 +72,7 @@ const InvestModal: React.FC<OwnProps> = ({
 
       }
       <Typography className={classes.label}>Amount to invest</Typography>
-      <TextField type='number' value={value} onChange={(e) => setValue(parseInt(e.target.value))}/>
+      <TextField type='number' value={value} onChange={(e) => setValue(parseFloat(e.target.value))}/>
       <Grid container direction='row' justify='space-around' className={classes.buttonBar}>
       <Button color='primary' onClick={onClose}>Cancel</Button>
       <Button color='primary' onClick={submit}>Submit</Button>
