@@ -39,7 +39,8 @@ contract RollingWithdraw is IWithdraw {
 
     /**
       * @param  _lastWithdraw The time stamp of the last withdraw
-      * @return bool If the user can withdraw or not
+      * @return bool If the user can withdraw or not. This will always be true 
+      *         in the rolling wihtdraw
       */
     function canWithdrawInterest(
         uint256 _lastWithdraw
