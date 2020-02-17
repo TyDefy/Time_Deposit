@@ -11,9 +11,9 @@ import dayjs from 'dayjs';
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
     container: {
-      width: spacing(20)*2
+      width: spacing(20) * 2
     },
-    buttonBar :{
+    buttonBar: {
 
     },
     header: {
@@ -65,18 +65,26 @@ const InvestModal: React.FC<OwnProps> = ({
       <Typography className={classes.value}>{daiBalance.toFixed(2)}</Typography>
       <Typography className={classes.label}>Current Interest Rate</Typography>
       <Typography className={classes.value}>{(currentInterestRate * 100).toFixed(2)}</Typography>
-      {period > 0 ? <div>
-                    <Typography className={classes.label}>Next Withdraw Date</Typography>
-                    <Typography className={classes.value}>{dayjs(nextWithdrawlDate).format('YYYY-MM-DD')}</Typography>
-                    </div> : null
-
+      {period > 0 &&
+        <div>
+          <Typography className={classes.label}>Next Withdraw Date</Typography>
+          <Typography className={classes.value}>{dayjs(nextWithdrawlDate).format('YYYY-MM-DD')}</Typography>
+        </div>
       }
       <Typography className={classes.label}>Amount to invest</Typography>
-      <TextField type='number' value={value} onChange={(e) => setValue(parseFloat(e.target.value))}/>
+      <TextField 
+        type='number' 
+        value={value} 
+        onChange={(e) => setValue(parseFloat(e.target.value))}
+        inputProps={{
+          min: 0, 
+          max: daiBalance,
+          step: 0.01
+        }}/>
       <Grid container direction='row' justify='space-around' className={classes.buttonBar}>
-      <Button color='primary' onClick={onClose}>Cancel</Button>
-      <Button color='primary' onClick={submit}>Submit</Button>
-    </Grid>
+        <Button color='primary' onClick={onClose}>Cancel</Button>
+        <Button color='primary' onClick={submit}>Submit</Button>
+      </Grid>
     </Grid>
   </Container>
 };
