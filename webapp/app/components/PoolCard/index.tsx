@@ -123,7 +123,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
   contribution = 0,
   interestAccrued = 0,
   availableInterest = 0,
-  daysUntilAccess = '0',
+  daysUntilAccess = 0,
 }: OwnProps) => {
 
   const [expanded, setExpanded] = React.useState(false);
@@ -221,7 +221,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
                   Days until access
                 </Typography>
                 <Typography className={classes.daysUntil}>
-                  {daysUntilAccess}
+                  {daysUntilAccess > 0 ? daysUntilAccess : '-'}
                 </Typography>
               </Paper>} 
             </Grid>

@@ -21,7 +21,9 @@ const selectAdminPoolDetails = createSelector(
       .map(participant => {
         const userTransactions = pool.transactions?.filter(t => t.userAddress === participant);
         const userContribution = userTransactions?.reduce((userContributed, transaction) => 
-          transaction.type === 'Deposit' ? userContributed += transaction.amount : userContributed -= transaction.amount, 0) || 0;
+          transaction.type === 'Deposit' ? 
+            userContributed += transaction.amount : 
+            userContributed -= transaction.amount, 0) || 0;
         
         return {
           address: participant,

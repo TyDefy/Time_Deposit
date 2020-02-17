@@ -327,7 +327,7 @@ function* poolPoller(poolContract: Pool) {
 
     if (ethAddress) {
       yield call(getPoolUserBalance, poolContract, ethAddress);
-      yield call(getUserInfo, poolContract, ethAddress)
+      // yield call(getUserInfo, poolContract, ethAddress)
     }
 
     if (ethAddress && isAdmin) {
