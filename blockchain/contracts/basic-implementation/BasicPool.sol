@@ -307,9 +307,9 @@ contract BasicPool is WhitelistAdminRole {
         uint256 iUnitTotalReward = iUnitInterest + penaltyPotPortion; 
 
         iUnitTotalCollateral_ -= iUnitTotalReward;
-        
         users_[msg.sender].balance -= iUnitInterest;
-        users_[msg.sender].totalPenaltyClaimed = users_[msg.sender].collateralInvested;
+        users_[msg.sender].totalPenaltyClaimed = users_[msg.sender]
+            .collateralInvested;
 
         uint256 balanceBefore = unitInstance_.balanceOf(address(this));
 
@@ -360,11 +360,6 @@ contract BasicPool is WhitelistAdminRole {
         (iUnitInterest, penaltyPotPortion) = _claimInterestAmount(msg.sender);
         uint256 iUnitTotalReward = iUnitInterest + penaltyPotPortion;
 
-        require(
-            iUnitInterest == 0,
-            "User interest has not been added"
-        ); 
-
         iUnitTotalCollateral_ -= iUnitTotalReward;
         users_[msg.sender].balance -= iUnitInterest;
         users_[msg.sender].totalPenaltyClaimed = users_[msg.sender]
@@ -379,7 +374,6 @@ contract BasicPool is WhitelistAdminRole {
 
         uint256 balanceAfterInterest = unitInstance_.balanceOf(address(this));
         uint256 unitReward = balanceAfterInterest - balanceBeforeInterest; 
-        penaltyPot_ -= penaltyPotPortion;
 
         require(
             unitInstance_.transfer(
