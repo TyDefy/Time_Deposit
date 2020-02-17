@@ -262,7 +262,7 @@ contract BasicPool is WhitelistAdminRole {
 
         iUnitTotalCollateral_ -= iUnitBurnt;
         users_[msg.sender].collateralInvested -= withdrawAmount;
-        users_[msg.sender].balance -= - iUnitBurnt;
+        users_[msg.sender].balance -= iUnitBurnt;
         users_[msg.sender].lastWtihdraw = now;
         users_[msg.sender].totalPenaltyClaimed += withdrawAmount;
 
@@ -351,10 +351,87 @@ contract BasicPool is WhitelistAdminRole {
             !isAlive_,
             "Contract has not been terminated. Please use other withdraw"
         );
+
+        _addInterestToBalance(msg.sender);
+
         // Withdraw full balance 
-        withdrawInterest();
-        uint256 fullUserBalance = users_[msg.sender].collateralInvested;
-        withdraw(fullUserBalance);
+        uint256 iUnitInterest; 
+        uint256 penaltyPotPortion;
+        (iUnitInterest, penaltyPotPortion) = _claimInterestAmount(msg.sender);
+        uint256 iUnitTotalReward = iUnitInterest + penaltyPotPortion;
+
+        require(
+            iUnitInterest == 0,
+            "User interest has not been added"
+        ); 
+
+        iUnitTotalCollateral_ -= iUnitTotalReward;
+        users_[msg.sender].balance -= iUnitInterest;
+        users_[msg.sender].totalPenaltyClaimed = users_[msg.sender]
+            .collateralInvested;
+
+        uint256 balanceBeforeInterest = unitInstance_.balanceOf(address(this));
+
+        require(
+            iUnitInstance_.redeem(iUnitTotalReward) == 0,
+            "Interest collateral transfer failed"
+        );
+
+        uint256 balanceAfterInterest = unitInstance_.balanceOf(address(this));
+        uint256 unitReward = balanceAfterInterest - balanceBeforeInterest; 
+        penaltyPot_ -= penaltyPotPortion;
+
+        require(
+            unitInstance_.transfer(
+                msg.sender,
+                unitReward
+            ),
+            "Collateral transfer failed"
+        );
+
+        emit WithdrawInterest(
+            msg.sender,
+            unitReward
+        );
+
+        uint256 withdrawAmount = users_[msg.sender].collateralInvested;
+        uint256 penaltyAmount;
+        uint256 fee;
+
+        uint256 balanceBefore = unitInstance_.balanceOf(address(this));
+        uint256 iUnitBalanceBefore = iUnitInstance_.balanceOf(address(this));
+
+        require(
+            iUnitInstance_.redeemUnderlying(withdrawAmount) == 0,
+            "Interest collateral transfer failed"
+        );
+
+        uint256 balanceAfter = unitInstance_.balanceOf(address(this));
+        uint256 iUnitBalanceAfter = iUnitInstance_.balanceOf(address(this));
+        
+        uint256 iUnitBurnt = iUnitBalanceBefore - iUnitBalanceAfter; 
+        uint256 unitRecived = balanceAfter - balanceBefore; 
+
+        iUnitTotalCollateral_ -= iUnitBurnt;
+        users_[msg.sender].collateralInvested -= withdrawAmount;
+        users_[msg.sender].balance -= iUnitBurnt;
+        users_[msg.sender].lastWtihdraw = now;
+        users_[msg.sender].totalPenaltyClaimed += withdrawAmount;
+
+        require(
+            unitInstance_.transfer(
+                msg.sender,
+                unitRecived
+            ),
+            "Collateral transfer failed"
+        );
+
+        emit Withdraw(
+            msg.sender,
+            withdrawAmount,
+            iUnitBurnt,
+            penaltyAmount
+        );
     }
 
     /**

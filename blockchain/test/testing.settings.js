@@ -33,11 +33,11 @@ const test_settings = {
         penaltyShare: "71056945512",
         penaltyShareMinusFee: "56845556411",
         penaltyShareMinusFeePlusInterest: "224404",
-        userCdaiBalanceWithPenalty: "5447699156061607297361",
+        userCdaiBalanceWithPenalty: "544769915604",
         earnedInterest: "224404",
         earnedInterestWithPenalty: "71057136257",
-        fullBalanceWithInterest: "473712970092",
-        fullBalanceWithInterestAndPenalty: "544769881945"
+        fullBalanceWithInterest: "473713194496",
+        fullBalanceWithInterestAndPenalty: "544770106349"
     },
     pDaiSettings: {
         name: "pDai",
@@ -55,11 +55,14 @@ const test_settings = {
         symbol: "cDAI",
         decimals: 18,
         mintAmount: "473712970092",
+        daiBalanceUnrounded: "99999999999999999933783102",
+        depositBalanceUnrounded: "99999999999933783102",
         mintAmountMinusInterestPenalty: "473712970092",
         mintAmountMinusInterest: "473712745688",
         mintAmountMinusPenaltyInterestFee: "4168671892773643060109",
         interestRateYearly: "17989044278774400",
-        exchangeIncrease: ethers.utils.parseUnits("100", 18)
+        exchangeIncrease: ethers.utils.parseUnits("100", 18),
+        roundingMargin: "66216898"
     },
     registrySettings: {
         penalty: {
