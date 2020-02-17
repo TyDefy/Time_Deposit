@@ -132,10 +132,10 @@ The `@notice` and `@dev` functions should only be used if the functions purpose 
 
 ```
 /**
-  * @param  _number : The amount of tokens
-  * @param  _user : The address of the user spending tokens 
-  * @return uint256 : The amount of tax the user is paying    
-  * @return uint256 : The users new balance
+  * @param  _number The amount of tokens
+  * @param  _user The address of the user spending tokens 
+  * @return uint256 The amount of tax the user is paying    
+  * @return uint256 The users new balance
   */
   function doesAThing(
         uint256 _number,

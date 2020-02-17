@@ -44,7 +44,7 @@ describe("Basic pool factory", async () => {
             test_settings.pcTokenSettings.decimals,
             pDaiInstance.contract.address
         );
-
+        
         registryInstance = await deployer.deploy(
             basicRegistryAbi,
             false,
@@ -179,7 +179,7 @@ describe("Basic pool factory", async () => {
             )).wait();
 
             let utilityDetails = await registryInstance.from(admin).poolDetails(
-                deployedPoolTx.events[3].args.pool
+                deployedPoolTx.events[4].args.pool
             );
 
             assert.equal(
@@ -199,7 +199,7 @@ describe("Basic pool factory", async () => {
             );
         });
 
-        it("Can deploy a basic pool without withdraw", async () => {
+        it("🧪 Can deploy a basic pool without withdraw", async () => {
             let deployedPoolTx = await(await factoryInstance.from(admin).deployBasicPool(
                 "0x0000000000000000000000000000000000000000",
                 test_settings.registrySettings.pool.name,
@@ -207,7 +207,7 @@ describe("Basic pool factory", async () => {
             )).wait();
 
             let utilityDetails = await registryInstance.from(admin).poolDetails(
-                deployedPoolTx.events[3].args.pool
+                deployedPoolTx.events[4].args.pool
             );
 
             assert.equal(

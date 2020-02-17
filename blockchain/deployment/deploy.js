@@ -36,7 +36,11 @@ const deploy = async (network, secret) => {
 	const ADMIN_ADDRESS = process.env.ADMIN_ADDRESS_PUBLIC_KEY;
 
 	if (network === 'local') {
-		const deployer = new etherlime.JSONRPCPrivateKeyDeployer(secret, 'http://localhost:8545/', defaultConfigs);
+		const deployer = new etherlime.JSONRPCPrivateKeyDeployer(
+			secret, 
+			'http://localhost:8545/', 
+			defaultConfigs
+		);
 
 		const deploy = (...args) => deployer.deploy(...args);
 
@@ -74,10 +78,24 @@ const deploy = async (network, secret) => {
 			"cDAI"
 		);
 
-		await poolRegistryInstance.registerDeployer(
+		let registeringDeployer = await poolRegistryInstance.registerDeployer(
 			poolFactoryInstance.contract.address,
 			true
 		);
+
+		await poolRegistryInstance.verboseWaitForTransaction(registeringDeployer, "Factory registered as deployer");
+
+		let removingAdmin = await poolRegistryInstance.init();
+
+		await poolRegistryInstance.verboseWaitForTransaction(removingAdmin, "Removing insecure deployer as admin in registry");
+
+		const CONTRACT_ADDRESSES = `
+			DAI_ADDRESS=${pDaiInstance.contract.address}
+			CDAI_ADDRESS=${pcDaiInstance.contract.address}
+			POOL_REGISTRY_ADDRESS=${poolRegistryInstance.contract.address}
+			POOL_FACTORY_ADDRESS=${poolFactoryInstance.contract.address}
+		`;
+		console.log(CONTRACT_ADDRESSES);
 
 		let newUtilities = await (await poolFactoryInstance.deployUtility(
 			process.env.PENALTY_PERCENTAGE,
@@ -91,36 +109,38 @@ const deploy = async (network, secret) => {
 		const withdrawAddress = newUtilities.events[2].args.withdraw;
 		const penaltyAddress = newUtilities.events[2].args.penalty;
 
-		let newPool = await (await poolFactoryInstance.deployBasicPool(
+		console.log("Withdraw address:" + withdrawAddress);
+		console.log("Penalty address:" + penaltyAddress);
+
+		let newPool = await(await poolFactoryInstance.deployBasicPool(
 			withdrawAddress,
 			process.env.POOL_NAME,
 			process.env.POOL_DESCRIPTION
 		)).wait();
-		
-		const poolInstance = deployer.wrapDeployedContract(basicPoolABI, newPool.events[3].args.pool);
 
-		await(await poolInstance.init(10)).wait();
+		const poolInstance = deployer.wrapDeployedContract(
+			basicPoolABI, 
+			newPool.events[3].args.pool
+		);
 
-		const CONTRACT_ADDRESSES = `
-			DAI_ADDRESS=${pDaiInstance.contract.address}
-			CDAI_ADDRESS=${pcDaiInstance.contract.address}
-			POOL_REGISTRY_ADDRESS=${poolRegistryInstance.contract.address}
-			POOL_FACTORY_ADDRESS=${poolFactoryInstance.contract.address}
-		`;
-		console.log(CONTRACT_ADDRESSES);
+		let removingAdminPool = await poolFactoryInstance.init();
 
-		console.log("Withdraw address:" + withdrawAddress);
-		console.log("Penalty address:" + penaltyAddress + "\nPool address:");
+		await poolFactoryInstance.verboseWaitForTransaction(removingAdminPool, "Removing insecure deployer as admin in factory");
 
 		const addresses = (process.env.ADDESSES_TO_MINT).split(',');
-
+		
 		for (const address of addresses) {
 			await (await pDaiInstance.mintTo(address));
 			console.log(`successfully minted to ${address}`);
 		}
 
 	} else if (network === 'rinkeby') {
-		const deployer = new etherlime.InfuraPrivateKeyDeployer(secret, network, process.env.INFURA_API_KEY_RINKEBY, defaultConfigs)
+		const deployer = new etherlime.InfuraPrivateKeyDeployer(
+			secret, 
+			network, 
+			process.env.INFURA_API_KEY_RINKEBY, 
+			defaultConfigs
+		);
 
 		const deploy = (...args) => deployer.deployAndVerify(...args);
 
@@ -149,9 +169,23 @@ const deploy = async (network, secret) => {
 			"cDai"
 		);
 
+		let removingAdminFactory = await poolFactoryInstance.init();
+
+		await poolFactoryInstance.verboseWaitForTransaction(
+			removingAdminFactory, 
+			"Removing insecure deployer as admin in factory"
+		);
+
 		await poolRegistryInstance.registerDeployer(
 			poolFactoryInstance.contract.address,
 			true
+		);
+
+		let removingAdminRegistry = await poolRegistryInstance.init();
+
+		await poolRegistryInstance.verboseWaitForTransaction(
+			removingAdminRegistry, 
+			"Removing insecure deployer as admin in registry"
 		);
 
 		const CONTRACT_ADDRESSES = `

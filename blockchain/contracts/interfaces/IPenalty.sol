@@ -28,10 +28,8 @@ contract IPenalty {
       */
     function penalize(uint256 _amount) public view returns(uint256, uint256);
 
+    /**
+      * @return uint8 The penalty percentage as a whole number
+      */
     function penalty() public view returns(uint8);
 }
-
-// has a function called calculate penality takes in amounts, returns penalty amount and how
-// much the person can withdraw. 
-// One penity library can manage one penality type (a specific %)
-// can only be called by its one withdraw library 
