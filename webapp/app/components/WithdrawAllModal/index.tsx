@@ -49,7 +49,7 @@ const WithdrawAllModal: React.FC<OwnProps> = ({
   onSubmit,
   classes
 }: OwnProps) => {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(availableFunds);
   const [penaltyAmount, setPenaltyAmount] = useState(0);
 
   useEffect(() => {

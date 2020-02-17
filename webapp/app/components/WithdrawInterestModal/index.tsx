@@ -47,7 +47,7 @@ const WithdrawInterestModal: React.FC<OwnProps> = ({
   onSubmit,
   classes
 }: OwnProps) => {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(availableInterest);
   const submit = () => onSubmit(value);
   return <Container maxWidth='sm' className={classes.container}>
     <Grid container direction='column' alignItems='center'>
