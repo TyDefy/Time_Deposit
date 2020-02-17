@@ -23,13 +23,16 @@ describe("Cyclic Withdraw Tests", async () => {
                 false, 
                 pool.signer.address,
                 test_settings.cyclicWithdraw.cycleLength,
-                test_settings.cyclicWithdraw.withdrawViolation
+                test_settings.cyclicWithdraw.withdrawViolation,
+                test_settings.cyclicWithdraw.interestWithdrawViolation
             );
         });
 
         it("All variables correctly initialized", async () => {
             let cycleLength = await cyclicWithdrawInstance.getCycle();
-            let canWithdraw = await cyclicWithdrawInstance.cantWithdrawInViolation();
+            let canWithdraw = await cyclicWithdrawInstance.canWithdrawInViolation();
+            let canWithdrawInterest = await cyclicWithdrawInstance.canWithdrawInterestInViolation();
+            let penaltyInstance = await cyclicWithdrawInstance.getPenalty();
 
             assert.equal(
                 test_settings.cyclicWithdraw.cycleLength,
@@ -37,27 +40,20 @@ describe("Cyclic Withdraw Tests", async () => {
                 "Cycle length incorrect"
             );
             assert.equal(
-                test_settings.cyclicWithdraw.withdrawViolation,
                 canWithdraw,
+                test_settings.cyclicWithdraw.withdrawViolation,
                 "Can withdraw in violation"
             );
-        });
-
-        it("Unitized variables secure", async () => {
-            let balance = await cyclicWithdrawInstance.from(user1).balanceOf(user1.signer.address);
-            let userInfo = await cyclicWithdrawInstance.cantWithdrawInViolation();
-
-            console.log(balance)
-            // assert.equal(
-            //     test_settings.cyclicWithdraw.cycleLength,
-            //     cycleLength.toString(),
-            //     "Cycle length incorrect"
-            // );
-            // assert.equal(
-            //     test_settings.cyclicWithdraw.withdrawViolation,
-            //     canWithdraw,
-            //     "Can withdraw in violation"
-            // );
+            assert.equal(
+                canWithdrawInterest,
+                test_settings.cyclicWithdraw.interestWithdrawViolation,
+                "Can withdraw in violation"
+            );
+            assert.equal(
+                penaltyInstance,
+                pool.signer.address,
+                "Can withdraw in violation"
+            );
         });
     });
 });
