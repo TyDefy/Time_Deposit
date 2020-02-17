@@ -118,10 +118,10 @@ const deploy = async (network, secret) => {
 			process.env.POOL_DESCRIPTION
 		)).wait();
 
-		const poolInstance = deployer.wrapDeployedContract(
-			basicPoolABI, 
-			newPool.events[3].args.pool
-		);
+		// const poolInstance = deployer.wrapDeployedContract(
+		// 	basicPoolABI, 
+		// 	newPool.events[3].args.pool
+		// );
 
 		let removingAdminPool = await poolFactoryInstance.init();
 

@@ -106,8 +106,8 @@ function* getCDaiRates() {
         exchangeRate = responseBody.cToken[0].exchange_rate.value;
         interestRate = responseBody.cToken[0].supply_rate.value;
       }
-      else if(environment == 1337 || environment == 4){
-        var exchangeRateStored: BigNumber= yield call([cdaiContract, cdaiContract.exchangeRateStored])
+      else if(environment == 4){
+        var exchangeRateStored: BigNumber= yield call([cdaiContract, cdaiContract.exchangeRateStored]);
         exchangeRate = Number(formatUnits(exchangeRateStored, 27));;
         const interestRatePerBlockUnscaled = yield call([cdaiContract, cdaiContract.supplyRatePerBlock]);
         const interestRatePerBlock = Number(formatUnits(interestRatePerBlockUnscaled, 18)); 

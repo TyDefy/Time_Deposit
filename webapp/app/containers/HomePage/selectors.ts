@@ -10,6 +10,7 @@ import dayjs from 'dayjs';
 
 export const selectPools = createSelector((state: RootState) => state.pools, selectEthAddress, selectExchangeRate, selectInterestRate, (pools, ethAddress, exchangeRate, interestRate) =>
   Object.values(pools).map(p => {
+
     const cdaiBalancePool = p.transactions?.reduce((poolCdaiBalance, t) =>
     t.type === 'Deposit' ? poolCdaiBalance += t.cdaiAmount : poolCdaiBalance -= t.cdaiAmount, 0) || 0;
 
@@ -32,9 +33,7 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
         withdrawDate = withdrawDateValue.setMonth(getMonths);
       }
 
-      
       const daysUntilAccess = lastWithdrawDate && p.period !== 0 ? Math.abs(dayjs(withdrawDate).diff(Date.now(), 'day')).toString() : '-';
-
       return {
         ...p,
         interestRate: interestRate,
