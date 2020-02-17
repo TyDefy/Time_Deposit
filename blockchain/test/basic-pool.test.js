@@ -315,108 +315,69 @@ describe("Basic Pool Tests", async () => {
             )).wait();
 
             let penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
-            let userPenaltyShareTB = await basicPoolInstance.getTotalBalance(user1.signer.address);
+            let user1Interest = await basicPoolInstance.getUserInterest(user1.signer.address);
+            let user2Interest = await basicPoolInstance.getUserInterest(user2.signer.address);
             let userPenaltyShareUI = await basicPoolInstance.getUserInfo(user1.signer.address);
-            let user2PenaltyShareTB = await basicPoolInstance.getTotalBalance(user2.signer.address);
-            let user2PenaltyShareUI = await basicPoolInstance.getUserInfo(user2.signer.address);
-            let user3PenaltyShareTB = await basicPoolInstance.getTotalBalance(user3.signer.address);
-            let internalCounter = await basicPoolInstance.getInternalIunitCounter();
-
-            console.log("Penalty Pot:\t" + penaltyPotBalance.toString());
-            console.log("Internal counter:\t" + internalCounter.toString());
-            console.log("User 1 total balance:\t" + userPenaltyShareTB.toString())
-            console.log("User 1 cDai balance:\t" + userPenaltyShareUI[1].toString())
-            console.log("User 2 total balance:\t" + user2PenaltyShareTB.toString())
-            console.log("User 2 cDai balance:\t" + user2PenaltyShareUI[1].toString())
-
-            let userPenaltyShare = await basicPoolInstance.getUserBalance(user1.signer.address);
-            console.log("User 1 tb:\t" + userPenaltyShare.toString())
-
-            userPenaltyShare = await basicPoolInstance.getUserInfo(user1.signer.address);
-            console.log("User 1 tb:\t" + userPenaltyShare[0].toString())
-            console.log("User 1 tb:\t" + userPenaltyShare[1].toString())
-
-            let user2PenaltyShare = await basicPoolInstance.getUserBalance(user2.signer.address);
-            console.log("User 2 tb:\t" + user2PenaltyShare.toString())
-
-            user2PenaltyShare = await basicPoolInstance.getUserInfo(user2.signer.address);
-            console.log("User 2 tb:\t" + user2PenaltyShare[0].toString())
-            console.log("User 2 tb:\t" + user2PenaltyShare[1].toString())
-
-            let user3PenaltyShare = await basicPoolInstance.getUserBalance(user3.signer.address);
-            console.log("User 3 tb:\t" + user3PenaltyShare.toString())
-
-            // User 1 withdraws their portion of the penalty pot
-            await basicPoolInstance.from(user1).withdrawInterest();
-
-            penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
-            userPenaltyShareTB = await basicPoolInstance.getTotalBalance(user1.signer.address);
-            userPenaltyShareUI = await basicPoolInstance.getUserInfo(user1.signer.address);
-            user2PenaltyShareTB = await basicPoolInstance.getTotalBalance(user2.signer.address);
-            user2PenaltyShareUI = await basicPoolInstance.getUserInfo(user2.signer.address);
-            internalCounter = await basicPoolInstance.getInternalIunitCounter();
-
-            console.log("Penalty Pot:\t" + penaltyPotBalance.toString());
-            console.log("Internal counter:\t" + internalCounter.toString());
-            console.log("User 1 total balance:\t" + userPenaltyShareTB.sub(userPenaltyShareUI[1]).toString())
-            console.log("User 2 total balance:\t" + user2PenaltyShareTB.toString())
-
-            userPenaltyShare = await basicPoolInstance.getUserBalance(user1.signer.address);
-            console.log("User 1 tb:\t" + userPenaltyShare.toString())
-
-            userPenaltyShare = await basicPoolInstance.getUserInfo(user1.signer.address);
-            console.log("User 1 tb:\t" + userPenaltyShare[0].toString())
-            console.log("User 1 tb:\t" + userPenaltyShare[1].toString())
-
-            user2PenaltyShare = await basicPoolInstance.getUserBalance(user2.signer.address);
-            console.log("User 2 tb:\t" + user2PenaltyShare.toString())
-
-            user2PenaltyShare = await basicPoolInstance.getUserInfo(user2.signer.address);
-            console.log("User 2 tb:\t" + user2PenaltyShare[0].toString())
-            console.log("User 2 tb:\t" + user2PenaltyShare[1].toString())
-
-            // User 1 withdraws more than their share of the penalty pot
-            await basicPoolInstance.from(user1).withdrawInterest();
-
-            let penaltyPotBalanceAfter = await basicPoolInstance.penaltyPotBalance();
-            console.log("Penalty Pot:\t" + penaltyPotBalanceAfter.toString());
-            internalCounter = await basicPoolInstance.getInternalIunitCounter();
-            console.log("Internal counter:\t" + internalCounter.toString());
-
-            userPenaltyShare = await basicPoolInstance.getUserBalance(user1.signer.address);
-            console.log("User 1 tb:\t" + userPenaltyShare.toString())
-
-            user2PenaltyShare = await basicPoolInstance.getUserBalance(user2.signer.address);
-            console.log("User 2 tb:\t" + user2PenaltyShare.toString())
 
             assert.equal(
                 penaltyPotBalance.toString(),
-                penaltyPotBalanceAfter.toString(),
-                "Penalty pot has incorrectly changed between user interest withdraws"
+                test_settings.basicPool.penaltyAmountInCdai,
+                "Penalty pot amount is incorrect after user 3 withdraw"
             );
-            
+            assert.equal(
+                user1Interest.toString(),
+                test_settings.basicPool.penaltyInterest,
+                "user 1 has incorrect penalty share portion"
+            );
+            assert.equal(
+                user2Interest.toString(),
+                test_settings.basicPool.penaltyInterest,
+                "user 2 has incorrect penalty share portion"
+            );
 
-            /**
-             *  Penalty Pot:	        71056945513
-                Internal counter:	    947425940185
-                User 1 total balance:	509241442848
-                User 1 cDai balance:	473712970092      A1
-                User 2 total balance:	509241442848
-                User 2 cDai balance:	473712970092     A1
+            await basicPoolInstance.from(user1).withdrawInterest();
 
-                Penalty Pot:	        35528472757
-                Internal counter:	    911897467429
-                User 1 total balance:	473712970092    A1
-                User 2 total balance:	512122129829      A2
+            penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
+            user1Interest = await basicPoolInstance.getUserInterest(user1.signer.address);
+            user2Interest = await basicPoolInstance.getUserInterest(user2.signer.address);
 
-                Penalty Pot:	      35528472757
-                Internal counter:	    911897467429
-                User 1 total balance:	473712970092      A1
-                User 2 total balance:	512122129829      A2
-             */
-            
+            assert.equal(
+                penaltyPotBalance.toString(),
+                test_settings.basicPool.penaltyPotAfterInterestWithdraw,
+                "Penalty pot amount is incorrect after user 1 interest withdraw"
+            );
+            assert.equal(
+                user1Interest.toString(),
+                0,
+                "user 1 has incorrect penalty share portion after withdrawing interest"
+            );
+            assert.equal(
+                user2Interest.toString(),
+                test_settings.basicPool.penaltyInterest,
+                "user 2 has incorrect penalty share portion"
+            );
 
+            await basicPoolInstance.from(user2).withdrawInterest();
 
+            penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
+            user1Interest = await basicPoolInstance.getUserInterest(user1.signer.address);
+            user2Interest = await basicPoolInstance.getUserInterest(user2.signer.address);
+
+            assert.equal(
+                penaltyPotBalance.toString(),
+                1,
+                "Penalty pot amount is incorrect after all users interest withdraw"
+            );
+            assert.equal(
+                user1Interest.toString(),
+                0,
+                "user 1 has incorrect penalty share portion after withdrawing interest"
+            );
+            assert.equal(
+                user2Interest.toString(),
+                0,
+                "user 2 has incorrect penalty share portion after withdrawing interest"
+            ); 
         });
     });
 

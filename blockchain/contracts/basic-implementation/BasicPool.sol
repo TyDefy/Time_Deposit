@@ -241,12 +241,12 @@ contract BasicPool is WhitelistAdminRole {
                     accumulativeFeeCollection_ += fee;
                 }
                 // Updates the balance of the user
-                users_[msg.sender].balance -= iUnitPenaltyAmount;
+                users_[msg.sender].balance -= iUnitPenAmount;
                 users_[msg.sender].collateralInvested -= penaltyAmount;
                 // Updates the balance of the penalty pot
-                penaltyPot_ += (iUnitPenaltyAmount - fee);
-                iUnitTotalCollateral_ -= (iUnitPenaltyAmount + fee);
-                iUnitTotalPenaltyCollateral -= (iUnitPenaltyAmount + fee);
+                penaltyPot_ += (iUnitPenAmount - fee);
+                iUnitTotalCollateral_ -= (iUnitPenAmount + fee);
+                iUnitTotalPenaltyCollateral -= (iUnitPenAmount + fee);
             }
         }
 
@@ -307,7 +307,7 @@ contract BasicPool is WhitelistAdminRole {
         uint256 iUnitTotalReward = iUnitInterest + penaltyPotPortion; 
 
         iUnitTotalCollateral_ -= iUnitTotalReward;
-        iUnitTotalPenaltyCollateral -= iUnitTotalReward;
+        
         users_[msg.sender].balance -= iUnitInterest;
         users_[msg.sender].totalPenaltyClaimed = users_[msg.sender].collateralInvested;
 
@@ -320,7 +320,6 @@ contract BasicPool is WhitelistAdminRole {
 
         uint256 balanceAfter = unitInstance_.balanceOf(address(this));
         uint256 unitReward = balanceAfter - balanceBefore; 
-        penaltyPot_ -= penaltyPotPortion;
 
         require(
             unitInstance_.transfer(
@@ -794,8 +793,8 @@ contract BasicPool is WhitelistAdminRole {
                             (unclaimedPenalty*1e18)/iUnitTotalPenaltyCollateral
                         )*penaltyPot_
                     )/1e18;
-                // Removing the claimed colatteral from the balance
                 iUnitTotalPenaltyCollateral -= unclaimedPenalty;
+                penaltyPot_ -= penaltyPortion;
                 return penaltyPortion;
             }
         }
