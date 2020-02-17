@@ -28,11 +28,15 @@ const test_settings = {
         withdrawAmountOn100: ethers.utils.parseUnits("85", 18),
         penaltyAmountOn100: ethers.utils.parseUnits("15", 18),
         penaltyAmountInCdai: "71056945513",
+        otherPenaltyAmountInCdai: "71056945514",
         fee: 20,
         interestEarned: "2244038717306567",
+        otherInterestEarned: "1758334395",
         penaltyShare: "71056945512",
         penaltyShareMinusFee: "56845556411",
+        otherPenaltyShareMinusFee: "58603666402",
         penaltyShareMinusFeePlusInterest: "224404",
+        otherPenaltyShareMinusFeePlusInterest: "58603890806",
         userCdaiBalanceWithPenalty: "544769915604",
         earnedInterest: "224404",
         earnedInterestWithPenalty: "71057136257",
@@ -48,6 +52,7 @@ const test_settings = {
         withdrawWithPenalty: "99999985000000000000000000",
         withdrawInterestBalancePenalty: "99999914999999999610090535",
         withdrawInterestBalance: "99999900000047371324086683",
+        otherWithdrawInterestBalance: "99999912371187252061701985",
         withdrawInterestPusPenaltyMinusFee: "99999912000053055652239429"
     },
     pcTokenSettings: {
@@ -60,6 +65,7 @@ const test_settings = {
         mintAmountMinusInterestPenalty: "473712970092",
         mintAmountMinusInterest: "473712745688",
         mintAmountMinusPenaltyInterestFee: "4168671892773643060109",
+        otherMintAmountMinusPenaltyInterestFee: "473712745688",
         interestRateYearly: "17989044278774400",
         exchangeIncrease: ethers.utils.parseUnits("100", 18),
         roundingMargin: "66216898"
