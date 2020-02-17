@@ -27,6 +27,8 @@ contract BasicPool is WhitelistAdminRole {
     ICToken internal iUnitInstance_;
     // The total amount of collateral in this pool
     uint256 internal iUnitTotalCollateral_;
+    // Internal counter for penalty claim pool
+    uint256 internal iUnitTotalPenaltyCollateral;
     // The amount of cToken allocated to the penalty pool
     uint256 internal penaltyPot_;
     // A non-reversable switch to kill the contract
@@ -174,6 +176,7 @@ contract BasicPool is WhitelistAdminRole {
         
         uint256 mintedTokens = iUnitPoolBalanceAfter - iUnitPoolBanalce;
         iUnitTotalCollateral_ += mintedTokens;
+        iUnitTotalPenaltyCollateral += mintedTokens;
 
         users_[msg.sender].collateralInvested += _amount;
         users_[msg.sender].balance += mintedTokens;
@@ -243,6 +246,7 @@ contract BasicPool is WhitelistAdminRole {
                 // Updates the balance of the penalty pot
                 penaltyPot_ += (iUnitPenAmount - fee);
                 iUnitTotalCollateral_ -= (iUnitPenAmount + fee);
+                iUnitTotalPenaltyCollateral -= (iUnitPenAmount + fee);
             }
         }
 
@@ -261,6 +265,7 @@ contract BasicPool is WhitelistAdminRole {
         uint256 unitRecived = balanceAfter - balanceBefore; 
 
         iUnitTotalCollateral_ -= iUnitBurnt;
+        iUnitTotalPenaltyCollateral -= iUnitBurnt;
         users_[msg.sender].collateralInvested -= withdrawAmount;
         users_[msg.sender].balance -= iUnitBurnt;
         users_[msg.sender].lastWtihdraw = now;
@@ -315,7 +320,6 @@ contract BasicPool is WhitelistAdminRole {
 
         uint256 balanceAfter = unitInstance_.balanceOf(address(this));
         uint256 unitReward = balanceAfter - balanceBefore; 
-        penaltyPot_ -= penaltyPotPortion;
 
         require(
             unitInstance_.transfer(
@@ -341,10 +345,6 @@ contract BasicPool is WhitelistAdminRole {
         withdraw(fullUserBalance);
     }
 
-    /**
-      * @notice Allows a user to withdraw their collateral after the pool has 
-      *         been ternmiated
-      */
     function finalWithdraw() public {
         // Ensureing this can only be called once contract is killed
         require(
@@ -360,11 +360,6 @@ contract BasicPool is WhitelistAdminRole {
         (iUnitInterest, penaltyPotPortion) = _claimInterestAmount(msg.sender);
         uint256 iUnitTotalReward = iUnitInterest + penaltyPotPortion;
 
-        require(
-            iUnitInterest == 0,
-            "User interest has not been added"
-        ); 
-
         iUnitTotalCollateral_ -= iUnitTotalReward;
         users_[msg.sender].balance -= iUnitInterest;
         users_[msg.sender].totalPenaltyClaimed = users_[msg.sender]
@@ -379,7 +374,6 @@ contract BasicPool is WhitelistAdminRole {
 
         uint256 balanceAfterInterest = unitInstance_.balanceOf(address(this));
         uint256 unitReward = balanceAfterInterest - balanceBeforeInterest; 
-        penaltyPot_ -= penaltyPotPortion;
 
         require(
             unitInstance_.transfer(
@@ -721,7 +715,7 @@ contract BasicPool is WhitelistAdminRole {
             ) {
                 uint256 unclaimedPenalty = users_[_user]
                     .totalInvestment - users_[_user].totalPenaltyClaimed;
-                return (((unclaimedPenalty*1e18)/iUnitTotalCollateral_
+                return (((unclaimedPenalty*1e18)/iUnitTotalPenaltyCollateral
                         )*penaltyPot_
                     )/1e18;
             }
@@ -790,9 +784,11 @@ contract BasicPool is WhitelistAdminRole {
                 // Works out the users portion of the penalty pot from their
                 // unclaimed penalty portion amount
                 uint256 penaltyPortion = ((
-                            (unclaimedPenalty*1e18)/iUnitTotalCollateral_
+                            (unclaimedPenalty*1e18)/iUnitTotalPenaltyCollateral
                         )*penaltyPot_
                     )/1e18;
+                iUnitTotalPenaltyCollateral -= unclaimedPenalty;
+                penaltyPot_ -= penaltyPortion;
                 return penaltyPortion;
             }
         }

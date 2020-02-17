@@ -130,7 +130,7 @@ const deploy = async (network, secret) => {
 		const addresses = (process.env.ADDESSES_TO_MINT).split(',');
 		
 		for (const address of addresses) {
-			await (await pDaiInstance.mintTo(address));
+			await (await pDaiInstance.mintTo(address)).wait();
 			console.log(`successfully minted to ${address}`);
 		}
 
@@ -146,7 +146,7 @@ const deploy = async (network, secret) => {
 
 		const dai = "0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa";
 
-		const pDaiInstance = deployer.wrapDeployedContract(erc20ABI, dai);
+		const pDaiInstance = etherlime.ContractAt(erc20ABI, dai);
 
 		const cDai = "0x2acc448d73e8d53076731fea2ef3fc38214d0a7d";
 
@@ -202,7 +202,7 @@ const deploy = async (network, secret) => {
 			await (await pDaiInstance.allocateTo(
                 address,
                 ethers.utils.parseUnits("100", 18)
-            ));
+            )).wait();
 			console.log(`successfully minted to ${address}`);
 		}
 	} else if (network === 'mainnet') {
