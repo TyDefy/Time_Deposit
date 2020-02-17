@@ -25,17 +25,15 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
     
     const totalAmountwithPenalties = contribution > 0 && p.userBalanceCDai ? (p.userBalanceCDai * exchangeRate): 0;
 
-      var lastWithdrawDateObject = Object.assign({}, {userWithdrawDate:  p.userLastWithdrawDate });
-
+      var lastWithdrawDate = p.userLastWithdrawDate;
       var withdrawDate;
-      if (p.period !== 0 && lastWithdrawDateObject.userWithdrawDate) {
-        let getMonths = lastWithdrawDateObject.userWithdrawDate.getMonth() + p.period;
-        let withdrawDateValue = lastWithdrawDateObject.userWithdrawDate;
+      if (p.period !== 0 && lastWithdrawDate) {
+        let getMonths = lastWithdrawDate.getMonth() + p.period;
+        let withdrawDateValue = lastWithdrawDate;
         withdrawDate = withdrawDateValue.setMonth(getMonths);
       }
 
-      const daysUntilAccess = lastWithdrawDateObject.userWithdrawDate && p.period !== 0 ? Math.abs(dayjs(withdrawDate).diff(Date.now(), 'day')).toString() : '-';
-
+      const daysUntilAccess = lastWithdrawDate && p.period !== 0 ? Math.abs(dayjs(withdrawDate).diff(Date.now(), 'day')).toString() : '-';
       return {
         ...p,
         interestRate: interestRate,
