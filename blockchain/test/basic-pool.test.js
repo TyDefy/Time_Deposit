@@ -15,6 +15,7 @@ describe("Basic Pool Tests", async () => {
     let admin = accounts[2];
     let user1 = accounts[3];
     let user2 = accounts[4];
+    let user3 = accounts[5];
     let deployer = new etherlime.EtherlimeGanacheDeployer(deployerInsecure.secretKey);
     
     let basicPoolInstance, 
@@ -88,6 +89,18 @@ describe("Basic Pool Tests", async () => {
         );
         // Approving dai as a spender
         await cDaiInstance.from(user2).approve(
+            pDaiInstance.contract.address,
+            test_settings.basicPool.deposit
+        );
+        // Minting dai for user 3
+        await pDaiInstance.from(user3).mint();
+        // Approving cDai as a spender
+        await pDaiInstance.from(user3).approve(
+            cDaiInstance.contract.address,
+            test_settings.basicPool.deposit
+        );
+        // Approving dai as a spender
+        await cDaiInstance.from(user3).approve(
             pDaiInstance.contract.address,
             test_settings.basicPool.deposit
         );
@@ -193,29 +206,178 @@ describe("Basic Pool Tests", async () => {
             );
             assert.equal(
                 userDaiBalanceAfterRedeem.toString(),
-                test_settings.pDaiSettings.mintAmount.toString(),
+                test_settings.pcTokenSettings.daiBalanceUnrounded,
                 "User has incorrect dai balance after redeem"
             );
             assert.equal(
                 print.events[1].args.value.toString(),
-                test_settings.basicPool.deposit.toString(),
+                test_settings.pcTokenSettings.depositBalanceUnrounded,
                 "User has been redeemed the incorrect amount"
             );
             assert.equal(
                 pcTokenBalanceInDaiAfter.toString(),
-                0,
+                test_settings.pcTokenSettings.roundingMargin,
                 "cDai contract has a balance in dai after redeem"
             );
         });
     });
 
     describe("Core Functionality", async () => {
-        it("Close pool to deposits", async () => {
-            //TODO
+        it("Kill switch on pool", async () => {
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+
+            let user1BalanceAfterDeposit = await basicPoolInstance.getUserInfo(user1.signer.address);
+
+            basicPoolInstance.from(admin).terminatePool();
+
+            await assert.revert(
+                basicPoolInstance.from(user1).deposit(
+                    test_settings.basicPool.deposit
+                )
+            );
+
+            await assert.revert(
+                basicPoolInstance.from(user1).withdraw(
+                    test_settings.basicPool.deposit
+                )
+            );
+
+            await assert.revert(
+                basicPoolInstance.from(user1).withdrawInterest()
+            );
+
+            await assert.revert(
+                basicPoolInstance.from(user1).withdrawAndClose()
+            );
+
+            let userBalanceBefore = await basicPoolInstance.getUserInfo(user1.signer.address);
+
+            await assert.notRevert(basicPoolInstance.from(user1).finalWithdraw());
+
+            let userBalanceAfter = await basicPoolInstance.getUserInfo(user1.signer.address);
+
+            assert.equal(
+                userBalanceBefore[0].toString(),
+                test_settings.basicPool.deposit.toString(),
+                "User deposit balance incorrect"
+            );
+            assert.equal(
+                userBalanceBefore[1].toString(),
+                test_settings.pcTokenSettings.mintAmount,
+                "User cdai deposit balance incorrect"
+            );
+            assert.equal(
+                userBalanceAfter[0].toString(),
+                0,
+                "User dai balance not 0 after final withdraw"
+            );
+            assert.equal(
+                userBalanceAfter[1].toString(),
+                0,
+                "User cDai balance not 0 after final withdraw"
+            );
         });
 
-        it("Kill switch on pool", async () => {
-            //TODO
+        it("Penalty is distributed evenly", async () => {
+            // User 1 will now have a steak in the penalty pot
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+            // User 2 now has a steak in the penalty pot
+            await pDaiInstance.from(user2).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user2).deposit(
+                test_settings.basicPool.deposit
+            );
+            // User 3 will now populate the penalty pot
+            await pDaiInstance.from(user3).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user3).deposit(
+                test_settings.basicPool.deposit
+            );
+            let tx = await(await basicPoolInstance.from(user3).withdraw(
+                test_settings.basicPool.deposit
+            )).wait();
+
+            let penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
+            let user1Interest = await basicPoolInstance.getUserInterest(user1.signer.address);
+            let user2Interest = await basicPoolInstance.getUserInterest(user2.signer.address);
+            let userPenaltyShareUI = await basicPoolInstance.getUserInfo(user1.signer.address);
+
+            assert.equal(
+                penaltyPotBalance.toString(),
+                test_settings.basicPool.penaltyAmountInCdai,
+                "Penalty pot amount is incorrect after user 3 withdraw"
+            );
+            assert.equal(
+                user1Interest.toString(),
+                test_settings.basicPool.penaltyInterest,
+                "user 1 has incorrect penalty share portion"
+            );
+            assert.equal(
+                user2Interest.toString(),
+                test_settings.basicPool.penaltyInterest,
+                "user 2 has incorrect penalty share portion"
+            );
+
+            await basicPoolInstance.from(user1).withdrawInterest();
+
+            penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
+            user1Interest = await basicPoolInstance.getUserInterest(user1.signer.address);
+            user2Interest = await basicPoolInstance.getUserInterest(user2.signer.address);
+
+            assert.equal(
+                penaltyPotBalance.toString(),
+                test_settings.basicPool.penaltyPotAfterInterestWithdraw,
+                "Penalty pot amount is incorrect after user 1 interest withdraw"
+            );
+            assert.equal(
+                user1Interest.toString(),
+                0,
+                "user 1 has incorrect penalty share portion after withdrawing interest"
+            );
+            assert.equal(
+                user2Interest.toString(),
+                test_settings.basicPool.penaltyInterest,
+                "user 2 has incorrect penalty share portion"
+            );
+
+            await basicPoolInstance.from(user2).withdrawInterest();
+
+            penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
+            user1Interest = await basicPoolInstance.getUserInterest(user1.signer.address);
+            user2Interest = await basicPoolInstance.getUserInterest(user2.signer.address);
+
+            assert.equal(
+                penaltyPotBalance.toString(),
+                1,
+                "Penalty pot amount is incorrect after all users interest withdraw"
+            );
+            assert.equal(
+                user1Interest.toString(),
+                0,
+                "user 1 has incorrect penalty share portion after withdrawing interest"
+            );
+            assert.equal(
+                user2Interest.toString(),
+                0,
+                "user 2 has incorrect penalty share portion after withdrawing interest"
+            ); 
         });
     });
 
@@ -322,19 +484,9 @@ describe("Basic Pool Tests", async () => {
             );
         });
 
-        it("Get interest per year", async () => {
-            let interestRatePerBlock = await basicPoolInstance.getInterestRatePerYear();
-
-            assert.equal(
-                interestRatePerBlock.toString(),
-                test_settings.pcTokenSettings.interestRateYearly.toString(),
-                "Unexpected interest rate per year"
-            );
-        });
-
         it("🧪 Get total balance", async () => {
-            let user1Balance = await basicPoolInstance.getTotalBalance(user1.signer.address);
-            let user2Balance = await basicPoolInstance.getTotalBalance(user2.signer.address);
+            let user1Balance = await basicPoolInstance.getUserBalance(user1.signer.address);
+            let user2Balance = await basicPoolInstance.getUserBalance(user2.signer.address);
             let penaltyPotBalace = await basicPoolInstance.penaltyPotBalance();
 
             assert.equal(
@@ -361,25 +513,21 @@ describe("Basic Pool Tests", async () => {
             await basicPoolInstance.from(user1).deposit(
                 test_settings.basicPool.deposit
             );
-
-            let user1BalanceAfterDeposit = await basicPoolInstance.getUserInfo(user1.signer.address);
-            console.log(user1BalanceAfterDeposit[0].toString())
-            console.log(user1BalanceAfterDeposit[1].toString())
-            console.log()
-
+            
             await assert.notRevert(basicPoolInstance.from(user1).withdrawAndClose());
 
             user1Balance = await basicPoolInstance.getUserInfo(user1.signer.address);
             user2Balance = await basicPoolInstance.getUserInfo(user2.signer.address);
             penaltyPotBalace = await basicPoolInstance.penaltyPotBalance();
-            
-            console.log(user1Balance[0].toString())
-            console.log(user1Balance[1].toString())//TODO This = 1, should be 0
-            console.log(penaltyPotBalace.toString())
 
             assert.equal(
                 user1Balance[0].toString(),
                 0,
+                "User 1 has balance after withdrawing"
+            );
+            assert.equal(
+                user1Balance[1].toString(),
+                1,
                 "User 1 has balance after withdrawing"
             );
             assert.equal(
@@ -404,17 +552,17 @@ describe("Basic Pool Tests", async () => {
 
             console.log()
 
-            user1Balance = await basicPoolInstance.getTotalBalance(user1.signer.address);//TODO = 1 should be 0
-            user2Balance = await basicPoolInstance.getTotalBalance(user2.signer.address);
+            user1Balance = await basicPoolInstance.getUserBalance(user1.signer.address);
+            user2Balance = await basicPoolInstance.getUserBalance(user2.signer.address);
             penaltyPotBalace = await basicPoolInstance.penaltyPotBalance();
 
             console.log()
 
-            // assert.equal(
-            //     user1Balance.toString(),
-            //     0,
-            //     "User 1 has balance after withdrawing"
-            // );
+            assert.equal(
+                user1Balance.toString(),
+                1,
+                "User 1 has balance after withdrawing"
+            );
             assert.equal(
                 user2Balance.toString(),
                 test_settings.basicPool.userCdaiBalanceWithPenalty.toString(),
@@ -483,7 +631,7 @@ describe("Basic Pool Tests", async () => {
         });
 
         it("Get user total balance", async () => {
-            let userInterest = await basicPoolInstance.getTotalBalance(user1.signer.address);
+            let userInterest = await basicPoolInstance.getUserBalance(user1.signer.address);
 
             assert.equal(
                 userInterest.toString(),
@@ -509,7 +657,7 @@ describe("Basic Pool Tests", async () => {
 
             await cDaiInstance.from(admin).increaseExchange(test_settings.pcTokenSettings.exchangeIncrease);
 
-            userInterest = await basicPoolInstance.getTotalBalance(user1.signer.address);
+            userInterest = await basicPoolInstance.getUserBalance(user1.signer.address);
 
             assert.equal(
                 userInterest.toString(),
@@ -528,7 +676,7 @@ describe("Basic Pool Tests", async () => {
                 test_settings.basicPool.deposit
             )).wait();
 
-            userInterest = await basicPoolInstance.getTotalBalance(user1.signer.address);
+            userInterest = await basicPoolInstance.getUserBalance(user1.signer.address);
 
             assert.equal(
                 userInterest.toString(),

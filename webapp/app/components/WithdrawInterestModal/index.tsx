@@ -10,9 +10,9 @@ import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typograph
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
     container: {
-      width: spacing(20)*2
+      width: spacing(20) * 2
     },
-    buttonBar :{
+    buttonBar: {
 
     },
     header: {
@@ -47,7 +47,7 @@ const WithdrawInterestModal: React.FC<OwnProps> = ({
   onSubmit,
   classes
 }: OwnProps) => {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(availableInterest);
   const submit = () => onSubmit(value);
   return <Container maxWidth='sm' className={classes.container}>
     <Grid container direction='column' alignItems='center'>
@@ -57,11 +57,18 @@ const WithdrawInterestModal: React.FC<OwnProps> = ({
       <Typography className={classes.label}>Available Interest</Typography>
       <Typography className={classes.value}>{availableInterest.toFixed(2)}</Typography>
       <Typography className={classes.label}>Amount</Typography>
-      <TextField type='number' value={value} onChange={(e) => setValue(parseInt(e.target.value))}/>
+      <TextField
+        value={value}
+        onChange={(e) => setValue(parseFloat(e.target.value))}
+        inputProps={{
+          min: 0,
+          max: availableInterest,
+          step: 0.01
+        }} />
       <Grid container direction='row' justify='space-around' className={classes.buttonBar}>
-      <Button color='primary' onClick={onClose}>Cancel</Button>
-      <Button color='primary' onClick={submit}>Submit</Button>
-      </Grid> 
+        <Button color='primary' onClick={onClose}>Cancel</Button>
+        <Button color='primary' onClick={submit}>Submit</Button>
+      </Grid>
     </Grid>
   </Container>
 };

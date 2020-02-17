@@ -3,6 +3,13 @@ pragma solidity 0.5.10;
 import { WhitelistAdminRole } from "openzeppelin-solidity/contracts/access/roles/WhitelistAdminRole.sol";
 import { IWithdraw } from "../interfaces/IWithdraw.sol";
 
+/**
+  * @author Veronica Coutts (@veronicaLC)
+  * @title  Basic registry
+  * @notice The registry for the econtract ecosystem. This registry allows for
+  *         multiple factories (registered deployers) and accomidated multiple
+  *         contract types, so long as they conform to the defined interfaces.
+  */
 contract BasicRegistry is WhitelistAdminRole {
     // Enums for the types of contracts
     enum ContractType { INVALID, CYCLIC_WITHDRAW, ROLLING_WITHDRAW, PENALTY }
@@ -42,14 +49,6 @@ contract BasicRegistry is WhitelistAdminRole {
         uint8 typeOfUtil
     );
 
-    constructor(
-        address _admin
-    )
-        public
-    {
-        addWhitelistAdmin(_admin);
-    }
-
     modifier onlyDeployer() {
         require(
             deployers_[msg.sender],
@@ -59,11 +58,28 @@ contract BasicRegistry is WhitelistAdminRole {
     }
 
     /**
-     * @notice  Allows a whitelist admin to register a 
-     *          deployer.
+      * @param  _admin The address of the admin
+      */
+    constructor(
+        address _admin
+    )
+        public
+    {
+        addWhitelistAdmin(_admin);
+    }
+
+    /**
+      * @notice Removes insecure deployer as admin after the registry has been
+      *         set up.
+      */
+    function init() public onlyWhitelistAdmin() {
+        renounceWhitelistAdmin();
+    }
+
+    /**
+     * @notice  Allows a whitelist admin to register a deployer.
      * @param   _deployer The address of the deployer
-     * @param   _deployerStatus If the deployer should be
-     *          active or inactive.
+     * @param   _deployerStatus If the deployer should be active or inactive.
      */
     function registerDeployer(
         address _deployer,
@@ -75,6 +91,16 @@ contract BasicRegistry is WhitelistAdminRole {
         deployers_[_deployer] = _deployerStatus;
     }
 
+    /**
+      * @notice This allows a registered deployer to register a deployed pool.
+      * @param  _admin The address of the admin
+      * @param  _pool The address of the pool
+      * @param  _withdraw The address of the withdraw library. Note: This can be
+      *         a 0 address if the pool was deployed without a withdraw library
+      * @param  _poolName The name of the pool
+      * @param  _poolDescription The description of the pool
+      * @return bool If the pool was successfully registered
+      */
     function registerPool(
         address _admin,
         address _pool,
@@ -121,6 +147,15 @@ contract BasicRegistry is WhitelistAdminRole {
     }
 
 
+    /**
+      * @notice Allows a registered deployer to register a deployed utility
+      * @param  _admin The address of the admin (user who deployed)
+      * @param  _contract The address of the utility (penalty/cyclic/rolling)
+      * @param  _name The name for the utility
+      * @param  _type The type of utility being registered (please see the 
+      *         ContractType enum for utility types)
+      * @return bool If the utility was successfully registered.
+      */
     function registerUtility(
         address _admin,
         address _contract,
