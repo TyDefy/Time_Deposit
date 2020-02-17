@@ -215,7 +215,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
               </Paper>
             </Grid>
             <Grid item xs={12}>
-              { period > 0 &&
+              {(period > 0) &&
               <Paper elevation={4} className={classes.cardMetric}>
                 <Typography className={classes.label}>
                   Days until access
@@ -223,8 +223,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
                 <Typography className={classes.daysUntil}>
                   {daysUntilAccess}
                 </Typography>
-              </Paper>
-              } 
+              </Paper>} 
             </Grid>
           </Grid>
         </CardContent>
