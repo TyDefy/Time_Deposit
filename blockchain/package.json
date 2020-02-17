@@ -11,7 +11,7 @@
     "deploy:rinkeby": "etherlime deploy --network=rinkeby --runs=500",
     "deploy:rinkeby:debug": "node --inspect-brk ./node_modules/etherlime/cli.js --timeout 30000 deploy --network=rinkeby --runs=50",
     "test": "etherlime test --output=none --timeout 100000 --gas-report=true --runs=999",
-    "test-one": "etherlime test test/pool/cycle.test.js --output=none --timeout 100000 --gas-report=true --runs=999",
+    "test-one": "etherlime test test/basic-factory.test.js --output=none --timeout 100000 --gas-report=true --runs=999",
     "test-cov": "etherlime coverage --timeout 100000 --runs=999",
     "flat": "etherlime flatten ./basic-implementation/BasicPool.sol",
     "remixd": "remixd -s . --remix-ide https://remix.ethereum.org",

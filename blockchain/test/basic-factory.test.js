@@ -163,7 +163,6 @@ describe("Basic pool factory", async () => {
         });
 
         it("Can deploy a basic pool", async () => {
-            //TODO Failing
             let deployedUtilityTx = await(await factoryInstance.from(admin).deployUtility(
                 test_settings.penalty.percentage,
                 test_settings.cyclicWithdraw.cycleLength,
@@ -173,18 +172,15 @@ describe("Basic pool factory", async () => {
                 test_settings.registrySettings.withdraw.name
             )).wait();
 
-            // console.log(deployedUtilityTx.events[2].args.withdraw)
             let deployedPoolTx = await(await factoryInstance.from(admin).deployBasicPool(
                 deployedUtilityTx.events[2].args.withdraw,
                 test_settings.registrySettings.pool.name,
                 test_settings.registrySettings.pool.description,
             )).wait();
-            console.log("0")
 
-            let utilityDetails = await registryInstance.from().poolDetails(
-                deployedPoolTx.events[3].args.pool
+            let utilityDetails = await registryInstance.from(admin).poolDetails(
+                deployedPoolTx.events[4].args.pool
             );
-            console.log("0")
 
             assert.equal(
                 utilityDetails[0],
@@ -203,8 +199,7 @@ describe("Basic pool factory", async () => {
             );
         });
 
-        it("Can deploy a basic pool without withdraw", async () => {
-            //TODO Failing
+        it("🧪 Can deploy a basic pool without withdraw", async () => {
             let deployedPoolTx = await(await factoryInstance.from(admin).deployBasicPool(
                 "0x0000000000000000000000000000000000000000",
                 test_settings.registrySettings.pool.name,
@@ -212,7 +207,7 @@ describe("Basic pool factory", async () => {
             )).wait();
 
             let utilityDetails = await registryInstance.from(admin).poolDetails(
-                deployedPoolTx.events[3].args.pool
+                deployedPoolTx.events[4].args.pool
             );
 
             assert.equal(
