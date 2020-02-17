@@ -1,7 +1,7 @@
 {
-  "name": "nobuntu-webapp",
+  "name": "timedeposit-webapp",
   "version": "1.0.0",
-  "description": "nobuntu-webapp",
+  "description": "timedeposit-webapp",
   "keywords": [
     "React",
     "Redux",

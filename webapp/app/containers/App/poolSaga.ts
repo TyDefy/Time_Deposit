@@ -8,7 +8,6 @@ import {
   withdraw,
   withdrawInterest,
   setUserPoolBalance,
-  setUserInfo,
   setPoolPenaltyPotBalance,
   setPoolFeeRate,
   setPoolFeeAmount,
