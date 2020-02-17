@@ -1,16 +1,40 @@
 pragma solidity 0.5.10;
 
 interface ICToken {
+
+    /**
+      * @param  mintAmount The amount to be minted
+      * @return uint The error code (0 if successful)
+      */
     function mint(uint mintAmount) external returns (uint);
 
+    /**
+      * @return uint The current exchange rate
+      */
     function exchangeRateCurrent() external returns (uint);
 
+    /**
+      * @param  redeemTokens The number of tokens to be burnt (in this tokens
+      *         balance)
+      * @return int The error code (0 if successful)
+      */
     function redeem(uint redeemTokens) external returns (uint);
     
+    /**
+      * @param  redeemAmount The number of tokens to be burnt (in the underlying
+      *         collateral currency
+      * @return int The error code (0 if successful)
+      */
     function redeemUnderlying(uint redeemAmount) external returns (uint);
 
+    /**
+      * @return uint The supply rate per block
+      */
     function supplyRatePerBlock() external view returns (uint);
 
+    /**
+      * @return uint The stored exhange rate
+      */
     function exchangeRateStored() external view returns(uint);
 
     // Standard ERC20 functionality 
