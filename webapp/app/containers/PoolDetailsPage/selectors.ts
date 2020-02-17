@@ -26,7 +26,7 @@ export const selectPool = createSelector(
       (transaction.type === 'Deposit') ? total += transaction.amount : total -= transaction.amount, 0);
 
     if(pool.contribution > 0 && pool.period !== 0){
-      pool.nextWithdrawDate = dayjs(new Date()).add(parseInt(pool.daysUntilAccess), 'day').toDate(); //TODO: I think this is where everything is going wrong
+      pool.nextWithdrawDate = dayjs(new Date()).add(pool.daysUntilAccess, 'day').toDate();
     
     }else if(pool.period !== 0){
       pool.nextWithdrawDate = dayjs(new Date()).add(pool.period, 'month').toDate()

@@ -23,8 +23,9 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
       t.type === 'Deposit' ? poolBalance += t.amount : poolBalance -= t.amount, 0) || 0;
 
 
-    const totalAmountwithPenalties = contribution > 0 && p.userBalanceCDai ? (p.userBalanceCDai * exchangeRate) : 0;
+    const totalAmountWithPenalties = contribution > 0 && p.userBalanceCDai ? (p.userBalanceCDai * exchangeRate) : 0;
 
+    //@ts-ignore
     const lastWithdrawDate = p.transactions
       .filter(t => t.userAddress.toLowerCase() === ethAddress?.toLowerCase() && t.type === 'Withdraw')
       .map(t => t.time)
@@ -35,12 +36,7 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
       .map(t => t.time)
       .reduce((a, b) => a > b ? a : b, new Date('01/01/1970'));
 
-    console.log(`last Withdraw: ${lastWithdrawDate}`);
-    console.log(`last Deposit: ${lastDepositDate}`);
-
-    //  = (lastDepositDate && !lastWithdrawDate) ? 
-    const daysUntilAccess = dayjs(lastDepositDate).add(p.period, 'month').diff(Date.now(), 'day').toString();
-    // const daysUntilAccess = lastWithdrawDate && p.period !== 0 ? Math.abs(dayjs(withdrawDate).diff(Date.now(), 'day')).toString() : '-';
+    const daysUntilAccess = dayjs(lastDepositDate).add(p.period, 'month').diff(Date.now(), 'day');
 
     return {
       ...p,
@@ -49,9 +45,9 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
       cdaiBalance: cdaiBalancePool,
       participants: balance > 0 ? new Set(p.transactions?.map(t => t.userAddress)).size : 0,
       contribution: contribution,
-      interestAccrued: contribution > 0 && totalAmountwithPenalties ? Math.abs(totalAmountwithPenalties - contribution) : 0,
-      availableInterest: p.period === 0 && totalAmountwithPenalties ? Math.abs(totalAmountwithPenalties - contribution) : 0,
-      daysUntilAccess: contribution > 0 ? daysUntilAccess : '-',
+      interestAccrued: contribution > 0 && totalAmountWithPenalties ? Math.abs(totalAmountWithPenalties - contribution) : 0,
+      availableInterest: p.period === 0 && totalAmountWithPenalties ? Math.abs(totalAmountWithPenalties - contribution) : 0,
+      daysUntilAccess: daysUntilAccess,
     }
   })
 );
