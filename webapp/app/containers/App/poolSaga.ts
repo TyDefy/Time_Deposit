@@ -289,25 +289,6 @@ function* getPoolTotalPenalty(poolContract: Pool) {
   }
 }
 
-function* getUserInfo(poolContract: Pool, ethAddress: string) {
-  try {
-    const userInfo = yield call([poolContract, poolContract.getUserInfo], ethAddress);
-    const lastDepositRaw = formatEther(userInfo[2]);
-    const lastWithdrawRaw = formatEther(userInfo[3]);
-
-    if (lastDepositRaw !== "0.0" && lastWithdrawRaw !== "0.0") {
-      yield put(setUserInfo({
-        lastDepositDate: new Date(parseInt(lastDepositRaw.substr(10, 20)) * 1000),
-        lastWithdrawDate: new Date(parseInt(lastDepositRaw.substr(10, 20)) * 1000),
-        poolAddress: poolContract.address
-      }));
-    }
-  } catch (e) {
-    console.log('There was an error getting the user info');
-    console.log(e);
-  }
-}
-
 function* getPoolFeeBalance(poolContract: Pool) {
   const poolFeeAmount = yield call([poolContract, poolContract.accumulativeFee]);
   yield put(setPoolFeeAmount({ poolAddress: poolContract.address, feeAmount: Number(formatUnits(poolFeeAmount, 9)) }))
@@ -327,7 +308,6 @@ function* poolPoller(poolContract: Pool) {
 
     if (ethAddress) {
       yield call(getPoolUserBalance, poolContract, ethAddress);
-      // yield call(getUserInfo, poolContract, ethAddress)
     }
 
     if (ethAddress && isAdmin) {
@@ -408,7 +388,6 @@ function* poolTransactionListener(poolContract: Pool) {
       }
       if (ethAddress && newTx.address.toLowerCase() === ethAddress?.toLowerCase()) {
         yield call(getPoolUserBalance, poolContract, ethAddress);
-        yield call(getUserInfo, poolContract, ethAddress)
       }
       const isAdmin = yield select(selectIsAdmin);
       if (isAdmin) {
