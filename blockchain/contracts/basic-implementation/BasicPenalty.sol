@@ -2,6 +2,11 @@ pragma solidity 0.5.10;
 
 import { IPenalty } from "../interfaces/IPenalty.sol";
 
+/**
+  * @author Veronica Coutts @veronicaLC
+  * @title  Basic penalty library
+  * @notice This contract us a utility that is used by the baisc pool
+  */
 contract BasicPenalty is IPenalty {
     uint8 internal penalty_;
     constructor(uint8 _penaltyPercentage) public {
@@ -23,6 +28,9 @@ contract BasicPenalty is IPenalty {
         return (_amount - penalty, penalty);
     }
 
+    /**
+      * @return uint8 The penalty percentage as a whole number
+      */
     function penalty() public view returns(uint8) {
         return penalty_;
     }

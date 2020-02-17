@@ -378,18 +378,18 @@ describe("Pool tests - withdraw", async () => {
             let poolCdaiBalanceAfter = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
             let penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
 
-            console.log();
+            console.log("");
 
             assert.equal(
                 balanceOfUserInPoolAfterWithdraw[0].toString(),
                 0,
                 "User has dai in pool after withdraw"
-            );//TODO
-            // assert.equal(
-            //     balanceOfUserInPoolAfterWithdraw[1].toString(),
-            //     0,
-            //     "User has cDai in pool after withdraw"
-            // );
+            );
+            assert.equal(
+                balanceOfUserInPoolAfterWithdraw[1].toString(),
+                1,
+                "User has cDai in pool after withdraw"
+            );
             assert.equal(
                 userDaiBalanceAfterWithdraw.toString(),
                 test_settings.pDaiSettings.withdrawWithPenalty.toString(),
@@ -407,7 +407,7 @@ describe("Pool tests - withdraw", async () => {
             );
             assert.equal(
                 poolCdaiBalanceAfter.toString(),
-                test_settings.basicPool.penaltyAmountInCdai.toString(),
+                test_settings.basicPool.otherPenaltyAmountInCdai.toString(),
                 "Pool does not own penalty amount of cdai"
             );
             assert.equal(
@@ -588,12 +588,7 @@ describe("Pool tests - withdraw", async () => {
                 userWithdrawInfo[2].toString(),
                 0,
                 "User is able to withdraw with 0 balance"
-            );//TODO Somewhere in the mock, a +1 needs to be added
-            // assert.equal(
-            //     checkSum.toString(),
-            //     poolCdaiBalanceAfter.toString(),
-            //     "Pool cDai balance is not equal to penalty and fee"
-            // );
+            );
             assert.equal(
                 checkSumForFee.toString(),
                 feeCollectedAfter.toString(),
@@ -601,7 +596,7 @@ describe("Pool tests - withdraw", async () => {
             );
             assert.equal(
                 userBalances[1].toString(),
-                0,
+                1,
                 "User has remaining cDai balance after complete withdraw"
             );
             assert.equal(
@@ -610,18 +605,12 @@ describe("Pool tests - withdraw", async () => {
                 "User has Dai balance after complete withdraw"
             );
         });
-
-        it("Negative testing withdraw", async () => {
-            //TODO if expired 
-            //TODO if disabled they cannot withdraw
-            //TODO no balance to withdraw
-        });
     });
 
     describe("Interest withdraw functionality", async () => {
         it("Interest withdraw (penalty)", async () => {
             let penaltyPot = await basicPoolInstance.penaltyPotBalance();
-            let amount = await(await basicPoolInstance.getInterestAmount(user2.signer.address)).wait();
+            let amount = await basicPoolInstance.getUserInterest(user2.signer.address);
             let user2DaiBalanceBefore = await pDaiInstance.balanceOf(user2.signer.address);
             let poolCdaiBalanceBefore = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
             let userDetailsBefore = await basicPoolInstance.getUserInfo(user2.signer.address);
@@ -629,7 +618,7 @@ describe("Pool tests - withdraw", async () => {
             console.log("");
 
             assert.equal(
-                amount.events[0].args.amount.toString(),
+                amount.toString(),
                 0,
                 "Interest amount is not 0 before penalty populated"
             );
@@ -724,7 +713,7 @@ describe("Pool tests - withdraw", async () => {
 
         it("Interest withdraw (interest)", async () => {
             let penaltyPot = await basicPoolInstance.penaltyPotBalance();
-            let amount = await(await basicPoolInstance.getInterestAmount(user2.signer.address)).wait();
+            let amount = await basicPoolInstance.getUserInterest(user2.signer.address);
             let user2DaiBalanceBefore = await pDaiInstance.balanceOf(user2.signer.address);
             let poolCdaiBalanceBefore = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
             let userDetailsBefore = await basicPoolInstance.getUserInfo(user2.signer.address);
@@ -732,7 +721,7 @@ describe("Pool tests - withdraw", async () => {
             console.log("");
 
             assert.equal(
-                amount.events[0].args.amount.toString(),
+                amount.toString(),
                 0,
                 "Interest amount is not 0 before penalty populated"
             );
@@ -811,7 +800,7 @@ describe("Pool tests - withdraw", async () => {
             );
             assert.equal(
                 user2DaiBalanceAfterInterestWithdraw.toString(),
-                test_settings.pDaiSettings.withdrawInterestBalance.toString(),
+                test_settings.pDaiSettings.withdrawInterestBalance,
                 "User dai balance has not been incremented to include interest"
             );
         });
@@ -819,7 +808,7 @@ describe("Pool tests - withdraw", async () => {
         it("🧪 Interest withdraw (penalty & interest + fee)", async () => {
             await basicPoolInstance.from(admin).init(test_settings.basicPool.fee);
             let penaltyPot = await basicPoolInstance.penaltyPotBalance();
-            let amount = await(await basicPoolInstance.getInterestAmount(user2.signer.address)).wait();
+            let amount = await basicPoolInstance.getUserInterest(user2.signer.address);
             let user2DaiBalanceBefore = await pDaiInstance.balanceOf(user2.signer.address);
             let poolCdaiBalanceBefore = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
             let userDetailsBefore = await basicPoolInstance.getUserInfo(user2.signer.address);
@@ -827,7 +816,7 @@ describe("Pool tests - withdraw", async () => {
             console.log("");
 
             assert.equal(
-                amount.events[0].args.amount.toString(),
+                amount.toString(),
                 0,
                 "Interest amount is not 0 before penalty populated"
             );
@@ -907,7 +896,7 @@ describe("Pool tests - withdraw", async () => {
             );
             assert.equal(
                 user2DaiBalanceAfterInterestWithdraw.toString(),
-                test_settings.pDaiSettings.withdrawInterestPusPenaltyMinusFee.toString(),
+                test_settings.pDaiSettings.otherWithdrawInterestBalance.toString(),
                 "User dai balance has not been incremented to include interest"
             );
             assert.equal(
@@ -927,7 +916,7 @@ describe("Pool tests - withdraw", async () => {
             );
             assert.equal(
                 userDetailsAfterInterestWithdraw[1].toString(),
-                test_settings.pcTokenSettings.mintAmountMinusPenaltyInterestFee.toString(),
+                test_settings.pcTokenSettings.otherMintAmountMinusPenaltyInterestFee.toString(),
                 "User dai balance in pool incorrectly affected"
             );
         });
@@ -936,10 +925,10 @@ describe("Pool tests - withdraw", async () => {
     describe("interest withdraw supporting functionality", async () => {
         it("🧪 Get interest amount for user (penalty)", async () => {
             let penaltyPot = await basicPoolInstance.penaltyPotBalance();
-            let amount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
+            let amount = await basicPoolInstance.getUserInterest(user1.signer.address);
 
             assert.equal(
-                amount.events[0].args.amount.toString(),
+                amount.toString(),
                 0,
                 "Interest amount is not 0 before penalty populated"
             );
@@ -971,17 +960,17 @@ describe("Pool tests - withdraw", async () => {
                 test_settings.basicPool.deposit
             );
             // Ensuring the second user has a share of penalty pot
-            amount = await(await basicPoolInstance.getInterestAmount(user2.signer.address)).wait();
+            amount = await basicPoolInstance.getUserInterest(user2.signer.address);
 
             console.log("");
 
             assert.equal( 
                 penaltyPot.toString(),
-                test_settings.basicPool.penaltyShare,
+                test_settings.basicPool.penaltyAmountInCdai,
                 "Penalty pot has incorrect balance"
             );
             assert.equal(
-                amount.events[0].args.amount.toString(),
+                amount.toString(),
                 test_settings.basicPool.penaltyShare,
                 "User does not have access to ful penalty pot portion"
             );
@@ -989,15 +978,15 @@ describe("Pool tests - withdraw", async () => {
 
         it("Get interest amount for user (interest)", async () => {
             let penaltyPot = await basicPoolInstance.penaltyPotBalance();
-            let amount = await(await basicPoolInstance.getTotalBalance(user1.signer.address)).wait();
-            console.log(amount.toString())
+            let amount = await basicPoolInstance.getUserBalance(user1.signer.address);
+
             assert.equal(
                 penaltyPot.toString(),
                 0,
                 "Penalty pot incorrectly populated"
             );
             assert.equal(
-                amount.events[0].args.amount.toString(),
+                amount.toString(),
                 0,
                 "User incorrectly has interest available"
             );
@@ -1012,11 +1001,11 @@ describe("Pool tests - withdraw", async () => {
             );
             // Creating earned interest
             await cDaiInstance.from(admin).increaseExchange(test_settings.pcTokenSettings.exchangeIncrease);
-            amount = await(await basicPoolInstance.getTotalBalance(user1.signer.address)).wait();
-            console.log(amount.toString())
+            amount = await basicPoolInstance.getUserBalance(user1.signer.address);
+            
             assert.equal(
-                amount.events[0].args.amount.toString(),
-                test_settings.basicPool.interestEarned,
+                amount.toString(),
+                test_settings.basicPool.fullBalanceWithInterest,
                 "User interest withdraw amount incorrect"
             );
         });
@@ -1024,12 +1013,12 @@ describe("Pool tests - withdraw", async () => {
         it("🧪 Get interest amount for user (penalty + fee)", async () => {
             await basicPoolInstance.from(admin).init(test_settings.basicPool.fee);
             let penaltyPot = await basicPoolInstance.penaltyPotBalance();
-            let amount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
+            let amount = await basicPoolInstance.getUserInterest(user1.signer.address);
 
             console.log("");
 
             assert.equal(
-                amount.events[0].args.amount.toString(),
+                amount.toString(),
                 0,
                 "Interest amount is not 0 before penalty populated"
             );
@@ -1061,7 +1050,7 @@ describe("Pool tests - withdraw", async () => {
                 test_settings.basicPool.deposit
             );
             // Ensuring the second user has a share of penalty pot
-            amount = await(await basicPoolInstance.getInterestAmount(user2.signer.address)).wait();
+            amount = await basicPoolInstance.getUserInterest(user2.signer.address);
 
             console.log("");
 
@@ -1071,8 +1060,8 @@ describe("Pool tests - withdraw", async () => {
                 "Penalty pot has incorrect balance"
             );
             assert.equal(
-                amount.events[0].args.amount.toString(),
-                test_settings.basicPool.penaltyShareMinusFee,
+                amount.toString(),
+                test_settings.basicPool.otherPenaltyShareMinusFee,
                 "User does not have access to ful penalty pot portion"
             );
         });
@@ -1080,10 +1069,10 @@ describe("Pool tests - withdraw", async () => {
         it("🧪 Get interest amount for user (interest & penalty + fee)", async () => {
             await basicPoolInstance.from(admin).init(test_settings.basicPool.fee);
             let penaltyPot = await basicPoolInstance.penaltyPotBalance();
-            let amount = await(await basicPoolInstance.getInterestAmount(user1.signer.address)).wait();
+            let amount = await basicPoolInstance.getUserInterest(user1.signer.address);
 
             assert.equal(
-                amount.events[0].args.amount.toString(),
+                amount.toString(),
                 0,
                 "Interest amount is not 0 before penalty populated"
             );
@@ -1118,8 +1107,8 @@ describe("Pool tests - withdraw", async () => {
             await cDaiInstance.from(admin).increaseExchange(test_settings.pcTokenSettings.exchangeIncrease);
 
             // Ensuring the second user has a share of penalty pot
-            amount = await(await basicPoolInstance.getInterestAmount(user2.signer.address)).wait();
-            let interest = new BigNumber(amount.events[0].args.amount.toString());
+            amount = await basicPoolInstance.getUserInterest(user2.signer.address);
+            let interest = new BigNumber(amount.toString());
             let diff = interest.minus(penaltyPot);
 
             console.log("");
@@ -1130,18 +1119,16 @@ describe("Pool tests - withdraw", async () => {
                 "Penalty pot has incorrect balance"
             );
             assert.equal(
-                amount.events[0].args.amount.toString(),
-                test_settings.basicPool.penaltyShareMinusFeePlusInterest,
+                amount.toString(),
+                test_settings.basicPool.otherPenaltyShareMinusFeePlusInterest,
                 "User does not have access to ful penalty pot portion"
             );
             assert.equal(
                 diff.toString(),
-                test_settings.basicPool.interestEarned.toString(),
+                test_settings.basicPool.otherInterestEarned.toString(),
                 "Interest earned above penalty is not correct"
             );
         });
-
-        //TODO test the final withdraw as well as closing withdraw
     });
 
     describe("Blocking withdraw functionality", async () => {

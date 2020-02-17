@@ -49,6 +49,17 @@ contract BasicRegistry is WhitelistAdminRole {
         uint8 typeOfUtil
     );
 
+    modifier onlyDeployer() {
+        require(
+            deployers_[msg.sender],
+            "Access denied, sender not a regsitered deployer"
+        );
+        _;
+    }
+
+    /**
+      * @param  _admin The address of the admin
+      */
     constructor(
         address _admin
     )
@@ -57,12 +68,12 @@ contract BasicRegistry is WhitelistAdminRole {
         addWhitelistAdmin(_admin);
     }
 
-    modifier onlyDeployer() {
-        require(
-            deployers_[msg.sender],
-            "Access denied, sender not a regsitered deployer"
-        );
-        _;
+    /**
+      * @notice Removes insecure deployer as admin after the registry has been
+      *         set up.
+      */
+    function init() public onlyWhitelistAdmin() {
+        renounceWhitelistAdmin();
     }
 
     /**

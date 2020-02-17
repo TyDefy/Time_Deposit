@@ -1,5 +1,10 @@
 pragma solidity 0.5.10;
 
+/**
+  * @author Veronica Coutts @veronicaLC
+  * @title  Cyclic withdraw library
+  * @notice The withdraw interface
+  */
 contract IWithdraw {
 
     /**
@@ -51,11 +56,23 @@ contract IWithdraw {
 		view
         returns(uint256, uint256);
 
-	  function getPenalty() public view returns(address);
-
+	/**
+      * @return bool If users can withdraw in voilation of the cycle
+      */
     function canWithdrawInViolation() public view returns(bool);
 
+	/**
+      * @return bool If users can withdraw interest in violation of the cycle
+      */
     function canWithdrawInterestInViolation() public view returns(bool);
 
+	/**
+      * @return uint8 The cycle lenght of the cycle
+      */
     function getCycle() public view returns(uint8);
+
+    /**
+      * @return address The address of the penalty contract
+      */
+	  function getPenalty() public view returns(address);
 }
