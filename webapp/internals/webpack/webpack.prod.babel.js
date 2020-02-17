@@ -100,9 +100,9 @@ module.exports = require('./webpack.base.babel')({
       minRatio: 0.8,
     }),
     new WebpackPwaManifest({
-      name: 'nobuntu Webapp',
-      short_name: 'nobuntu Webapp',
-      description: 'nobuntu Webapp',
+      name: 'Time Deposit Webapp',
+      short_name: 'Time Deposit Webapp',
+      description: 'Time Deposit Webapp',
       background_color: '#fafafa',
       theme_color: '#b1624d',
       inject: true,
