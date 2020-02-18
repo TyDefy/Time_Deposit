@@ -29,7 +29,7 @@ import { forwardTo } from 'utils/history';
 const styles = ( {spacing, transitions}: Theme) =>
   createStyles({
     card: {
-      height: '470px',
+      // height: '470px',
     },
     cardHeader: {
       backgroundColor: '#E5E5E5',

@@ -432,7 +432,6 @@ function* poolWatcherSaga(action) {
     const withdrawTxActions = yield Promise.all(withdrawLogs.map(
       async log => {
         const parsedWithdraw = poolContract.interface.parseLog(log).values;
-        debugger;
         return [addPoolTx({
           poolAddress: poolContract.address,
           userAddress: parsedWithdraw.user,
@@ -460,7 +459,6 @@ function* poolWatcherSaga(action) {
       yield put(action);
     }
   } catch (error) {
-    debugger;
     console.log('There was an error getting the pools transaction logs');
     console.log(error);
   }

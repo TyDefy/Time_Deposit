@@ -36,7 +36,7 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
       .map(t => t.time)
       .reduce((a, b) => a > b ? a : b, new Date('01/01/1970'));
 
-    const daysUntilAccess = dayjs(lastDepositDate).add(p.period, 'month').diff(Date.now(), 'day');
+    const daysUntilAccess = (contribution > 0) ? dayjs(lastDepositDate).add(p.period, 'month').diff(Date.now(), 'day') : 0;
 
     return {
       ...p,
