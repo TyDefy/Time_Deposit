@@ -432,14 +432,15 @@ function* poolWatcherSaga(action) {
     const withdrawTxActions = yield Promise.all(withdrawLogs.map(
       async log => {
         const parsedWithdraw = poolContract.interface.parseLog(log).values;
+        debugger;
         return [addPoolTx({
           poolAddress: poolContract.address,
           userAddress: parsedWithdraw.user,
           type: 'Withdraw',
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
-          amount: Number(formatEther(parsedWithdraw.amountInDai)),
-          cdaiAmount: Number(formatUnits(parsedWithdraw.amountIncDai, 9))
+          amount: Number(formatEther(parsedWithdraw.unitAmount)),
+          cdaiAmount: Number(formatUnits(parsedWithdraw.iUnitAmount, 9))
         }),
         addPoolTx({
           poolAddress: poolContract.address,
