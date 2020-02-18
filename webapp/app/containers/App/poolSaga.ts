@@ -418,8 +418,8 @@ function* poolWatcherSaga(action) {
           type: 'Deposit',
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
-          amount: Number(formatEther(parsedDeposit.amountInCollateral)),
-          cdaiAmount: Number(formatUnits(parsedDeposit.amountInInterestEarning, 9))
+          amount: Number(formatEther(parsedDeposit.unitAmount)),
+          cdaiAmount: Number(formatUnits(parsedDeposit.iUnitAmount, 9))
         })
       }));
 
