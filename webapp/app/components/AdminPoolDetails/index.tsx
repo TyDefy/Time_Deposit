@@ -102,6 +102,7 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
   active,
   feeAmountInDai = 0,
   withdrawPoolFee,
+  penaltyPotBalanceDai = 0,
 }: OwnProps) => (
     <Container maxWidth='lg'>
       <Grid container direction='row' className={classes.poolDetailsHeaderRow}>
@@ -149,7 +150,7 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
         </Grid>
         <Grid item>
           <Typography className={classes.label}>Penalty Balance</Typography>
-          <Typography className={classes.value}></Typography>
+          <Typography className={classes.value}>{`${(penaltyPotBalanceDai).toFixed(2)} DAI`}</Typography>
         </Grid>
         <Grid item>
           <Typography className={classes.label}>Fee</Typography>

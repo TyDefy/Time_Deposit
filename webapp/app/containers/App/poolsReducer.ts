@@ -54,7 +54,7 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         ...state,
         [action.payload.poolAddress]: {
           ...state[action.payload.poolAddress],
-          penaltyPotBalance: action.payload.penaltyPotBalance
+          penaltyPotBalanceCDai: action.payload.penaltyPotBalance
         }
       }
     }
