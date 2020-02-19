@@ -74,11 +74,11 @@ export interface Pool {
   contribution?: number;
   interestAccrued?: number;
   availableInterest?: number;
-  penaltyPotBalance?: number;
+  penaltyPotBalanceCDai?: number;
+  penaltyPotBalanceDai?: number;
   daysUntilAccess: number;
   transactions: Array<Transaction>;
   userBalanceCDai?: number;
-  cdaiBalance: number;
   nextWithdrawDate?: Date,
 }
 

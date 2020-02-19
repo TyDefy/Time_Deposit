@@ -14,7 +14,7 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
     const cdaiBalancePool = p.transactions?.reduce((poolCdaiBalance, t) =>
       t.type === 'Deposit' ? poolCdaiBalance += t.cdaiAmount : poolCdaiBalance -= t.cdaiAmount, 0) || 0;
 
-    const poolPenaltyBalance = p.penaltyPotBalance ? (p.penaltyPotBalance * exchangeRate) : 0;
+    const poolPenaltyBalance = p.penaltyPotBalanceCDai ? (p.penaltyPotBalanceCDai * exchangeRate) : 0;
     const contribution = ethAddress ?
       p.transactions?.filter(t => t.userAddress.toLowerCase() === ethAddress.toLowerCase())
         .reduce((contribution, t) => t.type === 'Deposit' ? contribution += t.amount : contribution -= t.amount, 0) : 0;
@@ -43,6 +43,7 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
       interestRate: interestRate,
       balance: (cdaiBalancePool * exchangeRate) + poolPenaltyBalance,
       cdaiBalance: cdaiBalancePool,
+      penaltyPotBalanceDai: poolPenaltyBalance,
       participants: balance > 0 ? new Set(p.transactions?.map(t => t.userAddress)).size : 0,
       contribution: contribution,
       interestAccrued: contribution > 0 && totalAmountWithPenalties ? Math.abs(totalAmountWithPenalties - contribution) : 0,

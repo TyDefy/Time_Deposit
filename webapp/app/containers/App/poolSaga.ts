@@ -281,7 +281,7 @@ function* getPoolTotalPenalty(poolContract: Pool) {
     const penaltyPotValue = yield call([poolContract, poolContract.penaltyPotBalance]);
     yield put(setPoolPenaltyPotBalance({
       poolAddress: poolContract.address,
-      penaltyPotBalance: Number(formatEther(penaltyPotValue)),
+      penaltyPotBalance: Number(formatUnits(penaltyPotValue, 9)),
     }));
   } catch (e) {
     console.log('There was an error getting the penaltyPoolBalance amount');
