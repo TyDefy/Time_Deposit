@@ -1,5 +1,5 @@
 import { BlockchainContext } from "blockchainContext";
-import { getContext, call, put, spawn, take, takeEvery } from "redux-saga/effects";
+import { getContext, call, put, spawn, take, takeEvery, delay } from "redux-saga/effects";
 import { Log } from "ethers/providers";
 import { poolDeployed, createPool, utilityDeployed } from "./actions";
 import { eventChannel } from "redux-saga";
@@ -124,6 +124,7 @@ function* deployedPoolWatcher() {
 
   while (true) {
     const newPool = yield take(poolDeployedChannel);
+    yield delay(15000);
     yield put(poolDeployed({
       address: newPool.pool,
       withdraw: newPool.withdraw,

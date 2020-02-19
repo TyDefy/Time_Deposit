@@ -406,7 +406,6 @@ function* poolTransactionListener(poolContract: Pool) {
 
 function* poolWatcherSaga(action) {
   const { provider, signer }: BlockchainContext = yield getContext('blockchain');
-
   const poolContract: Pool = new Contract(action.payload.address, PoolContractAbi, signer || provider)
 
   try {
