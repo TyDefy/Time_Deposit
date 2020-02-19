@@ -162,7 +162,7 @@ describe("Basic pool factory", async () => {
             );
         });
 
-        it("Can deploy a basic pool", async () => {
+        it("Can deploy a basic pool (0 fee)", async () => {
             let deployedUtilityTx = await(await factoryInstance.from(admin).deployUtility(
                 test_settings.penalty.percentage,
                 test_settings.cyclicWithdraw.cycleLength,
@@ -176,10 +176,11 @@ describe("Basic pool factory", async () => {
                 deployedUtilityTx.events[2].args.withdraw,
                 test_settings.registrySettings.pool.name,
                 test_settings.registrySettings.pool.description,
+                test_settings.registrySettings.pool.noFee,
             )).wait();
 
             let utilityDetails = await registryInstance.from(admin).poolDetails(
-                deployedPoolTx.events[4].args.pool
+                deployedPoolTx.events[5].args.pool
             );
 
             assert.equal(
@@ -199,15 +200,74 @@ describe("Basic pool factory", async () => {
             );
         });
 
+        it("Can deploy a basic pool (with fee)", async () => {
+            let deployedUtilityTx = await(await factoryInstance.from(admin).deployUtility(
+                test_settings.penalty.percentage,
+                test_settings.cyclicWithdraw.cycleLength,
+                test_settings.cyclicWithdraw.withdrawViolation,
+                test_settings.cyclicWithdraw.interestWithdrawViolation,
+                test_settings.registrySettings.penalty.name,
+                test_settings.registrySettings.withdraw.name
+            )).wait();
+
+            let deployedPoolTx = await(await factoryInstance.from(admin).deployBasicPool(
+                deployedUtilityTx.events[2].args.withdraw,
+                test_settings.registrySettings.pool.name,
+                test_settings.registrySettings.pool.description,
+                test_settings.registrySettings.pool.fee,
+            )).wait();
+
+            let utilityDetails = await registryInstance.from(admin).poolDetails(
+                deployedPoolTx.events[5].args.pool
+            );
+
+            assert.equal(
+                utilityDetails[0],
+                test_settings.registrySettings.pool.name,
+                "Pool name incorrect"
+            );
+            assert.equal(
+                utilityDetails[1],
+                deployedUtilityTx.events[2].args.withdraw,
+                "withdraw address incorrect"
+            );
+            assert.equal(
+                utilityDetails[3],
+                true,
+                "pool is incorreectly inactive"
+            );
+        });
+
+        it("Negative tests: Invalid fee reverts", async () => {
+            let deployedUtilityTx = await(await factoryInstance.from(admin).deployUtility(
+                test_settings.penalty.percentage,
+                test_settings.cyclicWithdraw.cycleLength,
+                test_settings.cyclicWithdraw.withdrawViolation,
+                test_settings.cyclicWithdraw.interestWithdrawViolation,
+                test_settings.registrySettings.penalty.name,
+                test_settings.registrySettings.withdraw.name
+            )).wait();
+
+            await assert.revert(
+                factoryInstance.from(admin).deployBasicPool(
+                    deployedUtilityTx.events[2].args.withdraw,
+                    test_settings.registrySettings.pool.name,
+                    test_settings.registrySettings.pool.description,
+                    test_settings.registrySettings.pool.invalidFee
+                )
+            );
+        });
+
         it("🧪 Can deploy a basic pool without withdraw", async () => {
             let deployedPoolTx = await(await factoryInstance.from(admin).deployBasicPool(
                 "0x0000000000000000000000000000000000000000",
                 test_settings.registrySettings.pool.name,
                 test_settings.registrySettings.pool.description,
+                test_settings.registrySettings.pool.fee
             )).wait();
 
             let utilityDetails = await registryInstance.from(admin).poolDetails(
-                deployedPoolTx.events[4].args.pool
+                deployedPoolTx.events[5].args.pool
             );
 
             assert.equal(
