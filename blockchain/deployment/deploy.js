@@ -115,7 +115,8 @@ const deploy = async (network, secret) => {
 		let newPool = await(await poolFactoryInstance.deployBasicPool(
 			withdrawAddress,
 			process.env.POOL_NAME,
-			process.env.POOL_DESCRIPTION
+			process.env.POOL_DESCRIPTION,
+			10,
 		)).wait();
 
 		// const poolInstance = deployer.wrapDeployedContract(
@@ -146,7 +147,7 @@ const deploy = async (network, secret) => {
 
 		const dai = "0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa";
 
-		const pDaiInstance = etherlime.ContractAt(erc20ABI, dai);
+		const pDaiInstance = deployer.wrapDeployedContract(erc20ABI, dai);
 
 		const cDai = "0x2acc448d73e8d53076731fea2ef3fc38214d0a7d";
 
@@ -169,23 +170,39 @@ const deploy = async (network, secret) => {
 			"cDai"
 		);
 
-		let removingAdminFactory = await poolFactoryInstance.init();
 
-		await poolFactoryInstance.verboseWaitForTransaction(
-			removingAdminFactory, 
-			"Removing insecure deployer as admin in factory"
-		);
 
 		await poolRegistryInstance.registerDeployer(
 			poolFactoryInstance.contract.address,
 			true
 		);
 
+		const addresses = (process.env.ADDESSES_TO_MINT).split(',');
+
+		for (const address of addresses) {
+			await (await pDaiInstance.allocateTo(
+                address,
+                ethers.utils.parseUnits("1000", 18)
+            )).wait();
+			console.log(`successfully minted to ${address}`);
+			await(await poolFactoryInstance.addWhitelistAdmin(address)).wait();
+			console.log(`successfully added ${address} to factory admin`);
+			await(await poolRegistryInstance.addWhitelistAdmin(address)).wait();
+			console.log(`successfully added ${address} to registry admin`);
+		}
+
 		let removingAdminRegistry = await poolRegistryInstance.init();
 
 		await poolRegistryInstance.verboseWaitForTransaction(
 			removingAdminRegistry, 
 			"Removing insecure deployer as admin in registry"
+		);
+
+		let removingAdminFactory = await poolFactoryInstance.init();
+
+		await poolFactoryInstance.verboseWaitForTransaction(
+			removingAdminFactory, 
+			"Removing insecure deployer as admin in factory"
 		);
 
 		const CONTRACT_ADDRESSES = `
@@ -196,15 +213,6 @@ const deploy = async (network, secret) => {
 		`;
 		console.log(CONTRACT_ADDRESSES);
 
-		const addresses = (process.env.ADDESSES_TO_MINT).split(',');
-
-		for (const address of addresses) {
-			await (await pDaiInstance.allocateTo(
-                address,
-                ethers.utils.parseUnits("100", 18)
-            )).wait();
-			console.log(`successfully minted to ${address}`);
-		}
 	} else if (network === 'mainnet') {
 	    console.log("Script & contracts are not ready for main net deployment")
 	}

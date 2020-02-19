@@ -90,7 +90,10 @@ const test_settings = {
         },
         pool: {
             name: "3 Month Savings Pool",
-            description: "A short term savings commitment mechanism"
+            description: "A short term savings commitment mechanism",
+            noFee: 0,
+            fee: 15,
+            invalidFee: 106
         }
     }
 }

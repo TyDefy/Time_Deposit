@@ -5,9 +5,8 @@ import { poolDeployed, createPool, utilityDeployed } from "./actions";
 import { eventChannel } from "redux-saga";
 import { getType } from "typesafe-actions";
 import { setTxContext, setTxHash } from "containers/TransactionModal/actions";
-import { ContractTransaction, Contract } from "ethers";
-import { BasicPool as Pool } from '../../../../blockchain/contractInterfaces/BasicPool';
-import PoolContractAbi from '../../../../blockchain/build/abis/BasicPool-abi.json';
+import { ContractTransaction } from "ethers";
+import { forwardTo } from "utils/history";
 
 export function* deployedUtilityWatcher() {
   const { poolFactoryContract, provider }: BlockchainContext = yield getContext('blockchain');
@@ -141,7 +140,7 @@ function* deployedPoolWatcher() {
 }
 
 function* createPoolSaga(action) {
-  const { poolFactoryContract, signer, provider }: BlockchainContext = yield getContext('blockchain');
+  const { poolFactoryContract }: BlockchainContext = yield getContext('blockchain');
   try {
     let utilityAddress = action.payload.utilityAddress;
     if (utilityAddress === 'new') {
@@ -165,19 +164,13 @@ function* createPoolSaga(action) {
       [poolFactoryContract, poolFactoryContract.deployBasicPool],
       utilityAddress,
       action.payload.name,
-      action.payload.description);
+      action.payload.description,
+      action.payload.feeRate);
     yield put(setTxHash(deployPoolTx.hash));
     yield call([deployPoolTx, deployPoolTx.wait]);
-    const newPoolAction = yield take(poolDeployed);
-    if (action.payload.feeRate !== 0) {
-      //@ts-ignore
-      const poolContract: Pool = new Contract(newPoolAction.payload.address, PoolContractAbi, signer || provider)
-      yield put(setTxContext('Initialising pool'));
-      const initTx: ContractTransaction = yield call([poolContract, poolContract.init], action.payload.feeRate);
-      yield put(setTxHash(initTx.hash));
-      yield call([initTx, initTx.wait]);
-    }
+    yield take(poolDeployed);
     yield put(createPool.success());
+    yield call(forwardTo, '/admin/pools');
   } catch (error) {
     yield put(createPool.failure(error.message));
   }
