@@ -115,7 +115,8 @@ const deploy = async (network, secret) => {
 		let newPool = await(await poolFactoryInstance.deployBasicPool(
 			withdrawAddress,
 			process.env.POOL_NAME,
-			process.env.POOL_DESCRIPTION
+			process.env.POOL_DESCRIPTION,
+			10,
 		)).wait();
 
 		// const poolInstance = deployer.wrapDeployedContract(
