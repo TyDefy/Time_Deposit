@@ -93,18 +93,26 @@ contract BasicFactory is WhitelistAdminRole {
     function deployBasicPool(
         address _withdraw,
         string memory _poolName,
-        string memory _poolDescription
+        string memory _poolDescription,
+        uint8 _fee
     )
         public
         onlyWhitelistAdmin()
         returns(address)
     {
+        require(
+            _fee >= 0 && _fee < 100,
+            "fee is not a whole number percentage"
+        );
+
         BasicPool newPool = new BasicPool(
             msg.sender,
             _withdraw,
             collateral_,
             interestToken_
         );
+
+        newPool.init(_fee);
 
         newPool.removeFacotryAsAdmin();
 
