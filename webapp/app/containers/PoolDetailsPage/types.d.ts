@@ -5,7 +5,7 @@ import {Utility} from '../App'
 
 /* --- STATE --- */
 interface PoolDetailsPageState {
-  readonly default: any;
+  readonly showModal: boolean;
 }
 
 interface UtilityState {
