@@ -13,13 +13,6 @@ let DEPLOYER_PRIVATE_KEY = process.env.DEPLOYER_PRIVATE_KEY;
 const etherlime = require('etherlime-lib');
 const ethers = require('ethers');
 
-Array.prototype.asyncForEach = async function (callback, thisArg) {
-	thisArg = thisArg || this
-	for (let i = 0, l = this.length; i !== l; ++i) {
-		await callback.call(thisArg, this[i], i, this)
-	}
-}
-
 const defaultConfigs = {
 	// chainId: 4,
 	etherscanApiKey: process.env.ETHERSCAN_API_KEY,
@@ -169,8 +162,6 @@ const deploy = async (network, secret) => {
 			cDai,
 			"cDai"
 		);
-
-
 
 		await poolRegistryInstance.registerDeployer(
 			poolFactoryInstance.contract.address,

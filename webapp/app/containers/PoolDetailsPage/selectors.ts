@@ -38,6 +38,7 @@ export const selectPool = createSelector(
 const selectPoolDetailsPage = createStructuredSelector<RootState, OwnProps, StateProps>({
   pool: selectPool,
   daiBalance: selectDaiBalance,
+  showModal: createSelector((state: RootState) => state.poolDetailsPage, substate => substate.showModal),
 });
 
 export default selectPoolDetailsPage;

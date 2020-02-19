@@ -19,6 +19,12 @@ import WithdrawAllModal from 'components/WithdrawAllModal';
 import { RouteComponentProps } from 'react-router-dom';
 import { RootState } from './types';
 import { deposit, withdraw, withdrawInterest } from 'containers/App/actions';
+import { setShowModal } from './actions';
+import { RESTART_ON_REMOUNT } from 'utils/constants';
+import injectSaga from 'utils/injectSaga';
+import injectReducer from 'utils/injectReducer';
+import saga from './saga';
+import reducer from './reducer';
 
 interface RouteParams {
   poolAddress: string;
@@ -32,11 +38,13 @@ interface DispatchProps {
   deposit(amount: number): void;
   withdraw(amount: number): void;
   withdrawInterest(amount: number): void;
+  setShowModal(value: boolean): void;
 }
 
 export interface StateProps {
   pool: Pool,
   daiBalance: number,
+  showModal: boolean,
 }
 
 export interface Transaction {
@@ -57,8 +65,9 @@ const PoolDetailsPage: React.FunctionComponent<Props> = ({
   deposit,
   withdrawInterest,
   withdraw,
+  setShowModal,
+  showModal,
 }: Props) => {
-  const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<ModalType>('invest');
 
   const displayModal = (modalToShow: ModalType) => {
@@ -114,6 +123,7 @@ const mapDispatchToProps = (
     deposit: (amount: number) => dispatch(deposit.request({poolAddress: ownProps.match.params.poolAddress, amount})),
     withdraw: (amount: number) => dispatch(withdraw.request({poolAddress: ownProps.match.params.poolAddress, amount})),
     withdrawInterest: (amount: number) => dispatch(withdrawInterest.request({poolAddress: ownProps.match.params.poolAddress, amount})),
+    setShowModal: (value: boolean) => dispatch(setShowModal({showModal: value})),
   };
 };
 
@@ -122,6 +132,11 @@ const withConnect = connect(
   mapDispatchToProps,
 );
 
+const withReducer = injectReducer<OwnProps>({ key: 'poolDetailsPage', reducer: reducer });
+const withSaga = injectSaga<OwnProps>({ key: 'poolDetailsPage', saga: saga, mode: RESTART_ON_REMOUNT });
+
 export default compose(
+  withReducer,
+  withSaga,
   withConnect,
 )(PoolDetailsPage);
