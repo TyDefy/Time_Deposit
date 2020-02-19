@@ -284,18 +284,26 @@ function* getPoolTotalPenalty(poolContract: Pool) {
       penaltyPotBalance: Number(formatUnits(penaltyPotValue, 9)),
     }));
   } catch (e) {
-    console.log('There was an error getting the penaltyPoolBalance amount');
+    console.log(`There was an error getting the penalty pot balance for pool ${poolContract.address}`);
   }
 }
 
 function* getPoolFeeBalance(poolContract: Pool) {
-  const poolFeeAmount = yield call([poolContract, poolContract.accumulativeFee]);
-  yield put(setPoolFeeAmount({ poolAddress: poolContract.address, feeAmount: Number(formatUnits(poolFeeAmount, 9)) }))
+  try {
+    const poolFeeAmount = yield call([poolContract, poolContract.accumulativeFee]);
+    yield put(setPoolFeeAmount({ poolAddress: poolContract.address, feeAmount: Number(formatUnits(poolFeeAmount, 9)) }))    
+  } catch (error) {
+    console.log(`There was an error getting the fee balance for pool ${poolContract.address}`);
+  }
 }
 
 function* getPoolUserBalance(poolContract: Pool, ethAddress: string) {
-  const userBalance = yield call([poolContract, poolContract.getUserBalance], ethAddress);
-  yield put(setUserPoolBalance({ poolAddress: poolContract.address, userBalance: Number(formatUnits(userBalance, 9)) }))
+  try {
+    const userBalance = yield call([poolContract, poolContract.getUserBalance], ethAddress);
+    yield put(setUserPoolBalance({ poolAddress: poolContract.address, userBalance: Number(formatUnits(userBalance, 9)) }))  
+  } catch (error) {
+    console.log(`There was an error getting the user's balance for pool ${poolContract.address}`);
+  }
 }
 
 function* poolPoller(poolContract: Pool) {
@@ -303,14 +311,14 @@ function* poolPoller(poolContract: Pool) {
     const ethAddress: string = yield select(selectEthAddress);
     const isAdmin: Boolean = yield select(selectIsAdmin);
 
-    yield call(getPoolTotalPenalty, poolContract)
 
     if (ethAddress) {
       yield call(getPoolUserBalance, poolContract, ethAddress);
     }
 
     if (ethAddress && isAdmin) {
-      yield call(getPoolFeeBalance, poolContract)
+      yield call(getPoolFeeBalance, poolContract);
+      yield call(getPoolTotalPenalty, poolContract)
     }
 
     yield delay(15000);
@@ -391,7 +399,7 @@ function* poolTransactionListener(poolContract: Pool) {
       const isAdmin = yield select(selectIsAdmin);
       if (isAdmin) {
         yield call(getPoolTotalPenalty, poolContract);
-      } 
+      }
     }
   }
 }
@@ -399,7 +407,6 @@ function* poolTransactionListener(poolContract: Pool) {
 function* poolWatcherSaga(action) {
   const { provider, signer }: BlockchainContext = yield getContext('blockchain');
 
-  //@ts-ignore
   const poolContract: Pool = new Contract(action.payload.address, PoolContractAbi, signer || provider)
 
   try {
@@ -459,7 +466,7 @@ function* poolWatcherSaga(action) {
       yield put(action);
     }
   } catch (error) {
-    console.log('There was an error getting the pools transaction logs');
+    console.log(`There was an error getting the pool's transaction logs`);
     console.log(error);
   }
 
@@ -490,8 +497,6 @@ function* poolWatcherSaga(action) {
   yield fork(poolWithdrawInterestListener, poolContract);
   yield fork(poolTerminatedListener, poolContract);
   yield fork(terminatePoolListener, poolContract);
-  yield fork(getPoolTotalPenalty, poolContract);
-  yield fork(getPoolFeeBalance, poolContract)
   yield fork(withdrawFeeListener, poolContract);
   yield fork(poolPoller, poolContract);
 }

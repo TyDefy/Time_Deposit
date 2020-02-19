@@ -167,7 +167,6 @@ function* createPoolSaga(action) {
       action.payload.description,
       action.payload.feeRate);
     yield put(setTxHash(deployPoolTx.hash));
-    yield call([deployPoolTx, deployPoolTx.wait]);
     yield take(poolDeployed);
     yield put(createPool.success());
     yield call(forwardTo, '/admin/pools');

@@ -36,7 +36,9 @@ const TransactionPopup: React.FC<OwnProps> = ({
         <CircularProgress />
         {
           txHash &&
-          <Link href={`https://${getNetwork(parseInt(`${process.env.CHAIN_ID}`)).name}.etherscan.io/tx/${txHash}`}>Etherscan</Link>
+          <Link href={`https://${getNetwork(parseInt(`${process.env.CHAIN_ID}`)).name}.etherscan.io/tx/${txHash}`} target="_blank" rel="noreferrer" >
+            Etherscan
+          </Link>
         }
       </Container>
     </Paper>
