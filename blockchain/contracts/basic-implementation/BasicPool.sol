@@ -269,7 +269,6 @@ contract BasicPool is WhitelistAdminRole {
         users_[msg.sender].collateralInvested -= withdrawAmount;
         users_[msg.sender].balance -= iUnitBurnt;
         users_[msg.sender].lastWtihdraw = now;
-        users_[msg.sender].totalPenaltyClaimed += withdrawAmount;
 
         require(
             unitInstance_.transfer(
