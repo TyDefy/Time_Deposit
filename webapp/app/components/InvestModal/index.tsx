@@ -71,7 +71,7 @@ const InvestModal: React.FC<OwnProps> = ({
           <Typography className={classes.value}>{dayjs(nextWithdrawlDate).format('YYYY-MM-DD')}</Typography>
         </div>
       }
-      <Typography className={classes.label}>Amount to invest</Typography>
+      <Typography className={classes.label}>Amount to Invest in Dai</Typography>
       <TextField 
         type='number' 
         value={value} 

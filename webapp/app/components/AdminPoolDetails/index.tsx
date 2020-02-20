@@ -129,7 +129,7 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
       </Grid>
       <Grid container direction='row' className={classes.poolDetailsRow}>
         <Grid item>
-          <Typography className={classes.label}>Currency Type</Typography>
+          <Typography className={classes.label}>Instrument</Typography>
           <Typography className={classes.value}>{type}</Typography>
         </Grid>
         <Grid item>

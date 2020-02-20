@@ -207,7 +207,7 @@ const PoolCard: React.FunctionComponent<OwnProps> = ({
             <Grid item xs={12}>
               <Paper elevation={4} className={classes.cardMetric}>
                 <Typography className={classes.label}>
-                  Available Interest
+                Penalty free withdrawal
                 </Typography>
                 <Typography className={classes.value}>
                   {`${availableInterest?.toFixed(2)} DAI`}

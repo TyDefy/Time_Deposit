@@ -54,7 +54,7 @@ const WithdrawInterestModal: React.FC<OwnProps> = ({
       <Typography variant='h6' className={classes.header}>Withdraw Interest</Typography>
       <Typography className={classes.label}>Pool</Typography>
       <Typography className={classes.value}>{`${name} (${type})`}</Typography>
-      <Typography className={classes.label}>Available Interest</Typography>
+      <Typography className={classes.label}>Penalty free withdrawal</Typography>
       <Typography className={classes.value}>{availableInterest.toFixed(2)}</Typography>
       <Typography className={classes.label}>Amount</Typography>
       <TextField
