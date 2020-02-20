@@ -70,9 +70,21 @@ const styles = ({ spacing , palette }: Theme) =>
       fontWeight: 'bold',
       margin: "12px 8px 0px 12px"
     },
+    profitLabel:{
+      fontSize: '1em',
+      opacity: '60%',
+      fontWeight: 'bold',
+      margin: "12px 8px 0px 12px",
+      color: 'green',
+    },
     value: {
       fontSize: '1.5em',
       margin: "8px 8px 0px 12px"
+    },
+    profitValue: {
+      fontSize: '1.5em',
+      margin: "8px 8px 0px 12px",
+      color: 'green',
     },
     button: {
       width: spacing(20)
@@ -125,7 +137,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
       <br/>
       <Grid container direction='row' spacing={0} className={classes.poolDetailsRow}>
         <Grid item xs={4}>
-          <Typography className={classes.label}>Currency Type</Typography>
+          <Typography className={classes.label}>Instrument</Typography>
           <Typography className={classes.value}>{type}</Typography>
         </Grid>
         <Grid item xs={4}>
@@ -140,20 +152,19 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
       <br/>
       <Grid container direction='row' className={classes.poolDetailsRow}>
         <Grid item xs={4}>
-          <Typography  className={classes.label}>Your contribution</Typography>
+          <Typography  className={classes.label}>Purchase Value</Typography>
           <Typography  className={classes.value}>{(contribution || 0).toFixed(2)}</Typography>
         </Grid>
         <Grid item xs={4}>
-          <Typography  className={classes.label}>Your Interest</Typography>
-          <Typography  className={classes.value}>{(interestAccrued || 0).toFixed(2)}</Typography>
+          <Typography className={classes.profitLabel}>Profit</Typography>
+          <Typography className={classes.profitValue}>{(interestAccrued || 0).toFixed(2)}</Typography>
         </Grid>
         <Grid item xs={4}>
-          <Typography  className={classes.label}>Available Interest</Typography>
+          <Typography  className={classes.label}>Penalty free withdrawal</Typography>
           <Typography  className={classes.value}>{(availableInterest || 0).toFixed(2)}</Typography>
         </Grid>
       </Grid>
       <br/>
-
       <Table>
         <TableHead className={classes.tableHeader}>
           <TableRow>
