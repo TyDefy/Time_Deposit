@@ -176,7 +176,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
       <Grid container direction='row' justify='space-around' className={classes.buttonBar}>
         <Button className={classes.button} color='primary' onClick={() => showModal('invest')}>INVEST</Button>
         <Button className={classes.button} color='primary' onClick={() => showModal('withdrawInterest')}>WITHDRAW INTEREST</Button>
-        <Button className={classes.button} color='primary' onClick={() => showModal('withdrawAll')}>WITHDRAW & CLOSE</Button>
+        <Button className={classes.button} color='primary' onClick={() => showModal('withdrawAll')}>WITHDRAW</Button>
       </Grid>
     </Container>
   );
