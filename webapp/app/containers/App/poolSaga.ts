@@ -206,7 +206,7 @@ function* poolWithdrawListener(poolContract: Pool) {
           yield call([tx, tx.wait]);
           yield put(withdraw.success());
           yield put(enqueueSnackbar({
-            message: 'Withdrawl successful'
+            message: 'Withdrawal successful'
           }))
         } catch (error) {
           yield put(withdraw.failure(error.message));
@@ -251,7 +251,7 @@ function* poolWithdrawInterestListener(poolContract: Pool) {
           yield call([tx, tx.wait]);
           yield put(withdrawInterest.success());
           yield put(enqueueSnackbar({
-            message: 'Withdrawl successful'
+            message: 'Withdrawal successful'
           }))
         } catch (error) {
           yield put(withdrawInterest.failure(error.message));
