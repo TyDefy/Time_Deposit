@@ -379,6 +379,130 @@ describe("Basic Pool Tests", async () => {
                 "user 2 has incorrect penalty share portion after withdrawing interest"
             ); 
         });
+
+        it("Penalty is stable between deposits and withdraws", async () => {
+            // User 1 will now have a steak in the penalty pot
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+            // User 2 now has a steak in the penalty pot
+            await pDaiInstance.from(user2).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user2).deposit(
+                test_settings.basicPool.deposit
+            );
+            // User 3 will now populate the penalty pot
+            await pDaiInstance.from(user3).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user3).deposit(
+                test_settings.basicPool.deposit
+            );
+            let tx = await(await basicPoolInstance.from(user3).withdraw(
+                test_settings.basicPool.deposit
+            )).wait();
+
+            let penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
+            let user1Interest = await basicPoolInstance.getUserInterest(user1.signer.address);
+            let user2Interest = await basicPoolInstance.getUserInterest(user2.signer.address);
+            let userPenaltyShareUI = await basicPoolInstance.getUserInfo(user1.signer.address);
+
+            assert.equal(
+                penaltyPotBalance.toString(),
+                test_settings.basicPool.penaltyAmountInCdai,
+                "Penalty pot amount is incorrect after user 3 withdraw"
+            );
+            assert.equal(
+                user1Interest.toString(),
+                test_settings.basicPool.penaltyInterest,
+                "user 1 has incorrect penalty share portion"
+            );
+            assert.equal(
+                user2Interest.toString(),
+                test_settings.basicPool.penaltyInterest,
+                "user 2 has incorrect penalty share portion"
+            );
+
+            let interestAvaliableUser1 = await basicPoolInstance.getInterestAmount(user1.signer.address);
+            let interestAvaliableUser2 = await basicPoolInstance.getInterestAmount(user2.signer.address);
+            let interestAvaliableUser3 = await basicPoolInstance.getInterestAmount(user3.signer.address);
+
+            assert.equal(
+                interestAvaliableUser1[1].toString(),
+                test_settings.basicPool.penaltyInterest,
+                "User 1 has incorect penalty balance"
+            );
+            assert.equal(
+                interestAvaliableUser2[1].toString(),
+                test_settings.basicPool.penaltyInterest,
+                "User 2 has incorect penalty balance"
+            );
+            assert.equal(
+                interestAvaliableUser3[1].toString(),
+                test_settings.basicPool.penaltyInterest,
+                "User 3 has incorect penalty balance"
+            );
+            
+            await basicPoolInstance.from(user2).withdraw(
+                test_settings.basicPool.withdraw
+            );
+
+            interestAvaliableUser1 = await basicPoolInstance.getInterestAmount(user1.signer.address);
+            interestAvaliableUser2 = await basicPoolInstance.getInterestAmount(user2.signer.address);
+            interestAvaliableUser3 = await basicPoolInstance.getInterestAmount(user3.signer.address);
+
+            assert.equal(
+                interestAvaliableUser1[1].toString(),
+                test_settings.basicPool.penaltyShare,
+                "User 1 has incorect penalty balance"
+            );
+            assert.equal(
+                interestAvaliableUser2[1].toString(),
+                test_settings.basicPool.penaltyShare,
+                "User 2 has incorect penalty balance"
+            );
+            assert.equal(
+                interestAvaliableUser3[1].toString(),
+                test_settings.basicPool.penaltyShare,
+                "User 3 has incorect penalty balance"
+            );
+
+            await pDaiInstance.from(user2).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.withdraw
+            );
+            await basicPoolInstance.from(user2).deposit(
+                test_settings.basicPool.withdraw
+            );
+
+            interestAvaliableUser1 = await basicPoolInstance.getInterestAmount(user1.signer.address);
+            interestAvaliableUser2 = await basicPoolInstance.getInterestAmount(user2.signer.address);
+            interestAvaliableUser3 = await basicPoolInstance.getInterestAmount(user3.signer.address);
+
+            assert.equal(
+                interestAvaliableUser1[1].toString(),
+                test_settings.basicPool.penShareAfterWithdraws,
+                "User 1 has incorect penalty balance"
+            );
+            assert.equal(
+                interestAvaliableUser2[1].toString(),
+                test_settings.basicPool.penShareAfterWithdrawsEarner,
+                "User 2 has incorect penalty balance"
+            );
+            assert.equal(
+                interestAvaliableUser3[1].toString(),
+                test_settings.basicPool.penShareAfterWithdraws,
+                "User 3 has incorect penalty balance"
+            );
+
+        });
     });
 
     describe("Supporting Functionality", async () => {
