@@ -285,6 +285,171 @@ describe("Basic Pool Tests", async () => {
             );
         });
 
+        it("Funds are correctly distributed between users after pool is terminated", async () => {
+            // User 1 will now have a steak in the penalty pot
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
+            // User 2 now has a steak in the penalty pot
+            await pDaiInstance.from(user2).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user2).deposit(
+                test_settings.basicPool.deposit
+            );
+            let tx = await(await basicPoolInstance.from(user2).withdraw(
+                test_settings.basicPool.withdraw
+            )).wait();
+
+            let penaltyPotBalance = await basicPoolInstance.penaltyPotBalance();
+            let user1Interest = await basicPoolInstance.getUserInterest(user1.signer.address);
+            let user2Interest = await basicPoolInstance.getUserInterest(user2.signer.address);
+
+            let user1PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user1.signer.address);
+            let user2PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user2.signer.address);
+
+            let penalty = await basicPoolInstance.penaltyPotBalance();
+            let poolBalanceInCdai = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            console.log("pool bal\t" + poolBalanceInCdai.toString())
+            console.log("pen balance\t" + penalty.toString())
+
+            console.log("user 1 bal\t" + user1PenaltyShareUI[1].toString());
+            console.log("user 1 TPC\t" + user1PenaltyShareUI[2].toString());
+            console.log("user 1 TI\t" + user1PenaltyShareUI[3].toString());
+
+            console.log("user 2 bal\t" + user2PenaltyShareUI[1].toString());
+            console.log("user 2 TPC\t" + user2PenaltyShareUI[2].toString());
+            console.log("user 2 TI\t" + user2PenaltyShareUI[3].toString());
+
+            assert.equal(
+                user1PenaltyShareUI[1].toString(),
+                test_settings.pcTokenSettings.mintAmount,
+                "User 1 has incorrect balance"
+            );
+            assert.equal(
+                user2PenaltyShareUI[1].toString(),
+                test_settings.basicPool.userBalanceIncDdaiAfterWithdraw,
+                "User 2 has incorrect balance"
+            );
+            assert.equal(
+                penalty.toString(),
+                test_settings.basicPool.penaltyInterest,
+                "User 1 has incorrect balance"
+            );
+
+            let tx2 = await (await basicPoolInstance.from(admin).terminatePool()).wait();
+
+            let aliveStatus = await basicPoolInstance.isPoolActive();
+
+            assert.equal(
+                aliveStatus,
+                false,
+                "The pool has not been terminated"
+            );
+
+            await basicPoolInstance.from(user1).finalWithdraw();
+            console.log("user 1 withdraw");
+
+            user1Interest = await basicPoolInstance.getUserInterest(user1.signer.address);
+            user2Interest = await basicPoolInstance.getUserInterest(user2.signer.address);
+
+            user1PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user1.signer.address);
+            user2PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user2.signer.address);
+
+            penalty = await basicPoolInstance.penaltyPotBalance();
+            poolBalanceInCdai = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            console.log("pool bal\t" + poolBalanceInCdai.toString())
+            console.log("pen balance\t" + penalty.toString())
+
+            console.log("user 1 bal\t" + user1PenaltyShareUI[1].toString());
+            console.log("user 1 TPC\t" + user1PenaltyShareUI[2].toString());
+            console.log("user 1 TI\t" + user1PenaltyShareUI[3].toString());
+
+            console.log("user 2 bal\t" + user2PenaltyShareUI[1].toString());
+            console.log("user 2 TPC\t" + user2PenaltyShareUI[2].toString());
+            console.log("user 2 TI\t" + user2PenaltyShareUI[3].toString());
+
+            assert.equal(
+                user1PenaltyShareUI[1].toString(),
+                0,
+                "User 1 has not been compleatly withdrawn"
+            );
+            assert.equal(
+                user2PenaltyShareUI[1].toString(),
+                test_settings.basicPool.userBalanceIncDdaiAfterWithdraw,
+                "User 2 has incorrect balance"
+            );
+
+            await basicPoolInstance.from(user2).finalWithdraw();
+            console.log("user 2 withdraw");
+
+            user1Interest = await basicPoolInstance.getUserInterest(user1.signer.address);
+            user2Interest = await basicPoolInstance.getUserInterest(user2.signer.address);
+
+            user1PenaltyShareUI = await basicPoolInstance.getUserInfo(user1.signer.address);
+            user2PenaltyShareUI = await basicPoolInstance.getUserInfo(user2.signer.address);
+
+            penalty = await basicPoolInstance.penaltyPotBalance();
+            poolBalanceInCdai = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            console.log("pool bal\t" + poolBalanceInCdai.toString())
+            console.log("pen balance\t" + penalty.toString())
+
+            console.log("user 1 bal\t" + user1PenaltyShareUI[1].toString());
+            console.log("user 1 TPC\t" + user1PenaltyShareUI[2].toString());
+            console.log("user 1 TI\t" + user1PenaltyShareUI[3].toString());
+
+            console.log("user 2 bal\t" + user2PenaltyShareUI[1].toString());
+            console.log("user 2 TPC\t" + user2PenaltyShareUI[2].toString());
+            console.log("user 2 TI\t" + user2PenaltyShareUI[3].toString());
+
+            /**             
+            pool bal	746097927895
+            pen balance	35528472756
+
+            user 1 bal	473712970092
+            user 1 TPC	0
+            user 1 TI	473712970092
+
+            user 2 bal	236856485047
+            user 2 TPC	0
+            user 2 TI	473712970092
+
+            user 1 withdraw
+
+            pool bal	248699309300
+            pen balance	11842824253
+
+            user 1 bal	0
+            user 1 TPC	473712970092
+            user 1 TI	473712970092
+
+            user 2 bal	236856485047
+            user 2 TPC	0
+            user 2 TI	473712970092
+
+            user 2 withdraw
+
+            pool bal	11842824253
+            pen balance	11842824253
+
+            user 1 bal	0
+            user 1 TPC	1582293630
+            user 1 TI	1582293631
+
+            user 2 bal	0
+            user 2 TPC	1582293631
+            user 2 TI	1582293632
+             */
+        });
+
         it("Penalty is distributed evenly", async () => {
             // User 1 will now have a steak in the penalty pot
             await pDaiInstance.from(user1).approve(
