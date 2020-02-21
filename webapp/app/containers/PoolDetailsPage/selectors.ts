@@ -9,8 +9,6 @@ export const selectSelectedPoolAddress = (state: RootState, props: OwnProps) => 
   return props.match.params.poolAddress
 };
 
-export const selectUtilities = createSelector((state: RootState) => state.utilities, substate => substate);
-
 export const selectPool = createSelector(
   selectPools, 
   selectEthAddress,
