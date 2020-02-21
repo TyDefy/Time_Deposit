@@ -14,7 +14,7 @@ const selectAdminPoolUserDetails = createSelector(
   selectSelectedPoolUserAddress,
   (pools, poolAddress, poolUserAddress) => {
     const pool = pools.filter(p => p.address === poolAddress)[0];
-    pool.transactions = pool.transactions?.filter(t => t.userAddress.toLowerCase() === poolUserAddress)
+    pool.transactions = pool.transactions?.filter(t => t.userAddress.toLowerCase() === poolUserAddress.toLowerCase())
       .sort((a, b) => (a.time < b.time) ? -1 : 1);
     return pool;
   }

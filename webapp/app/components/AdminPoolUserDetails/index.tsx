@@ -1,13 +1,13 @@
 /**
  *
- * PoolDetails
+ * AdminPoolUserDetails
  *
  */
 
 import React from 'react';
-import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, Chip, Table, TableHead, TableRow, TableCell, TableBody, Button } from '@material-ui/core';
-import dayjs from 'dayjs';
+import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, Chip, Table, TableHead, TableRow, TableCell, TableBody } from '@material-ui/core';
 import { Pool } from 'containers/App';
+import dayjs from 'dayjs';
 
 const styles = ({ spacing , palette }: Theme) =>
   createStyles({
@@ -94,11 +94,11 @@ const styles = ({ spacing , palette }: Theme) =>
     }
   });
 
-interface OwnProps extends WithStyles<typeof styles>, Pool { 
-  showModal(value: 'invest' | 'withdrawInterest' | 'withdrawAll'): void
+interface OwnProps extends WithStyles<typeof styles>, Pool {
+  userAddress: string,
 }
 
-const PoolDetails: React.FunctionComponent<OwnProps> = ({
+const AdminPoolUserDetails: React.FC<OwnProps> = ({
   classes,
   name,
   period,
@@ -112,7 +112,6 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
   description,
   transactions,
   active,
-  showModal,
 }: OwnProps) => (
     <Container maxWidth='lg'>
       <Grid container direction='row' className={classes.poolDetailsHeaderRow}>
@@ -121,20 +120,20 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         <Grid item xs={3}><Chip className={(active) ? classes.poolActive : classes.poolTerminated} label={(active) ? `Active` : `Terminated`} /></Grid>
         <Grid item xs={3}>
           <Typography className={classes.currentInterest}>
-            Current Interest:  
-            <strong className={classes.percentageInterest}>
+            Current Interest:
+        <strong className={classes.percentageInterest}>
               {`${((interestRate || 0) * 100).toFixed(2)} %`}
             </strong>
           </Typography>
         </Grid>
       </Grid>
-      <br/>
+      <br />
       <Grid container direction='row' spacing={0} className={classes.poolDetailsRow}>
         <Grid item xs={12}>
           <Typography className={classes.value}>{description}</Typography>
         </Grid>
       </Grid>
-      <br/>
+      <br />
       <Grid container direction='row' spacing={0} className={classes.poolDetailsRow}>
         <Grid item xs={4}>
           <Typography className={classes.label}>Instrument</Typography>
@@ -149,22 +148,22 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
           <Typography className={classes.value}>{participants}</Typography>
         </Grid>
       </Grid>
-      <br/>
+      <br />
       <Grid container direction='row' className={classes.poolDetailsRow}>
         <Grid item xs={4}>
-          <Typography  className={classes.label}>Purchase Value</Typography>
-          <Typography  className={classes.value}>{(contribution || 0).toFixed(2)}</Typography>
+          <Typography className={classes.label}>Purchase Value</Typography>
+          <Typography className={classes.value}>{(contribution || 0).toFixed(2)}</Typography>
         </Grid>
         <Grid item xs={4}>
           <Typography className={classes.profitLabel}>Profit</Typography>
           <Typography className={classes.profitValue}>{(interestAccrued || 0).toFixed(2)}</Typography>
         </Grid>
         <Grid item xs={4}>
-          <Typography  className={classes.label}>Penalty free withdrawal</Typography>
-          <Typography  className={classes.value}>{(availableInterest || 0).toFixed(2)}</Typography>
+          <Typography className={classes.label}>Penalty free withdrawal</Typography>
+          <Typography className={classes.value}>{(availableInterest || 0).toFixed(2)}</Typography>
         </Grid>
       </Grid>
-      <br/>
+      <br />
       <Table>
         <TableHead className={classes.tableHeader}>
           <TableRow>
@@ -176,7 +175,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         </TableHead>
         <TableBody>
           {transactions?.map(t =>
-            <TableRow key={`${t.txHash}${t.type==='Penalty' && `p`}`}>
+            <TableRow key={`${t.txHash}${t.type === 'Penalty' && `p`}`}>
               <TableCell>{t.txHash}</TableCell>
               <TableCell>{dayjs(t.time).format('YYYY-MM-DD HH:mm')}</TableCell>
               <TableCell>{t.type}</TableCell>
@@ -184,12 +183,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
             </TableRow>)}
         </TableBody>
       </Table>
-      <Grid container direction='row' justify='space-around' className={classes.buttonBar}>
-        <Button className={classes.button} color='primary' onClick={() => showModal('invest')}>INVEST</Button>
-        <Button className={classes.button} color='primary' onClick={() => showModal('withdrawInterest')}>WITHDRAW INTEREST</Button>
-        <Button className={classes.button} color='primary' onClick={() => showModal('withdrawAll')}>WITHDRAW</Button>
-      </Grid>
     </Container>
   );
 
-export default withStyles(styles, { withTheme: true })(PoolDetails);
+export default withStyles(styles, { withTheme: true })(AdminPoolUserDetails);
