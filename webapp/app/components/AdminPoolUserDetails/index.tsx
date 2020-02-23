@@ -9,7 +9,7 @@ import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typograph
 import { Pool } from 'containers/App';
 import dayjs from 'dayjs';
 
-const styles = ({ spacing , palette }: Theme) =>
+const styles = ({ spacing, palette }: Theme) =>
   createStyles({
     poolDetailsHeaderRow: {
       justifyContent: 'space-around',
@@ -64,13 +64,13 @@ const styles = ({ spacing , palette }: Theme) =>
       color: 'green',
       marginLeft: "8px"
     },
-    label:{
+    label: {
       fontSize: '1em',
       opacity: '60%',
       fontWeight: 'bold',
       margin: "12px 8px 0px 12px"
     },
-    profitLabel:{
+    profitLabel: {
       fontSize: '1em',
       opacity: '60%',
       fontWeight: 'bold',
@@ -109,7 +109,7 @@ const AdminPoolUserDetails: React.FC<OwnProps> = ({
   contribution,
   interestAccrued,
   availableInterest,
-  description,
+  userAddress,
   transactions,
   active,
 }: OwnProps) => (
@@ -130,22 +130,7 @@ const AdminPoolUserDetails: React.FC<OwnProps> = ({
       <br />
       <Grid container direction='row' spacing={0} className={classes.poolDetailsRow}>
         <Grid item xs={12}>
-          <Typography className={classes.value}>{description}</Typography>
-        </Grid>
-      </Grid>
-      <br />
-      <Grid container direction='row' spacing={0} className={classes.poolDetailsRow}>
-        <Grid item xs={4}>
-          <Typography className={classes.label}>Instrument</Typography>
-          <Typography className={classes.value}>{type}</Typography>
-        </Grid>
-        <Grid item xs={4}>
-          <Typography className={classes.label}>Pool Total</Typography>
-          <Typography className={classes.value}>{balance.toFixed(2)}</Typography>
-        </Grid>
-        <Grid item xs={4}>
-          <Typography className={classes.label}>Pool Participants</Typography>
-          <Typography className={classes.value}>{participants}</Typography>
+          <Typography className={classes.value}>User: {userAddress}</Typography>
         </Grid>
       </Grid>
       <br />
