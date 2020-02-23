@@ -35,6 +35,7 @@ import AdminPoolDetailsPage from 'containers/AdminPoolDetailsPage';
 import CreatePool from 'containers/CreatePool';
 import PoolDetailsPage, { Transaction } from 'containers/PoolDetailsPage';
 import PortfolioPage from 'containers/PortfolioPage';
+import AdminPoolUserDetailsPage from 'containers/AdminPoolUserDetailsPage';
 
 interface OwnProps {
   isMetamaskInstalled: boolean,
@@ -126,6 +127,7 @@ const App: React.FunctionComponent<Props> = (props: Props) => {
           <ProtectedRoute exact path='/admin/pools' component={AdminPoolsOverviewPage} isAuthorized={isAdmin} />
           <ProtectedRoute exact path='/admin/pool/create' component={CreatePool} isAuthorized={isAdmin} />
           <ProtectedRoute exact path='/admin/pool/:poolAddress' component={AdminPoolDetailsPage} isAuthorized={isAdmin} />
+          <ProtectedRoute exact path='/admin/pool/:poolAddress/:userAddress' component={AdminPoolUserDetailsPage} isAuthorized={isAdmin} />
           <ProtectedRoute exact path='/portfolio' component={PortfolioPage} isAuthorized={ethAddress}/>
           <Route exact path='/pool/:poolAddress' component={PoolDetailsPage} />
           <Route exact path='/' component={HomePage} />

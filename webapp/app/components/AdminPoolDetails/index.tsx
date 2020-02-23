@@ -8,6 +8,7 @@ import React from 'react';
 import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, Chip, TableHead, TableRow, TableCell, Table, TableBody, Button } from '@material-ui/core';
 import { PoolDetails } from 'containers/AdminPoolDetailsPage';
 import dayjs from 'dayjs';
+import { forwardTo } from 'utils/history';
 
 const styles = ({ spacing, palette }: Theme) =>
   createStyles({
@@ -87,6 +88,7 @@ interface OwnProps extends WithStyles<typeof styles>, PoolDetails {
 
 const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
   classes,
+  address,
   name,
   period,
   type,
@@ -176,7 +178,9 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
         </TableHead>
         <TableBody>
           {participantDetails.map(p =>
-            <TableRow key={p.address}>
+            <TableRow key={p.address} 
+              onClick={() => forwardTo(`/admin/pool/${address}/${p.address}`)}
+              style={{cursor: 'pointer'}}>
               <TableCell>{p.address}</TableCell>
               <TableCell>{dayjs(p.joined).format('YYYY-MM-DD')}</TableCell>
               <TableCell>{p?.contributed?.toFixed(2)}</TableCell>
