@@ -179,7 +179,8 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
         <TableBody>
           {participantDetails.map(p =>
             <TableRow key={p.address} 
-              onClick={() => forwardTo(`/admin/pool/${address}/${p.address}`)}>
+              onClick={() => forwardTo(`/admin/pool/${address}/${p.address}`)}
+              style={{cursor: 'pointer'}}>
               <TableCell>{p.address}</TableCell>
               <TableCell>{dayjs(p.joined).format('YYYY-MM-DD')}</TableCell>
               <TableCell>{p?.contributed?.toFixed(2)}</TableCell>
