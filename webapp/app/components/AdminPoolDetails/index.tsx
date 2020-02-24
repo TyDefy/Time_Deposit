@@ -170,10 +170,10 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
       <Table>
         <TableHead className={classes.tableHeader}>
           <TableRow>
-            <TableCell>Participant</TableCell>
+            <TableCell>Pool Members</TableCell>
             <TableCell>Date Joined</TableCell>
-            <TableCell>Contributed</TableCell>
-            <TableCell>Interest</TableCell>
+            <TableCell>Net Current Contribution</TableCell>
+            <TableCell>Net Current Accrued Profit</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
