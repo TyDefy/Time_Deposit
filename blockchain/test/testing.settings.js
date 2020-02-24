@@ -46,7 +46,9 @@ const test_settings = {
         penaltyPotAfterInterestWithdraw: "35528472757",
         penShareAfterWithdraws: "53292709134",
         penShareAfterWithdrawsEarner: "79939063701",
-        userBalanceIncDdaiAfterWithdraw: "236856485047"
+        userBalanceIncDdaiAfterWithdraw: "236856485047",
+        twoUsersFullAmount: "947425940184",
+        twoUsersHalfAmount: "473712970092"
     },
     pDaiSettings: {
         name: "pDai",
