@@ -28,6 +28,7 @@ const test_settings = {
         withdrawAmountOn100: ethers.utils.parseUnits("85", 18),
         penaltyAmountOn100: ethers.utils.parseUnits("15", 18),
         penaltyAmountInCdai: "71056945513",
+        poolBalanceWithOneUserAndPenalty: "544769915606",
         otherPenaltyAmountInCdai: "71056945514",
         fee: 20,
         interestEarned: "2244038717306567",
@@ -58,6 +59,7 @@ const test_settings = {
         mintAmountMinusDeposit: "99999900000000000000000000",
         withdrawWithPenalty: "99999985000000000000000000",
         withdrawInterestBalancePenalty: "99999914999999999610090535",
+        otherWithdrawInterestBalancePenalty: "100000014999999999543873638",
         withdrawInterestBalance: "99999900000047371324086683",
         otherWithdrawInterestBalance: "99999912371187252061701985",
         withdrawInterestPusPenaltyMinusFee: "99999912000053055652239429"

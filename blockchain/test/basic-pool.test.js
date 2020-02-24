@@ -285,7 +285,7 @@ describe("Basic Pool Tests", async () => {
             );
         });
 
-        it("Funds are correctly distributed between users after pool is terminated", async () => {
+        it("Pool termination - 0 penalty balance, 2 users", async () => {
             await pDaiInstance.from(user1).approve(
                 basicPoolInstance.contract.address,
                 test_settings.basicPool.deposit
@@ -359,9 +359,8 @@ describe("Basic Pool Tests", async () => {
             );
         });
 
-        it("Funds are correctly distributed between users after pool is terminated", async () => {
+        it("Pool termination - non 0 penalty balance, 2 users", async () => {
             // User 1 will now have a steak in the penalty pot
-
             await pDaiInstance.from(user1).approve(
                 basicPoolInstance.contract.address,
                 test_settings.basicPool.deposit
@@ -379,84 +378,340 @@ describe("Basic Pool Tests", async () => {
                 test_settings.basicPool.deposit
             );
 
-            // let claimPenAmount = await basicPoolInstance._getPenaltyPotPortion(user2.signer.address)
-            // console.log("Claim pen amount:\t" + claimPenAmount.toString())
+            let user1DaiBalance = await pDaiInstance.balanceOf(user1.signer.address);
+            let user2DaiBalance = await pDaiInstance.balanceOf(user2.signer.address);
+            let user1Info = await basicPoolInstance.getUserInfo(user1.signer.address);
+            let user2Info = await basicPoolInstance.getUserInfo(user2.signer.address);
 
-            // let penCollateral = await basicPoolInstance.getTotalPenCollateral();
-            // console.log(penCollateral.toString())
-
-            // let penalty = await basicPoolInstance.penaltyPotBalance();
-            // let poolBalanceInCdai = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
-
-            // console.log("pool bal\t" + poolBalanceInCdai.toString())
-            // console.log("pen balance\t" + penalty.toString())
+            assert.equal(
+                user1DaiBalance.toString(),
+                test_settings.pDaiSettings.mintAmountMinusDeposit,
+                "Users balance not as expected after deposit"
+            );
+            assert.equal(
+                user1DaiBalance.toString(),
+                user2DaiBalance.toString(),
+                "Users balances are different after initial deposits of same amount"
+            );
+            assert.equal(
+                user1Info[0].toString(),
+                test_settings.basicPool.deposit.toString(),
+                "User internal dai balance not as expected after deposit"
+            );
+            assert.equal(
+                user1Info[0].toString(),
+                user2Info[0].toString(),
+                "User internal pool dai balances are different after initial deposits of same amount"
+            );
+            assert.equal(
+                user1Info[1].toString(),
+                test_settings.basicPool.twoUsersHalfAmount,
+                "User internal pool cdai balance not as expected after deposit"
+            );
+            assert.equal(
+                user1Info[1].toString(),
+                user2Info[1].toString(),
+                "User internal pool cdai balances are different after initial deposits of same amount"
+            );
 
             let tx = await(await basicPoolInstance.from(user2).withdraw(
                 test_settings.basicPool.deposit
             )).wait();
 
-            let usrBal = await pDaiInstance.balanceOf(user1.signer.address);
-            console.log("usr1 untBal\t" + usrBal.toString());
+            user2DaiBalance = await pDaiInstance.balanceOf(user2.signer.address);
+            user2Info = await basicPoolInstance.getUserInfo(user2.signer.address);
+            let penaltyPotBalanceAfterWithdraw = await basicPoolInstance.penaltyPotBalance();
+            let totalPoolCdaiBalance = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
 
-            let usr2Bal = await pDaiInstance.balanceOf(user2.signer.address);
-            console.log("usr2 untBal\t" + usr2Bal.toString() + "\n>>> User pool state varaibles")
+            assert.equal(
+                user2DaiBalance.toString(),
+                test_settings.pDaiSettings.withdrawWithPenalty,
+                "User 2 balance has not been incrfeased as expected afer full withdraw"
+            );
+            assert.equal(
+                user2Info[0].toString(),
+                0,
+                "User 2 has unexpected internal pool dai balance"
+            );
+            assert.equal(
+                user2Info[1].toString(),
+                1,
+                "User 2 has unexpected internal pool cDai balance"
+            );
+            assert.equal(
+                penaltyPotBalanceAfterWithdraw.toString(),
+                test_settings.basicPool.penaltyAmountInCdai,
+                "Penalty amount in pool is unexpected after user 2 fill withdraw"
+            );
+            assert.equal(
+                totalPoolCdaiBalance.toString(),
+                test_settings.basicPool.poolBalanceWithOneUserAndPenalty,
+                "Pool cDai balance is unexpected after user 2 full withdraw"
+            );
 
-            let user1PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user1.signer.address);
-            console.log("usr1 untBal\t" + user1PenaltyShareUI[0].toString());
-            console.log("usr1 iUntBal\t" + user1PenaltyShareUI[1].toString());
-            console.log("usr1 ttlPenCmd\t" + user1PenaltyShareUI[2].toString());
-            console.log("usr1 ttlPenCnt\t" + user1PenaltyShareUI[3].toString());
+            let tx2 = await (await basicPoolInstance.from(admin).terminatePool()).wait();
+            let aliveStatus = await basicPoolInstance.isPoolActive();
 
-            let user2PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user2.signer.address);
-            console.log("usr2 untBal\t" + user2PenaltyShareUI[0].toString());
-            console.log("usr2 iUntBal\t" + user2PenaltyShareUI[1].toString());
-            console.log("usr2 ttlPenCmd\t" + user2PenaltyShareUI[2].toString());
-            console.log("usr2 ttlPenCnt\t" + user2PenaltyShareUI[3].toString() + "\n>>> Pool things");
+            assert.equal(
+                aliveStatus,
+                false,
+                "The pool has not been terminated"
+            );
 
-            let ttlPoolUnitBal = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
-            console.log("Pool ttlPoolUnitBal\t" + ttlPoolUnitBal.toString());
+            await basicPoolInstance.from(user1).finalWithdraw();
 
-            let ttlPoolIUnitBal = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
-            console.log("Pool ttlPoolIUnitBal\t" + ttlPoolIUnitBal.toString());
+            user1DaiBalance = await pDaiInstance.balanceOf(user1.signer.address);
+            user1Info = await basicPoolInstance.getUserInfo(user1.signer.address);
+            penaltyPotBalanceAfterWithdraw = await basicPoolInstance.penaltyPotBalance();
+            totalPoolCdaiBalance = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
 
-            let iUntTtlCol = await basicPoolInstance.getTotalColCounter();
-            console.log("Pool iUntTtlCol\t" + iUntTtlCol.toString())
+            assert.equal(
+                user1DaiBalance.toString(),
+                test_settings.pDaiSettings.otherWithdrawInterestBalancePenalty,
+                "User dai balance is an unexpected after final withdraw"
+            );
+            assert.equal(
+                user1Info[0].toString(),
+                0,
+                "User 1 is an undexpected internal pool dai balance after final withdraw"
+            );
+            assert.equal(
+                user1Info[1].toString(),
+                0,
+                "User 1 is an undexpected internal pool cDai balance after final withdraw"
+            );
+            assert.equal(
+                penaltyPotBalanceAfterWithdraw.toString(),
+                1,
+                "Penalty pot is an unexpected vaule after user 1 final withdraw"
+            );
+            assert.equal(
+                totalPoolCdaiBalance.toString(),
+                2,
+                "Pool cDai balance is an unexpected vaule after user 1 final withdraw"
+            );
 
-            let penPotBal = await basicPoolInstance.penaltyPotBalance();
-            console.log("Pool ttlPenPot\t" + penPotBal.toString())
+            await assert.revert(basicPoolInstance.from(user2).finalWithdraw());
 
-            let iUntTtlPenCol = await basicPoolInstance.getTotalPenCollateral();
-            console.log("Pool iUntTtlPenCol\t" + iUntTtlPenCol.toString())
+            user2DaiBalance = await pDaiInstance.balanceOf(user2.signer.address);
+            user2Info = await basicPoolInstance.getUserInfo(user2.signer.address);
+            penaltyPotBalanceAfterWithdraw = await basicPoolInstance.penaltyPotBalance();
+            totalPoolCdaiBalance = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
 
-            let accumulativeFee = await basicPoolInstance.accumulativeFee();
-            console.log("Pool accumulativeFee\t" + accumulativeFee.toString())
+            assert.equal(
+                user2DaiBalance.toString(),
+                test_settings.pDaiSettings.withdrawWithPenalty,
+                "User 2 balance has not been incrfeased as expected afer full withdraw"
+            );
+            assert.equal(
+                user2Info[0].toString(),
+                0,
+                "User 2 has unexpected internal pool dai balance"
+            );
+            assert.equal(
+                user2Info[1].toString(),
+                1,
+                "User 2 has unexpected internal pool cDai balance"
+            );
+            assert.equal(
+                penaltyPotBalanceAfterWithdraw.toString(),
+                1,
+                "Penalty amount in pool is unexpected after user 2 fill withdraw"
+            ); //TODO this should equal 0
+            assert.equal(
+                totalPoolCdaiBalance.toString(),
+                2,
+                "Pool cDai balance is unexpected after user 2 full withdraw"
+            ); //TODO this shoild = 0
+        });
 
-            /**
-             * 
-            user 1 withdraw
-            usr1 untBal	100000014999999999543873638
-            usr2 untBal	99999985000000000000000000
+        it("Pool termination - non 0 penalty balance, 3 users", async () => {
+            // User 1 will now have a steak in the penalty pot
+            await pDaiInstance.from(user1).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user1).deposit(
+                test_settings.basicPool.deposit
+            );
 
-            >>> User pool state varaibles
-            usr1 untBal	0
-            usr1 iUntBal	0
-            usr1 ttlPenCmd	473712970092
-            usr1 ttlPenCnt	473712970092
+            // User 2 now has a steak in the penalty pot
+            await pDaiInstance.from(user2).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user2).deposit(
+                test_settings.basicPool.deposit
+            );
 
-            usr2 untBal	0
-            usr2 iUntBal	1
-            usr2 ttlPenCmd	402656024578
-            usr2 ttlPenCnt	473712970092
-            
-            >>> Pool things
-            Pool ttlPoolUnitBal	0
-            Pool ttlPoolIUnitBal	2
-            Pool iUntTtlCol	115792089237316195423570985008687907853269984665640564039457584007842072694425
-            Pool ttlPenPot	1
-            Pool iUntTtlPenCol	473712970093
-            Pool accumulativeFee	0
-            user 2 withdraw
-             */
+            // User 2 now has a steak in the penalty pot
+            await pDaiInstance.from(user3).approve(
+                basicPoolInstance.contract.address,
+                test_settings.basicPool.deposit
+            );
+            await basicPoolInstance.from(user3).deposit(
+                test_settings.basicPool.deposit
+            );
+
+            let user1DaiBalance = await pDaiInstance.balanceOf(user1.signer.address);
+            let user2DaiBalance = await pDaiInstance.balanceOf(user2.signer.address);
+            let user3DaiBalance = await pDaiInstance.balanceOf(user3.signer.address);
+            let user1Info = await basicPoolInstance.getUserInfo(user1.signer.address);
+            let user2Info = await basicPoolInstance.getUserInfo(user2.signer.address);
+            let user3Info = await basicPoolInstance.getUserInfo(user3.signer.address);
+
+            assert.equal(
+                user1DaiBalance.toString(),
+                test_settings.pDaiSettings.mintAmountMinusDeposit,
+                "Users balance not as expected after deposit"
+            );
+            assert.equal(
+                user1DaiBalance.toString(),
+                user2DaiBalance.toString(),
+                "Users balances are different after initial deposits of same amount"
+            );
+            assert.equal(
+                user3DaiBalance.toString(),
+                user2DaiBalance.toString(),
+                "Users balances are different after initial deposits of same amount"
+            );
+            assert.equal(
+                user1Info[0].toString(),
+                test_settings.basicPool.deposit.toString(),
+                "User internal dai balance not as expected after deposit"
+            );
+            assert.equal(
+                user1Info[0].toString(),
+                user2Info[0].toString(),
+                "User internal pool dai balances are different after initial deposits of same amount"
+            );
+            assert.equal(
+                user3Info[0].toString(),
+                user2Info[0].toString(),
+                "User internal pool dai balances are different after initial deposits of same amount"
+            );
+            assert.equal(
+                user1Info[1].toString(),
+                test_settings.basicPool.twoUsersHalfAmount,
+                "User internal pool cdai balance not as expected after deposit"
+            );
+            assert.equal(
+                user1Info[1].toString(),
+                user2Info[1].toString(),
+                "User internal pool cdai balances are different after initial deposits of same amount"
+            );
+            assert.equal(
+                user3Info[1].toString(),
+                user2Info[1].toString(),
+                "User internal pool cdai balances are different after initial deposits of same amount"
+            );
+
+            let tx = await(await basicPoolInstance.from(user2).withdraw(
+                test_settings.basicPool.withdraw
+            )).wait();
+
+            user2DaiBalance = await pDaiInstance.balanceOf(user2.signer.address);
+            user2Info = await basicPoolInstance.getUserInfo(user2.signer.address);
+            let penaltyPotBalanceAfterWithdraw = await basicPoolInstance.penaltyPotBalance();
+            let totalPoolCdaiBalance = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            console.log(
+                "User 2 partial withdraw" +
+                user2DaiBalance.toString() + "\n" +
+                user2Info[0].toString()  + "\n" +
+                user2Info[1].toString()  + "\n" +
+                penaltyPotBalanceAfterWithdraw.toString()  + "\n" +
+                totalPoolCdaiBalance.toString()
+            );
+
+            // assert.equal(
+            //     user2DaiBalance.toString(),
+            //     test_settings.pDaiSettings.withdrawWithPenalty,
+            //     "User 2 balance has not been incrfeased as expected afer full withdraw"
+            // );
+            // assert.equal(
+            //     user2Info[0].toString(),
+            //     0,
+            //     "User 2 has unexpected internal pool dai balance"
+            // );
+            // assert.equal(
+            //     user2Info[1].toString(),
+            //     1,
+            //     "User 2 has unexpected internal pool cDai balance"
+            // );
+            // assert.equal(
+            //     penaltyPotBalanceAfterWithdraw.toString(),
+            //     test_settings.basicPool.penaltyAmountInCdai,
+            //     "Penalty amount in pool is unexpected after user 2 fill withdraw"
+            // );
+            // assert.equal(
+            //     totalPoolCdaiBalance.toString(),
+            //     test_settings.basicPool.poolBalanceWithOneUserAndPenalty,
+            //     "Pool cDai balance is unexpected after user 2 full withdraw"
+            // );
+
+            tx = await(await basicPoolInstance.from(user3).withdraw(
+                test_settings.basicPool.deposit
+            )).wait();
+
+            user3DaiBalance = await pDaiInstance.balanceOf(user3.signer.address);
+            user3Info = await basicPoolInstance.getUserInfo(user3.signer.address);
+            penaltyPotBalanceAfterWithdraw = await basicPoolInstance.penaltyPotBalance();
+            totalPoolCdaiBalance = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            console.log(
+                "User 3 full withdraw" +
+                user3DaiBalance.toString() + "\n" +
+                user3Info[0].toString()  + "\n" +
+                user3Info[1].toString()  + "\n" +
+                penaltyPotBalanceAfterWithdraw.toString()  + "\n" +
+                totalPoolCdaiBalance.toString()
+            );
+
+            // assert.equal(
+            //     user2DaiBalance.toString(),
+            //     test_settings.pDaiSettings.withdrawWithPenalty,
+            //     "User 2 balance has not been incrfeased as expected afer full withdraw"
+            // );
+            // assert.equal(
+            //     user2Info[0].toString(),
+            //     0,
+            //     "User 2 has unexpected internal pool dai balance"
+            // );
+            // assert.equal(
+            //     user2Info[1].toString(),
+            //     1,
+            //     "User 2 has unexpected internal pool cDai balance"
+            // );
+            // assert.equal(
+            //     penaltyPotBalanceAfterWithdraw.toString(),
+            //     test_settings.basicPool.penaltyAmountInCdai,
+            //     "Penalty amount in pool is unexpected after user 2 fill withdraw"
+            // );
+            // assert.equal(
+            //     totalPoolCdaiBalance.toString(),
+            //     test_settings.basicPool.poolBalanceWithOneUserAndPenalty,
+            //     "Pool cDai balance is unexpected after user 2 full withdraw"
+            // );
+
+            // let ttlPoolUnitBal = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            // console.log("Pool ttlPoolUnitBal\t" + ttlPoolUnitBal.toString());
+
+            // let ttlPoolIUnitBal = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            // console.log("Pool ttlPoolIUnitBal\t" + ttlPoolIUnitBal.toString());
+
+            // let iUntTtlCol = await basicPoolInstance.getTotalColCounter();
+            // console.log("Pool iUntTtlCol\t" + iUntTtlCol.toString())
+
+            // let penPotBal = await basicPoolInstance.penaltyPotBalance();
+            // console.log("Pool ttlPenPot\t" + penPotBal.toString())
+
+            // let iUntTtlPenCol = await basicPoolInstance.getTotalPenCollateral();
+            // console.log("Pool iUntTtlPenCol\t" + iUntTtlPenCol.toString())
+
+            // let accumulativeFee = await basicPoolInstance.accumulativeFee();
+            // console.log("Pool accumulativeFee\t" + accumulativeFee.toString())
+
 
             //  user2PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user2.signer.address);
 
@@ -531,43 +786,82 @@ describe("Basic Pool Tests", async () => {
             // console.log("user 1 TI\t" + user1PenaltyShareUI[3].toString());
 
             await basicPoolInstance.from(user1).finalWithdraw();
-            console.log("user 1 withdraw");
 
-             usrBal = await pDaiInstance.balanceOf(user1.signer.address);
-            console.log("usr1 untBal\t" + usrBal.toString());
+            user1DaiBalance = await pDaiInstance.balanceOf(user1.signer.address);
+            user1Info = await basicPoolInstance.getUserInfo(user1.signer.address);
+            penaltyPotBalanceAfterWithdraw = await basicPoolInstance.penaltyPotBalance();
+            totalPoolCdaiBalance = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
 
-             usr2Bal = await pDaiInstance.balanceOf(user2.signer.address);
-            console.log("usr2 untBal\t" + usr2Bal.toString() + "\n>>> User pool state varaibles")
+            console.log(
+                "User 1 after final withdraw" +
+                user1DaiBalance.toString() + "\n" +
+                user1Info[0].toString()  + "\n" +
+                user1Info[1].toString()  + "\n" +
+                penaltyPotBalanceAfterWithdraw.toString()  + "\n" +
+                totalPoolCdaiBalance.toString()
+            );
 
-             user1PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user1.signer.address);
-            console.log("usr1 untBal\t" + user1PenaltyShareUI[0].toString());
-            console.log("usr1 iUntBal\t" + user1PenaltyShareUI[1].toString());
-            console.log("usr1 ttlPenCmd\t" + user1PenaltyShareUI[2].toString());
-            console.log("usr1 ttlPenCnt\t" + user1PenaltyShareUI[3].toString());
+            // assert.equal(
+            //     user1DaiBalance.toString(),
+            //     test_settings.pDaiSettings.otherWithdrawInterestBalancePenalty,
+            //     "User dai balance is an unexpected after final withdraw"
+            // );
+            // assert.equal(
+            //     user1Info[0].toString(),
+            //     0,
+            //     "User 1 is an undexpected internal pool dai balance after final withdraw"
+            // );
+            // assert.equal(
+            //     user1Info[1].toString(),
+            //     0,
+            //     "User 1 is an undexpected internal pool cDai balance after final withdraw"
+            // );
+            // assert.equal(
+            //     penaltyPotBalanceAfterWithdraw.toString(),
+            //     1,
+            //     "Penalty pot is an unexpected vaule after user 1 final withdraw"
+            // );
+            // assert.equal(
+            //     totalPoolCdaiBalance.toString(),
+            //     2,
+            //     "Pool cDai balance is an unexpected vaule after user 1 final withdraw"
+            // );
 
-             user2PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user2.signer.address);
-            console.log("usr2 untBal\t" + user2PenaltyShareUI[0].toString());
-            console.log("usr2 iUntBal\t" + user2PenaltyShareUI[1].toString());
-            console.log("usr2 ttlPenCmd\t" + user2PenaltyShareUI[2].toString());
-            console.log("usr2 ttlPenCnt\t" + user2PenaltyShareUI[3].toString() + "\n>>> Pool things");
+            //  usrBal = await pDaiInstance.balanceOf(user1.signer.address);
+            // console.log("usr1 untBal\t" + usrBal.toString());
 
-             ttlPoolUnitBal = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
-            console.log("Pool ttlPoolUnitBal\t" + ttlPoolUnitBal.toString());
+            //  usr2Bal = await pDaiInstance.balanceOf(user2.signer.address);
+            // console.log("usr2 untBal\t" + usr2Bal.toString() + "\n>>> User pool state varaibles")
 
-             ttlPoolIUnitBal = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
-            console.log("Pool ttlPoolIUnitBal\t" + ttlPoolIUnitBal.toString());
+            //  user1PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user1.signer.address);
+            // console.log("usr1 untBal\t" + user1PenaltyShareUI[0].toString());
+            // console.log("usr1 iUntBal\t" + user1PenaltyShareUI[1].toString());
+            // console.log("usr1 ttlPenCmd\t" + user1PenaltyShareUI[2].toString());
+            // console.log("usr1 ttlPenCnt\t" + user1PenaltyShareUI[3].toString());
 
-             iUntTtlCol = await basicPoolInstance.getTotalColCounter();
-            console.log("Pool iUntTtlCol\t" + iUntTtlCol.toString())
+            //  user2PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user2.signer.address);
+            // console.log("usr2 untBal\t" + user2PenaltyShareUI[0].toString());
+            // console.log("usr2 iUntBal\t" + user2PenaltyShareUI[1].toString());
+            // console.log("usr2 ttlPenCmd\t" + user2PenaltyShareUI[2].toString());
+            // console.log("usr2 ttlPenCnt\t" + user2PenaltyShareUI[3].toString() + "\n>>> Pool things");
 
-             penPotBal = await basicPoolInstance.penaltyPotBalance();
-            console.log("Pool ttlPenPot\t" + penPotBal.toString())
+            //  ttlPoolUnitBal = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            // console.log("Pool ttlPoolUnitBal\t" + ttlPoolUnitBal.toString());
 
-             iUntTtlPenCol = await basicPoolInstance.getTotalPenCollateral();
-            console.log("Pool iUntTtlPenCol\t" + iUntTtlPenCol.toString())
+            //  ttlPoolIUnitBal = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            // console.log("Pool ttlPoolIUnitBal\t" + ttlPoolIUnitBal.toString());
 
-             accumulativeFee = await basicPoolInstance.accumulativeFee();
-            console.log("Pool accumulativeFee\t" + accumulativeFee.toString())
+            //  iUntTtlCol = await basicPoolInstance.getTotalColCounter();
+            // console.log("Pool iUntTtlCol\t" + iUntTtlCol.toString())
+
+            //  penPotBal = await basicPoolInstance.penaltyPotBalance();
+            // console.log("Pool ttlPenPot\t" + penPotBal.toString())
+
+            //  iUntTtlPenCol = await basicPoolInstance.getTotalPenCollateral();
+            // console.log("Pool iUntTtlPenCol\t" + iUntTtlPenCol.toString())
+
+            //  accumulativeFee = await basicPoolInstance.accumulativeFee();
+            // console.log("Pool accumulativeFee\t" + accumulativeFee.toString())
 
             /**
              * 
@@ -600,7 +894,7 @@ describe("Basic Pool Tests", async () => {
             usr1 iUntBal	0
             usr1 ttlPenCmd	473712970092
             usr1 ttlPenCnt	473712970092
-            
+
             usr2 untBal	0
             usr2 iUntBal	1
             usr2 ttlPenCmd	402656024578
@@ -664,8 +958,38 @@ describe("Basic Pool Tests", async () => {
             // console.log("pool bal\t" + poolBalanceInCdai.toString())
             // console.log("pen balance\t" + penalty.toString())
 
-            await basicPoolInstance.from(user2).finalWithdraw();
-            console.log("user 2 withdraw");
+            await assert.revert(basicPoolInstance.from(user2).finalWithdraw());
+
+            user2DaiBalance = await pDaiInstance.balanceOf(user2.signer.address);
+            user2Info = await basicPoolInstance.getUserInfo(user2.signer.address);
+            penaltyPotBalanceAfterWithdraw = await basicPoolInstance.penaltyPotBalance();
+            totalPoolCdaiBalance = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+
+            assert.equal(
+                user2DaiBalance.toString(),
+                test_settings.pDaiSettings.withdrawWithPenalty,
+                "User 2 balance has not been incrfeased as expected afer full withdraw"
+            );
+            assert.equal(
+                user2Info[0].toString(),
+                0,
+                "User 2 has unexpected internal pool dai balance"
+            );
+            assert.equal(
+                user2Info[0].toString(),
+                0,
+                "User 2 has unexpected internal pool cDai balance"
+            );
+            assert.equal(
+                penaltyPotBalanceAfterWithdraw.toString(),
+                1,
+                "Penalty amount in pool is unexpected after user 2 fill withdraw"
+            );
+            assert.equal(
+                totalPoolCdaiBalance.toString(),
+                2,
+                "Pool cDai balance is unexpected after user 2 full withdraw"
+            );
 
             //  user1Interest = await basicPoolInstance.getUserInterest(user1.signer.address);
             //  user2Interest = await basicPoolInstance.getUserInterest(user2.signer.address);
@@ -930,8 +1254,8 @@ describe("Basic Pool Tests", async () => {
             );
             assert.equal(
                 interestAvaliableUser3[1].toString(),
-                test_settings.basicPool.penaltyInterest,
-                "User 3 has incorect penalty balance"
+                0,
+                "User 3 has penalty balance after full withraw"
             );
             
             await basicPoolInstance.from(user2).withdraw(

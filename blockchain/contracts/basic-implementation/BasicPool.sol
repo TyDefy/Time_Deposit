@@ -362,6 +362,10 @@ contract BasicPool is WhitelistAdminRole {
             !isAlive_,
             "Contract has not been terminated. Please use other withdraw"
         );
+        require(
+            users_[msg.sender].balance > 1,
+            "User has no funding to withdraw"
+        );
         
         uint256 userBal = users_[msg.sender].balance;
         _addInterestToBalance(msg.sender);
