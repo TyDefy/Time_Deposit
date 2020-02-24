@@ -314,7 +314,8 @@ contract BasicPool is WhitelistAdminRole {
         (iUnitInterest, penaltyPotPortion) = _claimInterestAmount(msg.sender);
         uint256 iUnitTotalReward = iUnitInterest + penaltyPotPortion; 
 
-        iUnitTotalCollateral_ -= iUnitTotalReward;
+        // TODO total col never incoded pen
+        // iUnitTotalCollateral_ -= iUnitTotalReward;
         users_[msg.sender].balance -= iUnitInterest;
 
         uint256 balanceBefore = unitInstance_.balanceOf(address(this));
@@ -360,7 +361,8 @@ contract BasicPool is WhitelistAdminRole {
             !isAlive_,
             "Contract has not been terminated. Please use other withdraw"
         );
-
+        
+        uint256 userBal = users_[msg.sender].balance;
         _addInterestToBalance(msg.sender);
 
         // Withdraw full balance 
@@ -368,34 +370,37 @@ contract BasicPool is WhitelistAdminRole {
         uint256 penaltyPotPortion;
         (iUnitInterest, penaltyPotPortion) = _claimInterestAmount(msg.sender);
         uint256 iUnitTotalReward = iUnitInterest + penaltyPotPortion;
+        
 
         // iUnitTotalCollateral_ -= iUnitTotalReward;
         // users_[msg.sender].balance += iUnitTotalReward;
 
-        // uint256 balanceBeforeInterest = unitInstance_.balanceOf(address(this));
+        /**
+            uint256 balanceBeforeInterest = unitInstance_.balanceOf(address(this));
 
-        // require(
-        //     iUnitInstance_.redeem(iUnitTotalReward) == 0,
-        //     "Interest collateral transfer failed"
-        // );
+            require(
+                iUnitInstance_.redeem(iUnitTotalReward) == 0,
+                "Interest collateral transfer failed"
+            );
 
-        // uint256 balanceAfterInterest = unitInstance_.balanceOf(address(this));
-        // uint256 unitReward = balanceAfterInterest - balanceBeforeInterest; 
+            uint256 balanceAfterInterest = unitInstance_.balanceOf(address(this));
+            uint256 unitReward = balanceAfterInterest - balanceBeforeInterest; 
 
-        // require(
-        //     unitInstance_.transfer(
-        //         msg.sender,
-        //         unitReward
-        //     ),
-        //     "Collateral transfer failed"
-        // );
+            require(
+                unitInstance_.transfer(
+                    msg.sender,
+                    unitReward
+                ),
+                "Collateral transfer failed"
+            );
 
-        // emit WithdrawInterest(
-        //     msg.sender,
-        //     unitReward
-        // );
+            emit WithdrawInterest(
+                msg.sender,
+                unitReward
+            );
+        */
 
-        uint256 iUnitWithdrawAmount = (users_[msg.sender].balance + iUnitTotalReward);
+        uint256 iUnitWithdrawAmount = (userBal + iUnitTotalReward);
 
         uint256 balanceBefore = unitInstance_.balanceOf(address(this));
         uint256 iUnitBalanceBefore = iUnitInstance_.balanceOf(address(this));
@@ -411,9 +416,8 @@ contract BasicPool is WhitelistAdminRole {
         uint256 iUnitBurnt = iUnitBalanceBefore - iUnitBalanceAfter; 
         uint256 unitRecived = balanceAfter - balanceBefore; 
 
-        iUnitTotalCollateral_ -= iUnitBurnt;
-        
-        // iUnitTotalPenaltyCollateral -= ;
+        iUnitTotalCollateral_ -= userBal;
+        iUnitTotalPenaltyCollateral -= userBal;
         users_[msg.sender].collateralInvested = 0;
         users_[msg.sender].balance = 0;
         users_[msg.sender].lastWtihdraw = now;

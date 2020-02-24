@@ -392,8 +392,71 @@ describe("Basic Pool Tests", async () => {
             // console.log("pen balance\t" + penalty.toString())
 
             let tx = await(await basicPoolInstance.from(user2).withdraw(
-                test_settings.basicPool.withdraw
+                test_settings.basicPool.deposit
             )).wait();
+
+            let usrBal = await pDaiInstance.balanceOf(user1.signer.address);
+            console.log("usr1 untBal\t" + usrBal.toString());
+
+            let usr2Bal = await pDaiInstance.balanceOf(user2.signer.address);
+            console.log("usr2 untBal\t" + usr2Bal.toString() + "\n>>> User pool state varaibles")
+
+            let user1PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user1.signer.address);
+            console.log("usr1 untBal\t" + user1PenaltyShareUI[0].toString());
+            console.log("usr1 iUntBal\t" + user1PenaltyShareUI[1].toString());
+            console.log("usr1 ttlPenCmd\t" + user1PenaltyShareUI[2].toString());
+            console.log("usr1 ttlPenCnt\t" + user1PenaltyShareUI[3].toString());
+
+            let user2PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user2.signer.address);
+            console.log("usr2 untBal\t" + user2PenaltyShareUI[0].toString());
+            console.log("usr2 iUntBal\t" + user2PenaltyShareUI[1].toString());
+            console.log("usr2 ttlPenCmd\t" + user2PenaltyShareUI[2].toString());
+            console.log("usr2 ttlPenCnt\t" + user2PenaltyShareUI[3].toString() + "\n>>> Pool things");
+
+            let ttlPoolUnitBal = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            console.log("Pool ttlPoolUnitBal\t" + ttlPoolUnitBal.toString());
+
+            let ttlPoolIUnitBal = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            console.log("Pool ttlPoolIUnitBal\t" + ttlPoolIUnitBal.toString());
+
+            let iUntTtlCol = await basicPoolInstance.getTotalColCounter();
+            console.log("Pool iUntTtlCol\t" + iUntTtlCol.toString())
+
+            let penPotBal = await basicPoolInstance.penaltyPotBalance();
+            console.log("Pool ttlPenPot\t" + penPotBal.toString())
+
+            let iUntTtlPenCol = await basicPoolInstance.getTotalPenCollateral();
+            console.log("Pool iUntTtlPenCol\t" + iUntTtlPenCol.toString())
+
+            let accumulativeFee = await basicPoolInstance.accumulativeFee();
+            console.log("Pool accumulativeFee\t" + accumulativeFee.toString())
+
+            /**
+             * 
+            user 1 withdraw
+            usr1 untBal	100000014999999999543873638
+            usr2 untBal	99999985000000000000000000
+
+            >>> User pool state varaibles
+            usr1 untBal	0
+            usr1 iUntBal	0
+            usr1 ttlPenCmd	473712970092
+            usr1 ttlPenCnt	473712970092
+
+            usr2 untBal	0
+            usr2 iUntBal	1
+            usr2 ttlPenCmd	402656024578
+            usr2 ttlPenCnt	473712970092
+            
+            >>> Pool things
+            Pool ttlPoolUnitBal	0
+            Pool ttlPoolIUnitBal	2
+            Pool iUntTtlCol	115792089237316195423570985008687907853269984665640564039457584007842072694425
+            Pool ttlPenPot	1
+            Pool iUntTtlPenCol	473712970093
+            Pool accumulativeFee	0
+            user 2 withdraw
+             */
 
             //  user2PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user2.signer.address);
 
@@ -449,67 +512,6 @@ describe("Basic Pool Tests", async () => {
                 "The pool has not been terminated"
             );
 
-            let usrBal = await pDaiInstance.balanceOf(user1.signer.address);
-            console.log("usr1 untBal\t" + usrBal.toString());
-
-            let usr2Bal = await pDaiInstance.balanceOf(user2.signer.address);
-            console.log("usr2 untBal\t" + usr2Bal.toString() + "\n>>> User pool state varaibles")
-
-            let user1PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user1.signer.address);
-            console.log("usr1 untBal\t" + user1PenaltyShareUI[0].toString());
-            console.log("usr1 iUntBal\t" + user1PenaltyShareUI[1].toString());
-            console.log("usr1 ttlPenCmd\t" + user1PenaltyShareUI[2].toString());
-            console.log("usr1 ttlPenCnt\t" + user1PenaltyShareUI[3].toString());
-
-            let user2PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user2.signer.address);
-            console.log("usr2 untBal\t" + user2PenaltyShareUI[0].toString());
-            console.log("usr2 iUntBal\t" + user2PenaltyShareUI[1].toString());
-            console.log("usr2 ttlPenCmd\t" + user2PenaltyShareUI[2].toString());
-            console.log("usr2 ttlPenCnt\t" + user2PenaltyShareUI[3].toString() + "\n>>> Pool things");
-
-            let ttlPoolUnitBal = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
-            console.log("Pool ttlPoolUnitBal\t" + ttlPoolUnitBal.toString());
-
-            let ttlPoolIUnitBal = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
-            console.log("Pool ttlPoolIUnitBal\t" + ttlPoolIUnitBal.toString());
-
-            let iUntTtlCol = await basicPoolInstance.getTotalColCounter();
-            console.log("Pool iUntTtlCol\t" + iUntTtlCol.toString())
-
-            let penPotBal = await basicPoolInstance.penaltyPotBalance();
-            console.log("Pool ttlPenPot\t" + penPotBal.toString())
-
-            let iUntTtlPenCol = await basicPoolInstance.getTotalPenCollateral();
-            console.log("Pool iUntTtlPenCol\t" + iUntTtlPenCol.toString())
-
-            let accumulativeFee = await basicPoolInstance.accumulativeFee();
-            console.log("Pool accumulativeFee\t" + accumulativeFee.toString())
-
-            /**
-             * 
-           usr1 untBal	100000004999999999592714986
-            usr2 untBal	99999993458333333359753319
-
-            >>> User pool state varaibles
-            usr1 untBal	0
-            usr1 iUntBal	0
-            usr1 ttlPenCmd	473712970092
-            usr1 ttlPenCnt	473712970092
-
-            usr2 untBal	0
-            usr2 iUntBal	0
-            usr2 ttlPenCmd	473712970092
-            usr2 ttlPenCnt	473712970092
-
-            >>> Pool things
-            
-            Pool ttlPoolUnitBal	0
-            Pool ttlPoolIUnitBal	7303074957
-            Pool iUntTtlCol	115792089237316195423570985008687907853269984665640564039457584007884904242137
-            Pool ttlPenPot	7303074957
-            Pool iUntTtlPenCol	710569455139
-            Pool accumulativeFee	0
-             */
 
             //  claimPenAmount = await basicPoolInstance._getPenaltyPotPortion(user2.signer.address)
             // console.log("Claim pen amount:\t" + claimPenAmount.toString())
@@ -530,6 +532,89 @@ describe("Basic Pool Tests", async () => {
 
             await basicPoolInstance.from(user1).finalWithdraw();
             console.log("user 1 withdraw");
+
+             usrBal = await pDaiInstance.balanceOf(user1.signer.address);
+            console.log("usr1 untBal\t" + usrBal.toString());
+
+             usr2Bal = await pDaiInstance.balanceOf(user2.signer.address);
+            console.log("usr2 untBal\t" + usr2Bal.toString() + "\n>>> User pool state varaibles")
+
+             user1PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user1.signer.address);
+            console.log("usr1 untBal\t" + user1PenaltyShareUI[0].toString());
+            console.log("usr1 iUntBal\t" + user1PenaltyShareUI[1].toString());
+            console.log("usr1 ttlPenCmd\t" + user1PenaltyShareUI[2].toString());
+            console.log("usr1 ttlPenCnt\t" + user1PenaltyShareUI[3].toString());
+
+             user2PenaltyShareUI = await basicPoolInstance.getUserInfoTemp(user2.signer.address);
+            console.log("usr2 untBal\t" + user2PenaltyShareUI[0].toString());
+            console.log("usr2 iUntBal\t" + user2PenaltyShareUI[1].toString());
+            console.log("usr2 ttlPenCmd\t" + user2PenaltyShareUI[2].toString());
+            console.log("usr2 ttlPenCnt\t" + user2PenaltyShareUI[3].toString() + "\n>>> Pool things");
+
+             ttlPoolUnitBal = await pDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            console.log("Pool ttlPoolUnitBal\t" + ttlPoolUnitBal.toString());
+
+             ttlPoolIUnitBal = await cDaiInstance.balanceOf(basicPoolInstance.contract.address);
+            console.log("Pool ttlPoolIUnitBal\t" + ttlPoolIUnitBal.toString());
+
+             iUntTtlCol = await basicPoolInstance.getTotalColCounter();
+            console.log("Pool iUntTtlCol\t" + iUntTtlCol.toString())
+
+             penPotBal = await basicPoolInstance.penaltyPotBalance();
+            console.log("Pool ttlPenPot\t" + penPotBal.toString())
+
+             iUntTtlPenCol = await basicPoolInstance.getTotalPenCollateral();
+            console.log("Pool iUntTtlPenCol\t" + iUntTtlPenCol.toString())
+
+             accumulativeFee = await basicPoolInstance.accumulativeFee();
+            console.log("Pool accumulativeFee\t" + accumulativeFee.toString())
+
+            /**
+             * 
+            usr1 untBal	99999900000000000000000000
+            usr2 untBal	99999985000000000000000000
+            >>> User pool state varaibles
+            usr1 untBal	100000000000000000000
+            usr1 iUntBal	473712970092
+            usr1 ttlPenCmd	0
+            usr1 ttlPenCnt	473712970092
+            usr2 untBal	0
+            usr2 iUntBal	1
+            usr2 ttlPenCmd	402656024578
+            usr2 ttlPenCnt	473712970092
+            >>> Pool things
+            Pool ttlPoolUnitBal	0
+            Pool ttlPoolIUnitBal	544769915606
+            Pool iUntTtlCol	473712970093
+            Pool ttlPenPot	71056945513
+            Pool iUntTtlPenCol	473712970093
+            Pool accumulativeFee	0
+
+            user 1 withdraw
+
+            usr1 untBal	100000014999999999543873638
+            usr2 untBal	99999985000000000000000000
+
+            >>> User pool state varaibles
+            usr1 untBal	0
+            usr1 iUntBal	0
+            usr1 ttlPenCmd	473712970092
+            usr1 ttlPenCnt	473712970092
+            
+            usr2 untBal	0
+            usr2 iUntBal	1
+            usr2 ttlPenCmd	402656024578
+            usr2 ttlPenCnt	473712970092
+
+            >>> Pool things
+            Pool ttlPoolUnitBal	0
+            Pool ttlPoolIUnitBal	2
+            Pool iUntTtlCol	1
+            Pool ttlPenPot	1
+            Pool iUntTtlPenCol	1
+            Pool accumulativeFee	0
+
+             */
 
             // let user1Interest = await basicPoolInstance.getUserInterest(user1.signer.address);
             // let user2Interest = await basicPoolInstance.getUserInterest(user2.signer.address);
