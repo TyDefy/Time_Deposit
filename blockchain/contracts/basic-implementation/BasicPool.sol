@@ -250,6 +250,7 @@ contract BasicPool is WhitelistAdminRole {
                 // Updates the balance of the user
                 users_[msg.sender].balance -= iUnitPenAmount;
                 users_[msg.sender].collateralInvested -= penaltyAmount;
+                users_[msg.sender].totalPenaltyClaimed += iUnitPenAmount;
                 // Updates the balance of the penalty pot
                 penaltyPot_ += (iUnitPenAmount - fee);
                 iUnitTotalCollateral_ -= (iUnitPenAmount + fee);
