@@ -138,11 +138,11 @@ const deploy = async (network, secret) => {
 
 		const deploy = (...args) => deployer.deployAndVerify(...args);
 
-		const dai = "0x5592EC0cfb4dbc12D3aB100b257153436a1f0FEa";
+		const dai = "0x5592ec0cfb4dbc12d3ab100b257153436a1f0fea";
 
 		const pDaiInstance = deployer.wrapDeployedContract(erc20ABI, dai);
 
-		const cDai = "0x2acc448d73e8d53076731fea2ef3fc38214d0a7d";
+		const cDai = "0x6d7f0754ffeb405d23c51ce938289d4835be3b14";
 
 		const pcDaiInstance = deployer.wrapDeployedContract(pcTokenABI, cDai);
 
