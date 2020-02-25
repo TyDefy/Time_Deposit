@@ -896,7 +896,7 @@ describe("Pool tests - withdraw", async () => {
             );
             assert.equal(
                 user2DaiBalanceAfterInterestWithdraw.toString(),
-                test_settings.pDaiSettings.otherWithdrawInterestBalance.toString(),
+                test_settings.pDaiSettings.withdrawInterestPusPenaltyMinusFee.toString(),
                 "User dai balance has not been incremented to include interest"
             );
             assert.equal(
@@ -1061,7 +1061,7 @@ describe("Pool tests - withdraw", async () => {
             );
             assert.equal(
                 amount.toString(),
-                test_settings.basicPool.otherPenaltyShareMinusFee,
+                test_settings.basicPool.fullPenaltyPortion,
                 "User does not have access to ful penalty pot portion"
             );
         });
@@ -1108,8 +1108,6 @@ describe("Pool tests - withdraw", async () => {
 
             // Ensuring the second user has a share of penalty pot
             amount = await basicPoolInstance.getUserInterest(user2.signer.address);
-            let interest = new BigNumber(amount.toString());
-            let diff = interest.minus(penaltyPot);
 
             console.log("");
 
@@ -1120,13 +1118,8 @@ describe("Pool tests - withdraw", async () => {
             );
             assert.equal(
                 amount.toString(),
-                test_settings.basicPool.otherPenaltyShareMinusFeePlusInterest,
+                test_settings.basicPool.penaltyBalances.userFullPenPortion,
                 "User does not have access to ful penalty pot portion"
-            );
-            assert.equal(
-                diff.toString(),
-                test_settings.basicPool.otherInterestEarned.toString(),
-                "Interest earned above penalty is not correct"
             );
         });
     });

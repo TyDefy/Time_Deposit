@@ -346,7 +346,10 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     /**
-      * 
+      * @notice Allows users to withdraw all interest, balance and any unclaimed
+      *         penalty from the pool after the pool has been terminated
+      * @dev    This function can only be called after the pool has been 
+      *         terminated
       */
     function finalWithdraw() public {
         // Ensureing this can only be called once contract is killed
@@ -589,26 +592,6 @@ contract BasicPool is WhitelistAdminRole {
         );
     }
 
-    function getUserInfoTemp(
-        address _user
-    )
-        public
-        view
-        returns(
-            uint256,
-            uint256,
-            uint256,
-            uint256
-        )
-    {
-        return (
-            users_[_user].collateralInvested,
-            users_[_user].balance,
-            users_[_user].totalPenaltyClaimed,
-            users_[_user].totalInvestment
-        );
-    }
-
     /**
       * @return Returns the active status of the pool
       */
@@ -717,14 +700,6 @@ contract BasicPool is WhitelistAdminRole {
             }
         }
         return 0;
-    }
-
-    function getTotalPenCollateral() public view returns(uint256) {
-        return iUnitTotalPenaltyCollateral;
-    }
-
-    function getTotalColCounter() public view returns(uint256) {
-        return iUnitTotalCollateral_;
     }
 
     /**
@@ -843,13 +818,5 @@ contract BasicPool is WhitelistAdminRole {
         uint256 unitInterest = _getCurrentUnitValue(interestEarned);
         
         users_[msg.sender].collateralInvested += unitInterest; 
-    }
-
-    function _addPenaltyToBalance(address _user) internal {
-        uint256 iunitPen = _claimPenaltyAmount(_user);
-        uint256 uintPen = _getCurrentUnitValue(iunitPen);
-
-        users_[msg.sender].balance += iunitPen;
-        users_[msg.sender].collateralInvested += uintPen;
     }
 }

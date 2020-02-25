@@ -45,6 +45,7 @@ const test_settings = {
         earnedInterestWithPenalty: "71057136257",
         fullBalanceWithInterest: "473713194496",
         fullBalanceWithInterestAndPenalty: "544770106349",
+        fullPenaltyPortion: "56845556410",
         penaltyInterest: "35528472756",
         penaltyPotAfterInterestWithdraw: "35528472757",
         penShareAfterWithdraws: "53292709134",
@@ -54,7 +55,8 @@ const test_settings = {
         twoUsersHalfAmount: "473712970092",
         penaltyBalances: {
             after2userWithdraws: "85268334616",
-            after3userWithdraws: '28422778206'
+            after3userWithdraws: "28422778206",
+            userFullPenPortion: "56845780814"
         }
     },
     pDaiSettings: {
