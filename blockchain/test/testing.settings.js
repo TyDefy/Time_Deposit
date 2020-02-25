@@ -54,7 +54,7 @@ const test_settings = {
         twoUsersHalfAmount: "473712970092",
         penaltyBalances: {
             after2userWithdraws: "85268334616",
-            after3userWithdraws: '26664668214'
+            after3userWithdraws: '28422778206'
         }
     },
     pDaiSettings: {
@@ -67,7 +67,7 @@ const test_settings = {
         partialWithdrawWithPeanlty: "99999942500000000000000000",
         withdrawInterestBalancePenalty: "99999914999999999610090535",
         otherWithdrawInterestBalancePenalty: "100000014999999999543873638",
-        fullWithdrawBal: "100000012371134020304758204",
+        fullWithdrawBal: "100000011999999999706294848",
         withdrawInterestBalance: "99999900000047371324086683",
         otherWithdrawInterestBalance: "99999912371187252061701985",
         withdrawInterestPusPenaltyMinusFee: "99999912000053055652239429"
@@ -88,8 +88,8 @@ const test_settings = {
         exchangeIncrease: ethers.utils.parseUnits("100", 18),
         roundingMargin: "66216898",
         poolBal: {
-            poolBalAfterUser1Fullwithdraw: "284838236915",
-            poolBalAfterFeeWithdraw: "263521153262",
+            poolBalAfterUser1Fullwithdraw: "286596346907",
+            poolBalAfterFeeWithdraw: "265279263254",
         },
         poolBalanceAfterPartialWithdraw: "1219810897987",
         poolBalanceAfterPartialAndFullWithraw: "817154873409",

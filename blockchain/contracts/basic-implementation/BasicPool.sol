@@ -384,7 +384,6 @@ contract BasicPool is WhitelistAdminRole {
         uint256 unitRecived = balanceAfter - balanceBefore; 
 
         iUnitTotalCollateral_ -= userBal;
-        iUnitTotalPenaltyCollateral -= userBal;
         users_[msg.sender].collateralInvested = 0;
         users_[msg.sender].balance = 0;
         users_[msg.sender].lastWtihdraw = now;
@@ -792,8 +791,8 @@ contract BasicPool is WhitelistAdminRole {
                             (unclaimedPenalty*1e18)/iUnitTotalPenaltyCollateral
                         )*penaltyPot_
                     )/1e18;
-                // iUnitTotalPenaltyCollateral -= unclaimedPenalty;
                 penaltyPot_ -= penaltyPortion;
+                iUnitTotalPenaltyCollateral -= unclaimedPenalty;
                 return penaltyPortion;
             }
         }
