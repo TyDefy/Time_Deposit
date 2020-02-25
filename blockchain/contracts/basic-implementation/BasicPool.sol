@@ -203,17 +203,12 @@ contract BasicPool is WhitelistAdminRole {
     function withdraw(uint256 _amount) public killSwitch() {
         // Adding any earned interest into the balance of the user
         _addInterestToBalance(msg.sender);
-        // _addPenaltyToBalance(msg.sender);
 
         // Ensuring the user has a suficcient balance
         require(
             users_[msg.sender].collateralInvested >= _amount,
             "Insufficent balance"
         );
-
-        // users_[msg.sender].totalInvestment -= iUnitWithdrawAmount;
-        
-        // if(users_[msg.sender].totalPenaltyClaimed < 0) 
 
         // Setting up variables to store withdraw information
         bool withdrawAllowed;
@@ -253,8 +248,8 @@ contract BasicPool is WhitelistAdminRole {
                 users_[msg.sender].totalPenaltyClaimed += iUnitPenAmount;
                 // Updates the balance of the penalty pot
                 penaltyPot_ += (iUnitPenAmount - fee);
-                iUnitTotalCollateral_ -= (iUnitPenAmount + fee);
-                iUnitTotalPenaltyCollateral -= (iUnitPenAmount + fee);
+                iUnitTotalCollateral_ -= iUnitPenAmount;
+                iUnitTotalPenaltyCollateral -= iUnitPenAmount;
             }
         }
 
@@ -275,7 +270,6 @@ contract BasicPool is WhitelistAdminRole {
         iUnitTotalCollateral_ -= iUnitBurnt;
         iUnitTotalPenaltyCollateral -= iUnitBurnt;
         users_[msg.sender].collateralInvested -= withdrawAmount;
-        // PARTIAL FIX
         users_[msg.sender].totalPenaltyClaimed += iUnitBurnt;
         users_[msg.sender].balance -= iUnitBurnt;
         users_[msg.sender].lastWtihdraw = now;
@@ -315,8 +309,6 @@ contract BasicPool is WhitelistAdminRole {
         (iUnitInterest, penaltyPotPortion) = _claimInterestAmount(msg.sender);
         uint256 iUnitTotalReward = iUnitInterest + penaltyPotPortion; 
 
-        // TODO total col never incoded pen
-        // iUnitTotalCollateral_ -= iUnitTotalReward;
         users_[msg.sender].balance -= iUnitInterest;
 
         uint256 balanceBefore = unitInstance_.balanceOf(address(this));
@@ -375,36 +367,6 @@ contract BasicPool is WhitelistAdminRole {
         uint256 penaltyPotPortion;
         (iUnitInterest, penaltyPotPortion) = _claimInterestAmount(msg.sender);
         uint256 iUnitTotalReward = iUnitInterest + penaltyPotPortion;
-        
-
-        // iUnitTotalCollateral_ -= iUnitTotalReward;
-        // users_[msg.sender].balance += iUnitTotalReward;
-
-        /**
-            uint256 balanceBeforeInterest = unitInstance_.balanceOf(address(this));
-
-            require(
-                iUnitInstance_.redeem(iUnitTotalReward) == 0,
-                "Interest collateral transfer failed"
-            );
-
-            uint256 balanceAfterInterest = unitInstance_.balanceOf(address(this));
-            uint256 unitReward = balanceAfterInterest - balanceBeforeInterest; 
-
-            require(
-                unitInstance_.transfer(
-                    msg.sender,
-                    unitReward
-                ),
-                "Collateral transfer failed"
-            );
-
-            emit WithdrawInterest(
-                msg.sender,
-                unitReward
-            );
-        */
-
         uint256 iUnitWithdrawAmount = (userBal + iUnitTotalReward);
 
         uint256 balanceBefore = unitInstance_.balanceOf(address(this));
@@ -435,12 +397,12 @@ contract BasicPool is WhitelistAdminRole {
             "Collateral transfer failed"
         );
 
-        // emit Withdraw(
-        //     msg.sender,
-        //     withdrawAmount,
-        //     iUnitBurnt,
-        //     penaltyAmount
-        // );
+        emit Withdraw(
+            msg.sender,
+            unitRecived,
+            iUnitBurnt,
+            0
+        );
     }
 
     /**

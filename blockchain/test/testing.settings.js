@@ -34,6 +34,7 @@ const test_settings = {
         fee: 20,
         interestEarned: "2244038717306567",
         otherInterestEarned: "1758334395",
+        otherInterestEarned2Users: "17764236378",
         penaltyShare: "71056945512",
         penaltyShareMinusFee: "56845556411",
         otherPenaltyShareMinusFee: "58603666402",
@@ -50,7 +51,11 @@ const test_settings = {
         penShareAfterWithdrawsEarner: "79939063701",
         userBalanceIncDdaiAfterWithdraw: "236856485047",
         twoUsersFullAmount: "947425940184",
-        twoUsersHalfAmount: "473712970092"
+        twoUsersHalfAmount: "473712970092",
+        penaltyBalances: {
+            after2userWithdraws: "85268334616",
+            after3userWithdraws: '26664668214'
+        }
     },
     pDaiSettings: {
         name: "pDai",
@@ -62,6 +67,7 @@ const test_settings = {
         partialWithdrawWithPeanlty: "99999942500000000000000000",
         withdrawInterestBalancePenalty: "99999914999999999610090535",
         otherWithdrawInterestBalancePenalty: "100000014999999999543873638",
+        fullWithdrawBal: "100000012371134020304758204",
         withdrawInterestBalance: "99999900000047371324086683",
         otherWithdrawInterestBalance: "99999912371187252061701985",
         withdrawInterestPusPenaltyMinusFee: "99999912000053055652239429"
@@ -81,9 +87,19 @@ const test_settings = {
         interestRateYearly: "17989044278774400",
         exchangeIncrease: ethers.utils.parseUnits("100", 18),
         roundingMargin: "66216898",
+        poolBal: {
+            poolBalAfterUser1Fullwithdraw: "284838236915",
+            poolBalAfterFeeWithdraw: "263521153262",
+        },
         poolBalanceAfterPartialWithdraw: "1219810897987",
         poolBalanceAfterPartialAndFullWithraw: "817154873409",
-        poolBalanceAfterfinalWithdrawUser1: "272384957805"
+        poolBalanceAfterfinalWithdrawUser1: "272384957805",
+        poolTotalBalAfter3Defposits: "1421138910276",
+        poolTotalBalanceAfter1FullWithdraw: "1018482885698",
+        adminFee: {
+            oneFullWithdraw: "14211389102",
+            oneFullOnePartial: "21317083653",
+        }
     },
     registrySettings: {
         penalty: {
