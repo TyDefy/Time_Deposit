@@ -415,3 +415,9 @@ The below function allows both the pool and the withdraw library to check the pe
       */
     function penalty() public view returns(uint8) {
 ```
+
+# Testing
+
+Please note that inside the tests there are some blank console logs (`console.lo("")`). These are to counter a sequencing issue that occurs within ganache (the local testing blockchain).
+
+If they are removed the tests may act in unexpected ways as the transaction ordering will be disrupted. 

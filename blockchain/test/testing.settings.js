@@ -28,10 +28,13 @@ const test_settings = {
         withdrawAmountOn100: ethers.utils.parseUnits("85", 18),
         penaltyAmountOn100: ethers.utils.parseUnits("15", 18),
         penaltyAmountInCdai: "71056945513",
+        penaltyAountinCdaiTwoUserWithdraw: "106585418269",
+        poolBalanceWithOneUserAndPenalty: "544769915606",
         otherPenaltyAmountInCdai: "71056945514",
         fee: 20,
         interestEarned: "2244038717306567",
         otherInterestEarned: "1758334395",
+        otherInterestEarned2Users: "17764236378",
         penaltyShare: "71056945512",
         penaltyShareMinusFee: "56845556411",
         otherPenaltyShareMinusFee: "58603666402",
@@ -42,10 +45,19 @@ const test_settings = {
         earnedInterestWithPenalty: "71057136257",
         fullBalanceWithInterest: "473713194496",
         fullBalanceWithInterestAndPenalty: "544770106349",
+        fullPenaltyPortion: "56845556410",
         penaltyInterest: "35528472756",
         penaltyPotAfterInterestWithdraw: "35528472757",
         penShareAfterWithdraws: "53292709134",
-        penShareAfterWithdrawsEarner: "79939063701"
+        penShareAfterWithdrawsEarner: "79939063701",
+        userBalanceIncDdaiAfterWithdraw: "236856485047",
+        twoUsersFullAmount: "947425940184",
+        twoUsersHalfAmount: "473712970092",
+        penaltyBalances: {
+            after2userWithdraws: "85268334616",
+            after3userWithdraws: "28422778206",
+            userFullPenPortion: "56845780814"
+        }
     },
     pDaiSettings: {
         name: "pDai",
@@ -54,7 +66,10 @@ const test_settings = {
         mintAmount: "100000000000000000000000000",
         mintAmountMinusDeposit: "99999900000000000000000000",
         withdrawWithPenalty: "99999985000000000000000000",
+        partialWithdrawWithPeanlty: "99999942500000000000000000",
         withdrawInterestBalancePenalty: "99999914999999999610090535",
+        otherWithdrawInterestBalancePenalty: "100000014999999999543873638",
+        fullWithdrawBal: "100000011999999999706294848",
         withdrawInterestBalance: "99999900000047371324086683",
         otherWithdrawInterestBalance: "99999912371187252061701985",
         withdrawInterestPusPenaltyMinusFee: "99999912000053055652239429"
@@ -66,13 +81,27 @@ const test_settings = {
         mintAmount: "473712970092",
         daiBalanceUnrounded: "99999999999999999933783102",
         depositBalanceUnrounded: "99999999999933783102",
+        daiBalanceAfterPartialWithdrawFinalWithdraw: "99999999999999999983035113",
         mintAmountMinusInterestPenalty: "473712970092",
         mintAmountMinusInterest: "473712745688",
         mintAmountMinusPenaltyInterestFee: "4168671892773643060109",
         otherMintAmountMinusPenaltyInterestFee: "473712745688",
         interestRateYearly: "17989044278774400",
         exchangeIncrease: ethers.utils.parseUnits("100", 18),
-        roundingMargin: "66216898"
+        roundingMargin: "66216898",
+        poolBal: {
+            poolBalAfterUser1Fullwithdraw: "286596346907",
+            poolBalAfterFeeWithdraw: "265279263254",
+        },
+        poolBalanceAfterPartialWithdraw: "1219810897987",
+        poolBalanceAfterPartialAndFullWithraw: "817154873409",
+        poolBalanceAfterfinalWithdrawUser1: "272384957805",
+        poolTotalBalAfter3Defposits: "1421138910276",
+        poolTotalBalanceAfter1FullWithdraw: "1018482885698",
+        adminFee: {
+            oneFullWithdraw: "14211389102",
+            oneFullOnePartial: "21317083653",
+        }
     },
     registrySettings: {
         penalty: {
