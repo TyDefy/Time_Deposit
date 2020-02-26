@@ -117,10 +117,9 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
 }: OwnProps) => (
     <Container maxWidth='lg'>
       <Grid container direction='row' className={classes.poolDetailsHeaderRow}>
-        <Grid item xs={3}><Typography variant='h3' className={classes.poolName}>{name}</Typography></Grid>
-        <Grid item xs={3}><Chip className={classes.period} label={period == 0 ? 'Rolling' : `${period} month(s)`} /></Grid>
-        <Grid item xs={3}><Chip className={(active) ? classes.poolActive : classes.poolTerminated} label={(active) ? `Active` : `Terminated`} /></Grid>
-        <Grid item xs={3}>
+        <Grid item xs={4}><Typography variant='h3' className={classes.poolName}>{name}</Typography></Grid>
+        <Grid item xs={4}><Chip className={classes.period} label={period == 0 ? 'Rolling' : `${period} month(s)`} /> <Chip className={(active) ? classes.poolActive : classes.poolTerminated} label={(active) ? `Active` : `Terminated`} /></Grid>
+        <Grid item xs={4}>
           <Typography className={classes.currentInterest}>
             Current Interest:  
             <strong className={classes.percentageInterest}>
