@@ -108,6 +108,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
   participants,
   contribution,
   interestAccrued,
+  penaltyRate,
   availableInterest,
   description,
   transactions,
@@ -116,10 +117,9 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
 }: OwnProps) => (
     <Container maxWidth='lg'>
       <Grid container direction='row' className={classes.poolDetailsHeaderRow}>
-        <Grid item xs={3}><Typography variant='h3' className={classes.poolName}>{name}</Typography></Grid>
-        <Grid item xs={3}><Chip className={classes.period} label={`${period} month(s)`} /></Grid>
-        <Grid item xs={3}><Chip className={(active) ? classes.poolActive : classes.poolTerminated} label={(active) ? `Active` : `Terminated`} /></Grid>
-        <Grid item xs={3}>
+        <Grid item xs={4}><Typography variant='h3' className={classes.poolName}>{name}</Typography></Grid>
+        <Grid item xs={4}><Chip className={classes.period} label={period == 0 ? 'Rolling' : `${period} month(s)`} /> <Chip className={(active) ? classes.poolActive : classes.poolTerminated} label={(active) ? `Active` : `Terminated`} /></Grid>
+        <Grid item xs={4}>
           <Typography className={classes.currentInterest}>
             Current Interest:  
             <strong className={classes.percentageInterest}>
@@ -136,32 +136,38 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
       </Grid>
       <br/>
       <Grid container direction='row' spacing={0} className={classes.poolDetailsRow}>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <Typography className={classes.label}>Instrument</Typography>
           <Typography className={classes.value}>{type}</Typography>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <Typography className={classes.label}>Pool Total</Typography>
           <Typography className={classes.value}>{balance.toFixed(2)}</Typography>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <Typography className={classes.label}>Pool Participants</Typography>
           <Typography className={classes.value}>{participants}</Typography>
+        </Grid>
+        <Grid item xs={3}>
+          <Typography className={classes.label}>Pool Penalty</Typography>
+          <Typography className={classes.value}>{penaltyRate} %</Typography>
         </Grid>
       </Grid>
       <br/>
       <Grid container direction='row' className={classes.poolDetailsRow}>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <Typography  className={classes.label}>Purchase Value</Typography>
           <Typography  className={classes.value}>{(contribution || 0).toFixed(2)}</Typography>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <Typography className={classes.profitLabel}>Profit</Typography>
           <Typography className={classes.profitValue}>{(interestAccrued || 0).toFixed(2)}</Typography>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={3}>
           <Typography  className={classes.label}>Penalty free withdrawal</Typography>
           <Typography  className={classes.value}>{(availableInterest || 0).toFixed(2)}</Typography>
+        </Grid>
+        <Grid item xs={3}>
         </Grid>
       </Grid>
       <br/>
