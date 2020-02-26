@@ -240,12 +240,10 @@ function* poolWithdrawInterestListener(poolContract: Pool) {
       const writeableContract = poolContract.connect(signer);
       if (action.payload.poolAddress === poolContract.address) {
         try {
-          const withdrawAmount = parseEther(action.payload.amount.toString());
           yield put(setTxContext('Withdrawing interest'));
           const tx: ContractTransaction = yield call(
             //@ts-ignore
             [writeableContract, writeableContract.withdrawInterest],
-            withdrawAmount
           );
           yield put(setTxHash(tx.hash));
           yield call([tx, tx.wait]);
