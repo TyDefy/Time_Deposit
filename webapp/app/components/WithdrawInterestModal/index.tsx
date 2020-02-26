@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from 'react';
-import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, TextField, Button } from '@material-ui/core';
+import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, Button } from '@material-ui/core';
 
 const styles = ({ palette, spacing }: Theme) =>
   createStyles({
@@ -47,7 +47,7 @@ const WithdrawInterestModal: React.FC<OwnProps> = ({
   onSubmit,
   classes
 }: OwnProps) => {
-  const [value, setValue] = useState(availableInterest);
+  const [value] = useState(availableInterest);
   const submit = () => onSubmit(value);
   return <Container maxWidth='sm' className={classes.container}>
     <Grid container direction='column' alignItems='center'>
@@ -56,15 +56,6 @@ const WithdrawInterestModal: React.FC<OwnProps> = ({
       <Typography className={classes.value}>{`${name} (${type})`}</Typography>
       <Typography className={classes.label}>Penalty free withdrawal</Typography>
       <Typography className={classes.value}>{availableInterest.toFixed(2)}</Typography>
-      <Typography className={classes.label}>Amount</Typography>
-      <TextField
-        value={value}
-        onChange={(e) => setValue(parseFloat(e.target.value))}
-        inputProps={{
-          min: 0,
-          max: availableInterest,
-          step: 0.01
-        }} />
       <Grid container direction='row' justify='space-around' className={classes.buttonBar}>
         <Button color='primary' onClick={onClose}>Cancel</Button>
         <Button color='primary' onClick={submit}>Submit</Button>
