@@ -39,7 +39,7 @@ contract BasicPool is WhitelistAdminRole {
         uint256 collateralInvested;
         uint256 balance;
         uint256 lastDeposit;
-        uint256 lastWtihdraw;
+        uint256 lastWithdraw;
         uint256 totalPenaltyClaimed;    // underlying interest earning
         uint256 totalInvestment;        // underlying interest earning
     }
@@ -189,8 +189,8 @@ contract BasicPool is WhitelistAdminRole {
         users_[msg.sender].lastDeposit = now;
         users_[msg.sender].totalInvestment += mintedTokens;
         // If its a new user, last withdraw set to now
-        if(users_[msg.sender].lastWtihdraw == 0) {
-            users_[msg.sender].lastWtihdraw = now;
+        if(users_[msg.sender].lastWithdraw == 0) {
+            users_[msg.sender].lastWithdraw = now;
             users_[msg.sender].totalPenaltyClaimed = 0;
         }
         
@@ -235,7 +235,7 @@ contract BasicPool is WhitelistAdminRole {
                 penaltyAmount
             ) = withdrawInstance_.canWithdraw(
                 _amount,
-                users_[msg.sender].lastWtihdraw
+                users_[msg.sender].lastWithdraw
             );
             require(withdrawAllowed, "Withdraw is not allowed in violation");
             // Applying the penalty if there is one
@@ -285,7 +285,7 @@ contract BasicPool is WhitelistAdminRole {
         users_[msg.sender].collateralInvested -= withdrawAmount;
         users_[msg.sender].totalPenaltyClaimed += iUnitBurnt;
         users_[msg.sender].balance -= iUnitBurnt;
-        users_[msg.sender].lastWtihdraw = now;
+        users_[msg.sender].lastWithdraw = now;
 
         require(
             unitInstance_.transfer(
@@ -310,7 +310,7 @@ contract BasicPool is WhitelistAdminRole {
         if(address(withdrawInstance_) != address(0)) { 
             require(
                 withdrawInstance_.canWithdrawInterest(
-                    users_[msg.sender].lastWtihdraw
+                    users_[msg.sender].lastWithdraw
                 ),
                 "Cannot withdraw interest in violation"
             );
@@ -403,7 +403,7 @@ contract BasicPool is WhitelistAdminRole {
         iUnitTotalCollateral_ -= userBal;
         users_[msg.sender].collateralInvested = 0;
         users_[msg.sender].balance = 0;
-        users_[msg.sender].lastWtihdraw = now;
+        users_[msg.sender].lastWithdraw = now;
 
         require(
             unitInstance_.transfer(
@@ -535,7 +535,7 @@ contract BasicPool is WhitelistAdminRole {
                 penaltyAmount
             ) = withdrawInstance_.canWithdraw(
                 _amount,
-                users_[_user].lastWtihdraw
+                users_[_user].lastWithdraw
             );
         }
          
@@ -602,7 +602,7 @@ contract BasicPool is WhitelistAdminRole {
             users_[_user].collateralInvested,
             users_[_user].balance,
             users_[_user].lastDeposit,
-            users_[_user].lastWtihdraw
+            users_[_user].lastWithdraw
         );
     }
 
