@@ -89,7 +89,7 @@ export const addPoolTx = createStandardAction('ADD_POOL_TX')<{
   poolAddress: string,
   userAddress: string;
   time: Date;
-  type: 'Deposit' | 'Withdraw' | 'Penalty';
+  type: 'Deposit' | 'Withdraw' | 'Penalty' | 'Withdraw Interest';
   amount: number;
   cdaiAmount: number;
   txHash: string;

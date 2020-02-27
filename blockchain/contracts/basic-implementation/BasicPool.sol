@@ -67,7 +67,8 @@ contract BasicPool is WhitelistAdminRole {
     );
     event WithdrawInterest(
         address indexed user,
-        uint256 amount
+        uint256 unitAmount,
+        uint256 iUnitAmount
     );
     event InterestAvailable(
         address indexed user,
@@ -331,7 +332,8 @@ contract BasicPool is WhitelistAdminRole {
 
         emit WithdrawInterest(
             msg.sender,
-            unitReward
+            unitReward,
+            iUnitTotalReward
         );
     }
 

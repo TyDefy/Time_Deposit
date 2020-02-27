@@ -289,7 +289,7 @@ function* getPoolTotalPenalty(poolContract: Pool) {
 function* getPoolFeeBalance(poolContract: Pool) {
   try {
     const poolFeeAmount = yield call([poolContract, poolContract.accumulativeFee]);
-    yield put(setPoolFeeAmount({ poolAddress: poolContract.address, feeAmount: Number(formatUnits(poolFeeAmount, 9)) }))    
+    yield put(setPoolFeeAmount({ poolAddress: poolContract.address, feeAmount: Number(formatUnits(poolFeeAmount, 9)) }))
   } catch (error) {
     console.log(`There was an error getting the fee balance for pool ${poolContract.address}`);
   }
@@ -298,7 +298,7 @@ function* getPoolFeeBalance(poolContract: Pool) {
 function* getPoolUserBalance(poolContract: Pool, ethAddress: string) {
   try {
     const userBalance = yield call([poolContract, poolContract.getUserBalance], ethAddress);
-    yield put(setUserPoolBalance({ poolAddress: poolContract.address, userBalance: Number(formatUnits(userBalance, 9)) }))  
+    yield put(setUserPoolBalance({ poolAddress: poolContract.address, userBalance: Number(formatUnits(userBalance, 9)) }))
   } catch (error) {
     console.log(`There was an error getting the user's balance for pool ${poolContract.address}`);
   }
@@ -348,11 +348,23 @@ function* poolTransactionListener(poolContract: Pool) {
         transactionHash: tx.transactionHash,
       })
     };
+    const withdrawInterestHandler = (address, withdrawAmount, cDaiAmount, tx) => {
+      emit({
+        type: 'Withdraw Interest',
+        address,
+        withdrawAmount,
+        cDaiAmount,
+        blockNumber: tx.blockNumber,
+        transactionHash: tx.transactionHash,
+      })
+    };
     poolContract.on(poolContract.filters.Deposit(null, null, null), depositHandler);
     poolContract.on(poolContract.filters.Withdraw(null, null, null, null), withdrawHandler);
+    poolContract.on(poolContract.filters.WithdrawInterest(null, null, null), withdrawInterestHandler);
     return () => {
       poolContract.off(poolContract.filters.Deposit(null, null, null), depositHandler);
       poolContract.off(poolContract.filters.Withdraw(null, null, null, null), withdrawHandler);
+      poolContract.off(poolContract.filters.WithdrawInterest(null, null, null), withdrawInterestHandler);
     };
   });
 
@@ -371,7 +383,7 @@ function* poolTransactionListener(poolContract: Pool) {
           amount: Number(formatEther(newTx.daiAmount)),
           cdaiAmount: Number(formatUnits(newTx.cDaiAmount, 9))
         }));
-      } else {
+      } else if (newTx.type === 'Withdraw') {
         yield put(addPoolTx({
           poolAddress: poolContract.address,
           userAddress: newTx.address,
@@ -389,6 +401,16 @@ function* poolTransactionListener(poolContract: Pool) {
           time: new Date(txDate.timestamp * 1000),
           amount: Number(formatEther(newTx.penaltyAmount)),
           cdaiAmount: 0,
+        }))
+      } else {
+        yield put(addPoolTx({
+          poolAddress: poolContract.address,
+          userAddress: newTx.address,
+          type: 'Withdraw Interest',
+          txHash: newTx.transactionHash || '0x',
+          time: new Date(txDate.timestamp * 1000),
+          amount: Number(formatEther(newTx.withdrawAmount)),
+          cdaiAmount: Number(formatUnits(newTx.cDaiAmount, 9))
         }))
       }
       if (ethAddress && newTx.address.toLowerCase() === ethAddress?.toLowerCase()) {
@@ -457,7 +479,30 @@ function* poolWatcherSaga(action) {
         ]
       }));
 
-    const actions = depositTxActions.concat(withdrawTxActions.flat()).sort((a, b) => a.time - b.time);
+    const withdrawInterestLogs: Log[] = yield call([provider, provider.getLogs], {
+      ...poolContract.filters.WithdrawInterest(null, null, null),
+      fromBlock: 0,
+      toBlock: 'latest',
+    })
+
+    const withdrawInterestTxActions = yield Promise.all(withdrawInterestLogs.map(
+      async log => {
+        const parsedWithdrawInterest = poolContract.interface.parseLog(log).values;
+        return addPoolTx({
+          poolAddress: poolContract.address,
+          userAddress: parsedWithdrawInterest.user,
+          type: 'Withdraw Interest',
+          txHash: log.transactionHash || '0x',
+          time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
+          amount: Number(formatEther(parsedWithdrawInterest.unitAmount)),
+          cdaiAmount: Number(formatUnits(parsedWithdrawInterest.iUnitAmount, 9))
+        })
+      }));
+
+    const actions = depositTxActions
+      .concat(withdrawTxActions.flat())
+      .concat(withdrawInterestTxActions)
+      .sort((a, b) => a.time - b.time);
 
     for (const action of actions) {
       yield put(action);
