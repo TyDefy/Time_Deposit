@@ -9,7 +9,7 @@ import { ICToken } from "../interfaces/ICToken.sol";
   * @author Veronica Coutts (@VeronicaLC)
   * @title  Basic Pool
   * @notice This basic pool allows for a collective savings account. This pool
-  *         is intended as a comitment mechanism for savings, and to form the 
+  *         is intended as a comitment mechanism for savings, and to form the
   *         base for future itterations
   */
 contract BasicPool is WhitelistAdminRole {
@@ -19,7 +19,7 @@ contract BasicPool is WhitelistAdminRole {
     uint8 internal feePercentage_ = 0;
     // Lock for setting the fee
     bool internal feeLock_ = false;
-    // Instance of the withdraw library 
+    // Instance of the withdraw library
     IWithdraw internal withdrawInstance_;
     // Instance of the collateral token (i.e Dai)
     IERC20 internal unitInstance_;
@@ -88,7 +88,7 @@ contract BasicPool is WhitelistAdminRole {
 
     /**
       * @param  _admin The address of the admin for this pool
-      * @param  _withdraw The address of the withdraw contract. This can be a 
+      * @param  _withdraw The address of the withdraw contract. This can be a
       *         0 address, and will not break the pool
       * @param  _collateralToken The address of the unit (collateral token)
       * @param  _cToken The address of the iunit (the interest earning token)
@@ -112,8 +112,8 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     /**
-      * @notice This function allows admins to set the fee for the pool. This 
-      *         fee can only be set once, and cannot be edited. This fee is 
+      * @notice This function allows admins to set the fee for the pool. This
+      *         fee can only be set once, and cannot be edited. This fee is
       *         taken off as a percentage of any penalties
       * @dev    If no fee is set the contracts will still work
       * @param  _fee The fee that will be applied to any penalties
@@ -143,8 +143,8 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     /**
-      * @notice Allows a user to deposit underlying collateral into the 
-      *         contract, where it will then be converted into the interest 
+      * @notice Allows a user to deposit underlying collateral into the
+      *         contract, where it will then be converted into the interest
       *         earning asset
       * @param  _amount the amount of the raw token they  are depositng
       */
@@ -179,7 +179,7 @@ contract BasicPool is WhitelistAdminRole {
         );
 
         uint256 iUnitPoolBalanceAfter = iUnitInstance_.balanceOf(address(this));
-        
+
         uint256 mintedTokens = iUnitPoolBalanceAfter - iUnitPoolBanalce;
         iUnitTotalCollateral_ += mintedTokens;
         iUnitTotalPenaltyCollateral += mintedTokens;
@@ -193,7 +193,7 @@ contract BasicPool is WhitelistAdminRole {
             users_[msg.sender].lastWithdraw = now;
             users_[msg.sender].totalPenaltyClaimed = 0;
         }
-        
+
         emit Deposit(
             msg.sender,
             _amount,
@@ -203,9 +203,9 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     /**
-      * @notice This call will add any unclaimed interest to the users balance. 
+      * @notice This call will add any unclaimed interest to the users balance.
       *         This added interest does not include any penalty
-      * @param  _amount The amount the user would like to withdraw 
+      * @param  _amount The amount the user would like to withdraw
       */
     function withdraw(uint256 _amount) public killSwitch() {
         // Adding any earned interest into the balance of the user
@@ -223,15 +223,15 @@ contract BasicPool is WhitelistAdminRole {
         uint256 penaltyAmount;
         uint256 fee;
 
-        if(address(withdrawInstance_) == address(0)) { 
+        if(address(withdrawInstance_) == address(0)) {
             withdrawAmount = _amount;
             penaltyAmount = 0;
             withdrawAllowed = true;
         } else {
             // Getting the correct withdraw information from the withdraw lib
             (
-                withdrawAllowed, 
-                withdrawAmount, 
+                withdrawAllowed,
+                withdrawAmount,
                 penaltyAmount
             ) = withdrawInstance_.canWithdraw(
                 _amount,
@@ -246,7 +246,7 @@ contract BasicPool is WhitelistAdminRole {
                 if(feePercentage_ != 0) {
                     // Gets the fee amount of the penalty
                     fee = ((iUnitPenAmount*feePercentage_)/100);
-                    // Updates the admin balances with the fee   
+                    // Updates the admin balances with the fee
                     accumulativeFeeCollection_ += fee;
                 }
                 // Updates the balance of the user
@@ -276,9 +276,9 @@ contract BasicPool is WhitelistAdminRole {
 
         uint256 balanceAfter = unitInstance_.balanceOf(address(this));
         uint256 iUnitBalanceAfter = iUnitInstance_.balanceOf(address(this));
-        
-        uint256 iUnitBurnt = iUnitBalanceBefore - iUnitBalanceAfter; 
-        uint256 unitRecived = balanceAfter - balanceBefore; 
+
+        uint256 iUnitBurnt = iUnitBalanceBefore - iUnitBalanceAfter;
+        uint256 unitReceived = balanceAfter - balanceBefore;
 
         iUnitTotalCollateral_ -= iUnitBurnt;
         iUnitTotalPenaltyCollateral -= iUnitBurnt;
@@ -290,7 +290,7 @@ contract BasicPool is WhitelistAdminRole {
         require(
             unitInstance_.transfer(
                 msg.sender,
-                unitRecived
+                unitReceived
             ),
             "Collateral transfer failed"
         );
@@ -307,7 +307,7 @@ contract BasicPool is WhitelistAdminRole {
       * @notice Allows a user to withdraw their interest and penalty pot share
       */
     function withdrawInterest() public killSwitch() {
-        if(address(withdrawInstance_) != address(0)) { 
+        if(address(withdrawInstance_) != address(0)) {
             require(
                 withdrawInstance_.canWithdrawInterest(
                     users_[msg.sender].lastWithdraw
@@ -317,10 +317,10 @@ contract BasicPool is WhitelistAdminRole {
         }
         // Gets the users interest as well as claiming their portion of the
         // penalty pot
-        uint256 iUnitInterest; 
+        uint256 iUnitInterest;
         uint256 penaltyPotPortion;
         (iUnitInterest, penaltyPotPortion) = _claimInterestAmount(msg.sender);
-        uint256 iUnitTotalReward = iUnitInterest + penaltyPotPortion; 
+        uint256 iUnitTotalReward = iUnitInterest + penaltyPotPortion;
 
         users_[msg.sender].balance -= iUnitInterest;
 
@@ -332,7 +332,7 @@ contract BasicPool is WhitelistAdminRole {
         );
 
         uint256 balanceAfter = unitInstance_.balanceOf(address(this));
-        uint256 unitReward = balanceAfter - balanceBefore; 
+        uint256 unitReward = balanceAfter - balanceBefore;
 
         require(
             unitInstance_.transfer(
@@ -353,7 +353,7 @@ contract BasicPool is WhitelistAdminRole {
       * @notice Allows a user to withdraw all the funds from their account
       */
     function withdrawAndClose() public killSwitch() {
-        // Withdraw full balance 
+        // Withdraw full balance
         withdrawInterest();
         uint256 fullUserBalance = users_[msg.sender].collateralInvested;
         withdraw(fullUserBalance);
@@ -362,7 +362,7 @@ contract BasicPool is WhitelistAdminRole {
     /**
       * @notice Allows users to withdraw all interest, balance and any unclaimed
       *         penalty from the pool after the pool has been terminated
-      * @dev    This function can only be called after the pool has been 
+      * @dev    This function can only be called after the pool has been
       *         terminated
       */
     function finalWithdraw() public {
@@ -379,15 +379,13 @@ contract BasicPool is WhitelistAdminRole {
         uint256 userBal = users_[msg.sender].balance;
         _addInterestToBalance(msg.sender);
 
-        // Withdraw full balance 
-        uint256 iUnitInterest; 
+        // Withdraw full balance
         uint256 penaltyPotPortion;
         (iUnitInterest, penaltyPotPortion) = _claimInterestAmount(msg.sender);
         uint256 iUnitTotalReward = iUnitInterest + penaltyPotPortion;
         uint256 iUnitWithdrawAmount = (userBal + iUnitTotalReward);
 
         uint256 balanceBefore = unitInstance_.balanceOf(address(this));
-        uint256 iUnitBalanceBefore = iUnitInstance_.balanceOf(address(this));
 
         require(
             iUnitInstance_.redeem(iUnitWithdrawAmount) == 0,
@@ -395,10 +393,8 @@ contract BasicPool is WhitelistAdminRole {
         );
 
         uint256 balanceAfter = unitInstance_.balanceOf(address(this));
-        uint256 iUnitBalanceAfter = iUnitInstance_.balanceOf(address(this));
-        
-        uint256 iUnitBurnt = iUnitBalanceBefore - iUnitBalanceAfter; 
-        uint256 unitRecived = balanceAfter - balanceBefore; 
+
+        uint256 unitReceived = balanceAfter - balanceBefore;
 
         iUnitTotalCollateral_ -= userBal;
         users_[msg.sender].collateralInvested = 0;
@@ -408,14 +404,14 @@ contract BasicPool is WhitelistAdminRole {
         require(
             unitInstance_.transfer(
                 msg.sender,
-                unitRecived
+                unitReceived
             ),
             "Collateral transfer failed"
         );
 
         emit Withdraw(
             msg.sender,
-            unitRecived,
+            unitReceived,
             users_[msg.sender].collateralInvested,
             users_[msg.sender].balance
         );
@@ -433,7 +429,7 @@ contract BasicPool is WhitelistAdminRole {
         );
 
         uint256 balanceAfter = unitInstance_.balanceOf(address(this));
-        uint256 unitReward = balanceAfter - balanceBefore; 
+        uint256 unitReward = balanceAfter - balanceBefore;
         accumulativeFeeCollection_ = 0;
 
         require(
@@ -462,10 +458,10 @@ contract BasicPool is WhitelistAdminRole {
     )
         public
         view
-        returns(uint256, uint256) 
+        returns(uint256, uint256)
     {
         return (
-            _getRoughInterestEarned(_user), 
+            _getRoughInterestEarned(_user),
             _getPenaltyPotPortion(_user)
         );
     }
@@ -482,7 +478,7 @@ contract BasicPool is WhitelistAdminRole {
 
     /**
       * @param  _user The address of the user
-      * @return uint256 The total balance of the user and any interest or 
+      * @return uint256 The total balance of the user and any interest or
       *         penalty they are entitled to. This value is in units (interest
       *         earning collateral)
       */
@@ -493,9 +489,9 @@ contract BasicPool is WhitelistAdminRole {
 
     /**
       * @param  _user The address of the user
-      * @param  _amount The amount of collateral (uints) the user wishes to 
+      * @param  _amount The amount of collateral (uints) the user wishes to
       *         withdraw
-      * @return bool If the pool allows users to withdraw collateral at this 
+      * @return bool If the pool allows users to withdraw collateral at this
       *         time (may be blocked in a cyclic withdraw)
       * @return uint256 The amount the user can withdraw
       * @return uint256 The penalty amount that will be charged if they withdraw
@@ -524,14 +520,14 @@ contract BasicPool is WhitelistAdminRole {
         uint256 withdrawAmount = _amount;
         uint256 penaltyAmount = 0;
         
-        if(address(withdrawInstance_) == address(0)) { 
+        if(address(withdrawInstance_) == address(0)) {
             withdrawAmount = _amount;
             penaltyAmount = 0;
             withdrawAllowed = true;
         } else {
             (
-                withdrawAllowed, 
-                withdrawAmount, 
+                withdrawAllowed,
+                withdrawAmount,
                 penaltyAmount
             ) = withdrawInstance_.canWithdraw(
                 _amount,
@@ -540,8 +536,8 @@ contract BasicPool is WhitelistAdminRole {
         }
          
         return (
-            withdrawAllowed, 
-            withdrawAmount, 
+            withdrawAllowed,
+            withdrawAmount,
             penaltyAmount
         );
     }
@@ -555,7 +551,7 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     /**
-      * @return uint256 The collected balance of the penalty pot, to be 
+      * @return uint256 The collected balance of the penalty pot, to be
       *         distributed between token holders within the pool.
       */
     function penaltyPotBalance() public view returns(uint256) {
@@ -571,7 +567,7 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     /**
-      * @return uint256 The total amount of interest earning collateral the fee 
+      * @return uint256 The total amount of interest earning collateral the fee
       *         has accumulated
       */
     function accumulativeFee() public view returns(uint256) {
