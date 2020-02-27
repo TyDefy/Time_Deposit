@@ -63,7 +63,6 @@ contract BasicPool is WhitelistAdminRole {
     event Withdraw(
         address indexed user,
         uint256 unitAmount,
-        uint256 penalty,
         uint256 userUnitBalance,
         uint256 useriUnitBalance
     );
@@ -81,7 +80,7 @@ contract BasicPool is WhitelistAdminRole {
     event PenaltyCharged(
         address indexed user,
         uint256 unitAmount,
-        unit256 penaltyiUnitBalance
+        uint256 penaltyiUnitBalance
     );
     event PenaltyWithdrawn(
         uint256 newPenaltyPotBalance
@@ -299,7 +298,6 @@ contract BasicPool is WhitelistAdminRole {
         emit Withdraw(
             msg.sender,
             withdrawAmount,
-            penaltyAmount,
             users_[msg.sender].collateralInvested,
             users_[msg.sender].balance
         );
@@ -418,7 +416,6 @@ contract BasicPool is WhitelistAdminRole {
         emit Withdraw(
             msg.sender,
             unitRecived,
-            0,
             users_[msg.sender].collateralInvested,
             users_[msg.sender].balance
         );
