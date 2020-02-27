@@ -78,6 +78,14 @@ contract BasicPool is WhitelistAdminRole {
     event FeeSet(
         uint8 feePercentage
     );
+    event PenaltyCharged(
+        address indexed user,
+        uint256 unitAmount,
+        unit256 penaltyiUnitBalance
+    );
+    event PenaltyWithdrawn(
+        uint256 newPenaltyPotBalance
+    );
 
     /**
       * @param  _admin The address of the admin for this pool
@@ -250,6 +258,12 @@ contract BasicPool is WhitelistAdminRole {
                 penaltyPot_ += (iUnitPenAmount - fee);
                 iUnitTotalCollateral_ -= iUnitPenAmount;
                 iUnitTotalPenaltyCollateral -= iUnitPenAmount;
+
+                emit PenaltyCharged(
+                    msg.sender,
+                    iUnitPenAmount,
+                    penaltyPot_
+                );
             }
         }
 
@@ -774,6 +788,9 @@ contract BasicPool is WhitelistAdminRole {
                 return penaltyPortion;
             }
         }
+        emit PenaltyWithdrawn(
+            penaltyPot_
+        );
         return 0;
     }
     
