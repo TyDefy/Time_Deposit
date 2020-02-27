@@ -785,12 +785,14 @@ contract BasicPool is WhitelistAdminRole {
                     )/1e18;
                 penaltyPot_ -= penaltyPortion;
                 iUnitTotalPenaltyCollateral -= unclaimedPenalty;
+
+                emit PenaltyWithdrawn(
+                    penaltyPot_
+                );
+
                 return penaltyPortion;
             }
         }
-        emit PenaltyWithdrawn(
-            penaltyPot_
-        );
         return 0;
     }
     
