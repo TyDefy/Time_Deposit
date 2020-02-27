@@ -57,22 +57,20 @@ contract BasicPool is WhitelistAdminRole {
     event Deposit(
         address indexed user,
         uint256 unitAmount,
-        uint256 iUnitAmount
+        uint256 userUnitBalance,
+        uint256 useriUnitBalance
     );
     event Withdraw(
         address indexed user,
         uint256 unitAmount,
-        uint256 iUnitAmount,
-        uint256 penalty
+        uint256 penalty,
+        uint256 userUnitBalance,
+        uint256 useriUnitBalance
     );
     event WithdrawInterest(
         address indexed user,
         uint256 unitAmount,
-        uint256 iUnitAmount
-    );
-    event InterestAvailable(
-        address indexed user,
-        uint256 amount
+        uint256 useriUnitBalance
     );
     event PoolTerminated(
         address indexed terminator
@@ -192,7 +190,8 @@ contract BasicPool is WhitelistAdminRole {
         emit Deposit(
             msg.sender,
             _amount,
-            mintedTokens
+            users_[msg.sender].collateralInvested,
+            users_[msg.sender].balance
         );
     }
 
@@ -286,8 +285,9 @@ contract BasicPool is WhitelistAdminRole {
         emit Withdraw(
             msg.sender,
             withdrawAmount,
-            iUnitBurnt,
-            penaltyAmount
+            penaltyAmount,
+            users_[msg.sender].collateralInvested,
+            users_[msg.sender].balance
         );
     }
 
@@ -333,7 +333,7 @@ contract BasicPool is WhitelistAdminRole {
         emit WithdrawInterest(
             msg.sender,
             unitReward,
-            iUnitTotalReward
+            users_[msg.sender].balance
         );
     }
 
@@ -404,8 +404,9 @@ contract BasicPool is WhitelistAdminRole {
         emit Withdraw(
             msg.sender,
             unitRecived,
-            iUnitBurnt,
-            0
+            0,
+            users_[msg.sender].collateralInvested,
+            users_[msg.sender].balance
         );
     }
 
