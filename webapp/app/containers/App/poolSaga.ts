@@ -13,6 +13,8 @@ import {
   setPoolFeeAmount,
   withdrawPoolFee,
   terminatePool,
+  setPoolUserBalances,
+  setPoolUserCDaiBalance,
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
@@ -324,102 +326,107 @@ function* poolPoller(poolContract: Pool) {
 }
 
 function* poolTransactionListener(poolContract: Pool) {
-  const { provider, ethAddress }: BlockchainContext = yield getContext('blockchain');
+  const { provider }: BlockchainContext = yield getContext('blockchain');
 
   const poolTransactionChannel = eventChannel(emit => {
-    const depositHandler = (address, daiAmount, cDaiAmount, tx) => {
+    const depositHandler = (address, daiAmount, daiBalance, cdaiBalance, tx) => {
       emit({
         type: 'Deposit',
         address,
         daiAmount,
-        cDaiAmount,
+        daiBalance,
+        cdaiBalance,
         blockNumber: tx.blockNumber,
         transactionHash: tx.transactionHash,
       })
     };
-    const withdrawHandler = (address, withdrawAmount, cDaiAmount, penaltyAmount, tx) => {
+    const withdrawHandler = (address, daiAmount, daiBalance, cdaiBalance, tx) => {
       emit({
         type: 'Withdraw',
         address,
-        withdrawAmount,
-        cDaiAmount,
-        penaltyAmount,
+        daiAmount,
+        daiBalance,
+        cdaiBalance,
         blockNumber: tx.blockNumber,
         transactionHash: tx.transactionHash,
       })
     };
-    const withdrawInterestHandler = (address, withdrawAmount, cDaiAmount, tx) => {
+    const withdrawInterestHandler = (address, daiAmount, cdaiBalance, tx) => {
       emit({
         type: 'Withdraw Interest',
         address,
-        withdrawAmount,
-        cDaiAmount,
+        daiAmount,
+        cdaiBalance,
         blockNumber: tx.blockNumber,
         transactionHash: tx.transactionHash,
       })
     };
-    poolContract.on(poolContract.filters.Deposit(null, null, null), depositHandler);
+    const penaltyChargedHandler = (address, daiAmount, penaltyPotCDaiBalance, tx) => {
+      emit({
+        type: 'Penalty',
+        address,
+        daiAmount,
+        penaltyPotCDaiBalance,
+        blockNumber: tx.blockNumber,
+        transactionHash: tx.transactionHash,
+      })
+    };
+    // const penaltyWithdrawnHandler = (penaltyPotCDaiBalance, tx) => {
+    //   emit({
+    //     type: 'Penalty Withdrawn',
+    //     penaltyPotCDaiBalance,
+    //     blockNumber: tx.blockNumber,
+    //     transactionHash: tx.transactionHash,
+    //   })
+    // };
+    poolContract.on(poolContract.filters.Deposit(null, null, null, null), depositHandler);
     poolContract.on(poolContract.filters.Withdraw(null, null, null, null), withdrawHandler);
     poolContract.on(poolContract.filters.WithdrawInterest(null, null, null), withdrawInterestHandler);
+    poolContract.on(poolContract.filters.PenaltyCharged(null, null, null), penaltyChargedHandler);
+    // poolContract.on(poolContract.filters.PenaltyWithdrawn(null), penaltyWithdrawnHandler);
     return () => {
-      poolContract.off(poolContract.filters.Deposit(null, null, null), depositHandler);
+      poolContract.off(poolContract.filters.Deposit(null, null, null, null), depositHandler);
       poolContract.off(poolContract.filters.Withdraw(null, null, null, null), withdrawHandler);
       poolContract.off(poolContract.filters.WithdrawInterest(null, null, null), withdrawInterestHandler);
+      poolContract.off(poolContract.filters.PenaltyCharged(null, null, null), penaltyChargedHandler);
+      // poolContract.off(poolContract.filters.PenaltyWithdrawn(null), penaltyWithdrawnHandler);
     };
   });
 
   while (true) {
-    const newTx = yield take(poolTransactionChannel);
-    const txDate = yield call([provider, provider.getBlock], newTx.blockNumber);
-    const latestTx = yield select(selectLatestPoolTxTime(poolContract.address));
-    if (new Date(txDate.timestamp * 1000) > latestTx) {
-      if (newTx.type === 'Deposit') {
-        yield put(addPoolTx({
-          poolAddress: poolContract.address,
-          userAddress: newTx.address,
-          type: 'Deposit',
-          txHash: newTx.transactionHash || '0x',
-          time: new Date(txDate.timestamp * 1000),
-          amount: Number(formatEther(newTx.daiAmount)),
-          cdaiAmount: Number(formatUnits(newTx.cDaiAmount, 9))
-        }));
-      } else if (newTx.type === 'Withdraw') {
-        yield put(addPoolTx({
-          poolAddress: poolContract.address,
-          userAddress: newTx.address,
-          type: 'Withdraw',
-          txHash: newTx.transactionHash || '0x',
-          time: new Date(txDate.timestamp * 1000),
-          amount: Number(formatEther(newTx.withdrawAmount)),
-          cdaiAmount: Number(formatUnits(newTx.cDaiAmount, 9))
-        }))
-        yield put(addPoolTx({
-          poolAddress: poolContract.address,
-          userAddress: newTx.address,
-          type: 'Penalty',
-          txHash: newTx.transactionHash || '0x',
-          time: new Date(txDate.timestamp * 1000),
-          amount: Number(formatEther(newTx.penaltyAmount)),
-          cdaiAmount: 0,
-        }))
-      } else {
-        yield put(addPoolTx({
-          poolAddress: poolContract.address,
-          userAddress: newTx.address,
-          type: 'Withdraw Interest',
-          txHash: newTx.transactionHash || '0x',
-          time: new Date(txDate.timestamp * 1000),
-          amount: Number(formatEther(newTx.withdrawAmount)),
-          cdaiAmount: Number(formatUnits(newTx.cDaiAmount, 9))
-        }))
-      }
-      if (ethAddress && newTx.address.toLowerCase() === ethAddress?.toLowerCase()) {
-        yield call(getPoolUserBalance, poolContract, ethAddress);
-      }
-      const isAdmin = yield select(selectIsAdmin);
-      if (isAdmin) {
-        yield call(getPoolTotalPenalty, poolContract);
-      }
+    yield takeEvery(poolTransactionChannel, processPoolTx, provider, poolContract);
+  }
+}
+
+function* processPoolTx(provider, poolContract, newTx) {
+  const txDate = yield call([provider, provider.getBlock], newTx.blockNumber);
+  const latestTxDate = yield select(selectLatestPoolTxTime(poolContract.address));
+  const newTxDate = new Date(txDate.timestamp * 1000);
+  debugger;
+  if ((newTxDate > latestTxDate) || (newTxDate >= latestTxDate && 
+    (newTx.type === 'Penalty' || newTx.type === 'Withdraw'))) {
+    debugger;
+    yield put(addPoolTx({
+      poolAddress: poolContract.address,
+      userAddress: newTx.address,
+      type: newTx.type,
+      amount: Number(formatEther(newTx.daiAmount)),
+      txHash: newTx.transactionHash,
+      time: new Date(txDate.timestamp * 1000),
+    }))
+    if (newTx.daiBalance && newTx.cdaiBalance) {
+      yield put(setPoolUserBalances({
+        poolAddress: poolContract.address,
+        userAddress: newTx.address,
+        daiBalance: Number(formatEther(newTx.daiBalance)),
+        cdaiBalance: Number(formatUnits(newTx.cdaiBalance, 9)),
+      }))
+    } else if (newTx.cdaiBalance) {
+      yield put(setPoolUserCDaiBalance({
+        poolAddress: poolContract.address,
+        userAddress: newTx.address,
+        cdaiBalance: Number(formatUnits(newTx.cdaiBalance, 9)),
+      }))
     }
   }
 }
@@ -430,7 +437,7 @@ function* poolWatcherSaga(action) {
 
   try {
     const depositLogs: Log[] = yield call([provider, provider.getLogs], {
-      ...poolContract.filters.Deposit(null, null, null),
+      ...poolContract.filters.Deposit(null, null, null, null),
       fromBlock: 0,
       toBlock: 'latest',
     })
@@ -445,7 +452,6 @@ function* poolWatcherSaga(action) {
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
           amount: Number(formatEther(parsedDeposit.unitAmount)),
-          cdaiAmount: Number(formatUnits(parsedDeposit.iUnitAmount, 9))
         })
       }));
 
@@ -458,25 +464,14 @@ function* poolWatcherSaga(action) {
     const withdrawTxActions = yield Promise.all(withdrawLogs.map(
       async log => {
         const parsedWithdraw = poolContract.interface.parseLog(log).values;
-        return [addPoolTx({
+        return addPoolTx({
           poolAddress: poolContract.address,
           userAddress: parsedWithdraw.user,
           type: 'Withdraw',
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
           amount: Number(formatEther(parsedWithdraw.unitAmount)),
-          cdaiAmount: Number(formatUnits(parsedWithdraw.iUnitAmount, 9))
-        }),
-        addPoolTx({
-          poolAddress: poolContract.address,
-          userAddress: parsedWithdraw.user,
-          type: 'Penalty',
-          txHash: log.transactionHash || '0x',
-          time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
-          amount: Number(formatEther(parsedWithdraw.penalty)),
-          cdaiAmount: 0
-        }),
-        ]
+        })
       }));
 
     const withdrawInterestLogs: Log[] = yield call([provider, provider.getLogs], {
@@ -495,13 +490,31 @@ function* poolWatcherSaga(action) {
           txHash: log.transactionHash || '0x',
           time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
           amount: Number(formatEther(parsedWithdrawInterest.unitAmount)),
-          cdaiAmount: Number(formatUnits(parsedWithdrawInterest.iUnitAmount, 9))
         })
       }));
 
+    const penaltyChargedLogs: Log[] = yield call([provider, provider.getLogs], {
+      ...poolContract.filters.PenaltyCharged(null, null, null),
+      fromBlock: 0,
+      toBlock: 'latest',
+    })
+
+    const penaltyChargedTxActions = yield Promise.all(penaltyChargedLogs.map(
+      async log => {
+        const parsedPenaltyCharged = poolContract.interface.parseLog(log).values;
+        return addPoolTx({
+          poolAddress: poolContract.address,
+          userAddress: parsedPenaltyCharged.user,
+          type: 'Penalty',
+          txHash: log.transactionHash || '0x',
+          time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
+          amount: Number(formatEther(parsedPenaltyCharged.unitAmount)),
+        })
+      }));
     const actions = depositTxActions
-      .concat(withdrawTxActions.flat())
+      .concat(withdrawTxActions)
       .concat(withdrawInterestTxActions)
+      .concat(penaltyChargedTxActions)
       .sort((a, b) => a.time - b.time);
 
     for (const action of actions) {

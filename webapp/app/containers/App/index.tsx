@@ -81,6 +81,12 @@ export interface Pool {
   transactions: Array<Transaction>;
   userBalanceCDai?: number;
   nextWithdrawDate?: Date,
+  daiBalances: {
+    [userAddress: string]: number;
+  },
+  cdaiBalances: {
+    [userAddress: string]: number;
+  }
 }
 
 export interface Utility {

@@ -91,8 +91,20 @@ export const addPoolTx = createStandardAction('ADD_POOL_TX')<{
   time: Date;
   type: 'Deposit' | 'Withdraw' | 'Penalty' | 'Withdraw Interest';
   amount: number;
-  cdaiAmount: number;
   txHash: string;
+}>()
+
+export const setPoolUserBalances = createStandardAction('SET_POOL_USER_BALANCES')<{
+  poolAddress: string,
+  userAddress: string;
+  daiBalance: number;
+  cdaiBalance: number;
+}>()
+
+export const setPoolUserCDaiBalance = createStandardAction('SET_POOL_USER_CDAI_BALANCE')<{
+  poolAddress: string,
+  userAddress: string;
+  cdaiBalance: number;
 }>()
 
 export const setPoolInterestRate = createStandardAction('SET_POOL_INTEREST_RATE')<{
