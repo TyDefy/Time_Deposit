@@ -44,10 +44,9 @@ type Props = StateProps & DispatchProps & OwnProps;
 
 const CreatePool: React.FunctionComponent<Props> = ({ utilities, createPool }: Props) => {
   const CreatePoolSchema = Yup.object().shape({
-    name: Yup.string().max(120, 'Name is too long').required('Name is required'),
+    name: Yup.string().max(24, 'Name is too long').required('Name is required'),
     description: Yup.string().max(180, 'Description is too long').required('Description is required'),
     type: Yup.number().required(),
-    utilityAddress: Yup.string().required(),
     feeRate: Yup.number().min(0).max(100).required(),
     penaltyRate: Yup.number().min(0).max(100).required(),
   });
