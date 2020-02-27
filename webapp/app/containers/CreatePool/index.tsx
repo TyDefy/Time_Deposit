@@ -46,9 +46,6 @@ const CreatePool: React.FunctionComponent<Props> = ({ utilities, createPool }: P
   const CreatePoolSchema = Yup.object().shape({
     name: Yup.string().max(24, 'Name is too long').required('Name is required'),
     description: Yup.string().max(180, 'Description is too long').required('Description is required'),
-    type: Yup.number().required(),
-    feeRate: Yup.number().min(0).max(100).required(),
-    penaltyRate: Yup.number().min(0).max(100).required(),
   });
   const poolTypes = [{ value: 0, label: 'cDAI' }]
 
@@ -69,7 +66,7 @@ const CreatePool: React.FunctionComponent<Props> = ({ utilities, createPool }: P
         canWithdrawInterestInViolation: false,
       }}
       validationSchema={CreatePoolSchema}
-      onSubmit={(values, actions) => {
+      onSubmit={(values) => {
         createPool(values)
       }}
       render={({values}) =>
