@@ -26,6 +26,7 @@ import { eventChannel } from "redux-saga";
 import { selectLatestPoolTxTime, selectIsAdmin, selectEthAddress } from "./selectors";
 import { enqueueSnackbar } from "containers/Notification/actions";
 import { setTxContext, setTxHash } from "containers/TransactionModal/actions";
+import { selectPoolParticipantAddresses } from "containers/HomePage/selectors";
 
 function* terminatePoolListener(poolContract: Pool) {
   while (true) {
@@ -402,10 +403,8 @@ function* processPoolTx(provider, poolContract, newTx) {
   const txDate = yield call([provider, provider.getBlock], newTx.blockNumber);
   const latestTxDate = yield select(selectLatestPoolTxTime(poolContract.address));
   const newTxDate = new Date(txDate.timestamp * 1000);
-  debugger;
   if ((newTxDate > latestTxDate) || (newTxDate >= latestTxDate && 
     (newTx.type === 'Penalty' || newTx.type === 'Withdraw'))) {
-    debugger;
     yield put(addPoolTx({
       poolAddress: poolContract.address,
       userAddress: newTx.address,
@@ -545,6 +544,18 @@ function* poolWatcherSaga(action) {
     const parsedLog = poolContract.interface.parseLog(feeSetLogs[0]).values;
     yield put(setPoolFeeRate({ poolAddress: poolContract.address, feeRate: parsedLog.feePercentage }));
   }
+
+  const users: Array<string> = yield select(selectPoolParticipantAddresses(poolContract.address));
+
+  for (const user of users) {
+    const userInfo = yield call([poolContract, poolContract.getUserInfo], user);
+    yield put(setPoolUserBalances({
+      poolAddress: poolContract.address,
+      userAddress: user,
+      daiBalance: Number(formatEther(userInfo[0])),
+      cdaiBalance: Number(formatUnits(userInfo[1], 9))
+    }))
+  };
 
   yield fork(poolTransactionListener, poolContract);
   yield fork(poolDepositListener, poolContract);

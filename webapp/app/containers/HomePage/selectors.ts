@@ -53,6 +53,13 @@ export const selectPools = createSelector((state: RootState) => state.pools, sel
   })
 );
 
+export const selectPoolParticipantAddresses = (poolAddress: string) => createSelector((state: RootState) =>
+  state.pools, (allPools) => {
+    const pool = Object.values(allPools).filter(p => p.address === poolAddress)[0];
+    const participants = new Set(pool.transactions?.map(t => t.userAddress));
+    return [...participants]
+  });
+
 const selectActivePools = createSelector(selectPools, allPools => allPools.filter(p => p.active));
 const selectPoolsBalance = createSelector(selectPools, allPools => allPools.reduce((totalBalance, pool) => totalBalance += pool.balance, 0))
 
