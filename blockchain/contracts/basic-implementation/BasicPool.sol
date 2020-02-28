@@ -85,6 +85,10 @@ contract BasicPool is WhitelistAdminRole {
     event PenaltyWithdrawn(
         uint256 penaltyPotiUnitBalance
     );
+    event InterestAccrued(
+        address user,
+        uint256 unitValue
+    );
 
     /**
       * @param  _admin The address of the admin for this pool
@@ -463,7 +467,7 @@ contract BasicPool is WhitelistAdminRole {
     {
         return (
             _getRoughInterestEarned(_user),
-            _getPenaltyPotPortion(_user)
+            getPenaltyPotPortion(_user)
         );
     }
     
@@ -473,7 +477,7 @@ contract BasicPool is WhitelistAdminRole {
       */
     function getUserInterest(address _user) public view returns(uint256) {
         uint256 interest = _getRoughInterestEarned(_user);
-        uint256 penaltyPortion = _getPenaltyPotPortion(_user);
+        uint256 penaltyPortion = getPenaltyPotPortion(_user);
         return interest + penaltyPortion;
     }
 
@@ -618,6 +622,32 @@ contract BasicPool is WhitelistAdminRole {
     }
 
     /**
+      * @notice Works out how much of the penalty pot a user is entitled to
+      * @param  _user Address of user
+      * @return uint256 The users portion of the penalty pot
+      */ 
+    function getPenaltyPotPortion(
+        address _user
+    ) 
+        public 
+        view 
+        returns(uint256) 
+    {
+        if(penaltyPot_ != 0) {
+            if(users_[_user].totalPenaltyClaimed < users_[_user]
+                    .totalInvestment
+            ) {
+                uint256 unclaimedPenalty = users_[_user]
+                    .totalInvestment - users_[_user].totalPenaltyClaimed;
+                return (((unclaimedPenalty*1e18)/iUnitTotalPenaltyCollateral
+                        )*penaltyPot_
+                    )/1e18;
+            }
+        }
+        return 0;
+    }
+
+    /**
       * ------------------------------------------------------------------------
       * INTERNAL FUNCTIONS
       * ------------------------------------------------------------------------
@@ -685,32 +715,6 @@ contract BasicPool is WhitelistAdminRole {
         } else {
             return 0;
         }
-    }
-
-    /**
-      * @notice Works out how much of the penalty pot a user is entitled to
-      * @param  _user Address of user
-      * @return uint256 The users portion of the penalty pot
-      */ 
-    function _getPenaltyPotPortion(
-        address _user
-    ) 
-        public 
-        view 
-        returns(uint256) 
-    {
-        if(penaltyPot_ != 0) {
-            if(users_[_user].totalPenaltyClaimed < users_[_user]
-                    .totalInvestment
-            ) {
-                uint256 unclaimedPenalty = users_[_user]
-                    .totalInvestment - users_[_user].totalPenaltyClaimed;
-                return (((unclaimedPenalty*1e18)/iUnitTotalPenaltyCollateral
-                        )*penaltyPot_
-                    )/1e18;
-            }
-        }
-        return 0;
     }
 
     /**
@@ -834,5 +838,10 @@ contract BasicPool is WhitelistAdminRole {
         uint256 unitInterest = _getCurrentUnitValue(interestEarned);
         
         users_[msg.sender].collateralInvested += unitInterest; 
+
+        emit InterestAccrued(
+            msg.sender,
+            unitInterest
+        );
     }
 }
