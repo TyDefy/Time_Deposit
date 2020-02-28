@@ -69,15 +69,6 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         }
       }
     }
-    case getType(AppActions.setUserPoolBalance): {
-      return {
-        ...state,
-        [action.payload.poolAddress]: {
-          ...state[action.payload.poolAddress],
-          userBalanceCDai: action.payload.userBalance,
-        }
-      }
-    }
     case getType(AppActions.addPoolTx): {
       return {
         ...state,
@@ -96,12 +87,12 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         [action.payload.poolAddress]: {
           ...state[action.payload.poolAddress],
           daiBalances: {
-            ...state[action.payload.poolAddress]?.daiBalances,
-            [action.payload.userAddress]: action.payload.daiBalance
+            ...state[action.payload.poolAddress].daiBalances,
+            [action.payload.userAddress.toLowerCase()]: action.payload.daiBalance
           },
           cdaiBalances: {
-            ...state[action.payload.poolAddress]?.cdaiBalances,
-            [action.payload.userAddress]: action.payload.cdaiBalance
+            ...state[action.payload.poolAddress].cdaiBalances,
+            [action.payload.userAddress.toLowerCase()]: action.payload.cdaiBalance
           },
         }
       }

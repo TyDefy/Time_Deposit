@@ -372,25 +372,33 @@ function* poolTransactionListener(poolContract: Pool) {
         transactionHash: tx.transactionHash,
       })
     };
-    // const penaltyWithdrawnHandler = (penaltyPotCDaiBalance, tx) => {
-    //   emit({
-    //     type: 'Penalty Withdrawn',
-    //     penaltyPotCDaiBalance,
-    //     blockNumber: tx.blockNumber,
-    //     transactionHash: tx.transactionHash,
-    //   })
-    // };
+    const penaltyWithdrawnHandler = (penaltyPotCDaiBalance) => {
+      emit({
+        type: 'Penalty Withdrawn',
+        penaltyPotCDaiBalance,
+      })
+    };
+    const interestAccruedHandler = (address, daiAmount, tx) => {
+      emit({
+        type: 'Interest Accrued',
+        address,
+        daiAmount,
+        blockNumber: tx.blockNumber,
+        transactionHash: tx.transactionHash,
+      })
+    };
     poolContract.on(poolContract.filters.Deposit(null, null, null, null), depositHandler);
     poolContract.on(poolContract.filters.Withdraw(null, null, null, null), withdrawHandler);
     poolContract.on(poolContract.filters.WithdrawInterest(null, null, null), withdrawInterestHandler);
     poolContract.on(poolContract.filters.PenaltyCharged(null, null, null), penaltyChargedHandler);
-    // poolContract.on(poolContract.filters.PenaltyWithdrawn(null), penaltyWithdrawnHandler);
+    poolContract.on(poolContract.filters.PenaltyWithdrawn(null), penaltyWithdrawnHandler);
+    poolContract.on(poolContract.filters.InterestAccrued(null, null), interestAccruedHandler);
     return () => {
       poolContract.off(poolContract.filters.Deposit(null, null, null, null), depositHandler);
       poolContract.off(poolContract.filters.Withdraw(null, null, null, null), withdrawHandler);
       poolContract.off(poolContract.filters.WithdrawInterest(null, null, null), withdrawInterestHandler);
       poolContract.off(poolContract.filters.PenaltyCharged(null, null, null), penaltyChargedHandler);
-      // poolContract.off(poolContract.filters.PenaltyWithdrawn(null), penaltyWithdrawnHandler);
+      poolContract.off(poolContract.filters.PenaltyWithdrawn(null), penaltyWithdrawnHandler);
     };
   });
 
@@ -403,8 +411,9 @@ function* processPoolTx(provider, poolContract, newTx) {
   const txDate = yield call([provider, provider.getBlock], newTx.blockNumber);
   const latestTxDate = yield select(selectLatestPoolTxTime(poolContract.address));
   const newTxDate = new Date(txDate.timestamp * 1000);
-  if ((newTxDate > latestTxDate) || (newTxDate >= latestTxDate && 
-    (newTx.type === 'Penalty' || newTx.type === 'Withdraw'))) {
+  if ((newTx.type !== 'Penalty Withdrawn') && 
+    (newTxDate > latestTxDate) || (newTxDate >= latestTxDate && 
+    (newTx.type === 'Penalty' || newTx.type === 'Withdraw' || newTx.type === 'Interest Accrued'))) {
     yield put(addPoolTx({
       poolAddress: poolContract.address,
       userAddress: newTx.address,
@@ -425,6 +434,12 @@ function* processPoolTx(provider, poolContract, newTx) {
         poolAddress: poolContract.address,
         userAddress: newTx.address,
         cdaiBalance: Number(formatUnits(newTx.cdaiBalance, 9)),
+      }))
+    }
+    if (newTx.penaltyPotCDaiBalance) {
+      yield put(setPoolPenaltyPotBalance({
+        poolAddress: poolContract.address,
+        penaltyPotBalance: Number(formatUnits(newTx.penaltyPotCDaiBalance, 9)),
       }))
     }
   }
@@ -510,10 +525,30 @@ function* poolWatcherSaga(action) {
           amount: Number(formatEther(parsedPenaltyCharged.unitAmount)),
         })
       }));
+    
+      const interestAccruedLogs: Log[] = yield call([provider, provider.getLogs], {
+        ...poolContract.filters.InterestAccrued(null, null),
+        fromBlock: 0,
+        toBlock: 'latest',
+      })
+  
+      const interestAccruedTxActions = yield Promise.all(interestAccruedLogs.map(
+        async log => {
+          const parsedInterestAccrued = poolContract.interface.parseLog(log).values;
+          return addPoolTx({
+            poolAddress: poolContract.address,
+            userAddress: parsedInterestAccrued.user,
+            type: 'Interest Accrued',
+            txHash: log.transactionHash || '0x',
+            time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
+            amount: Number(formatEther(parsedInterestAccrued.unitInterest)),
+          })
+        }));
     const actions = depositTxActions
       .concat(withdrawTxActions)
       .concat(withdrawInterestTxActions)
       .concat(penaltyChargedTxActions)
+      .concat(interestAccruedTxActions)
       .sort((a, b) => a.time - b.time);
 
     for (const action of actions) {
