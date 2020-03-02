@@ -351,6 +351,9 @@ contract BasicPool is WhitelistAdminRole {
             unitReward,
             users_[msg.sender].balance
         );
+        emit PenaltyWithdrawn(
+            penaltyPot_
+        );
     }
 
     /**
@@ -419,6 +422,9 @@ contract BasicPool is WhitelistAdminRole {
             unitReceived,
             users_[msg.sender].collateralInvested,
             users_[msg.sender].balance
+        );
+        emit PenaltyWithdrawn(
+            penaltyPot_
         );
     }
 
@@ -783,10 +789,6 @@ contract BasicPool is WhitelistAdminRole {
                     )/1e18;
                 penaltyPot_ -= penaltyPortion;
                 iUnitTotalPenaltyCollateral -= unclaimedPenalty;
-
-                emit PenaltyWithdrawn(
-                    penaltyPot_
-                );
 
                 return penaltyPortion;
             }
