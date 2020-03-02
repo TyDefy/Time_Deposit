@@ -124,7 +124,15 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         }
       }
     }
-
+    case getType(AppActions.setPoolUserPenaltyPotPortion): {
+      return {
+        ...state,
+        [action.payload.poolAddress]: {
+          ...state[action.payload.poolAddress],
+          userPenaltyPotBalanceCDai: action.payload.penaltyPotPortionCDai,
+        }
+      }
+    }
     default:
       return state;
   }

@@ -17,13 +17,11 @@ export const selectPools = createSelector(
   Object.values(pools).map(p => {
     const daiBalance = Object.values(p.daiBalances).reduce((total, userBalance) => total += userBalance, 0);
     const cdaiBalance = Object.values(p.cdaiBalances).reduce((total, userCDaiBalance) => total += userCDaiBalance, 0);
-    const contribution = ethAddress && p.daiBalances[ethAddress.toLowerCase()] ? p.daiBalances[ethAddress.toLowerCase()] : 0;
-
-    //@ts-ignore
-    // const lastWithdrawDate = p.transactions
-    //   .filter(t => t.userAddress.toLowerCase() === ethAddress?.toLowerCase() && t.type === 'Withdraw')
-    //   .map(t => t.time)
-    //   .reduce((a, b) => a > b ? a : b, new Date('01/01/1970'));
+    const contribution = ethAddress && p.daiBalances[ethAddress.toLowerCase()] ? 
+      p.daiBalances[ethAddress.toLowerCase()] : 0;
+    const currentValue = ethAddress && p.cdaiBalances[ethAddress.toLowerCase()] ? 
+      p.cdaiBalances[ethAddress.toLowerCase()] : 0;
+    const userBalanceWithPenalty = (currentValue + p.userPenaltyPotBalanceCDai) * exchangeRate;
 
     const lastDepositDate = p.transactions
       .filter(t => t.userAddress.toLowerCase() === ethAddress?.toLowerCase() && t.type === 'Deposit')
@@ -32,6 +30,7 @@ export const selectPools = createSelector(
 
     const daysUntilAccess = (contribution > 0) ? dayjs(lastDepositDate).add(p.period, 'month').diff(Date.now(), 'day') : 0;
 
+    const poolPenaltyBalance = p.penaltyPotBalanceCDai ? p.penaltyPotBalanceCDai * exchangeRate : 0;
     return {
       ...p,
       interestRate: interestRate,
@@ -41,7 +40,7 @@ export const selectPools = createSelector(
       participants: new Set(p.transactions?.map(t => t.userAddress)).size,
       contribution: contribution,
       interestAccrued: Math.abs((cdaiBalance * exchangeRate) - daiBalance),
-      availableInterest: p.period === 0 && totalAmountWithPenalties ? Math.abs(totalAmountWithPenalties - contribution) : 0,
+      availableInterest: Math.abs(userBalanceWithPenalty - contribution),
       daysUntilAccess: daysUntilAccess,
     }
   })

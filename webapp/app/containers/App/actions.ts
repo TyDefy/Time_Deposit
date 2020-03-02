@@ -107,6 +107,12 @@ export const setPoolUserCDaiBalance = createStandardAction('SET_POOL_USER_CDAI_B
   cdaiBalance: number;
 }>()
 
+export const setPoolUserPenaltyPotPortion = createStandardAction('SET_POOL_USER_PENALTY_POT_PORTION')<{
+  poolAddress: string,
+  userAddress: string;
+  penaltyPotPortionCDai: number;
+}>()
+
 export const setPoolInterestRate = createStandardAction('SET_POOL_INTEREST_RATE')<{
   poolAddress: string;
   interestRate: number;

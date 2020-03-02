@@ -102,10 +102,7 @@ const AdminPoolUserDetails: React.FC<OwnProps> = ({
   classes,
   name,
   period,
-  type,
   interestRate,
-  balance,
-  participants,
   contribution,
   interestAccrued,
   availableInterest,
@@ -160,7 +157,7 @@ const AdminPoolUserDetails: React.FC<OwnProps> = ({
         </TableHead>
         <TableBody>
           {transactions?.map(t =>
-            <TableRow key={`${t.txHash}${t.type === 'Penalty' && `p`}`}>
+            <TableRow key={`${t.txHash}${t.type}`}>
               <TableCell>{t.txHash}</TableCell>
               <TableCell>{dayjs(t.time).format('YYYY-MM-DD HH:mm')}</TableCell>
               <TableCell>{t.type}</TableCell>

@@ -102,7 +102,7 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
   participantDetails,
   terminatePool,
   active,
-  feeAmountInDai = 0,
+  feeAmountDai = 0,
   withdrawPoolFee,
   penaltyPotBalanceDai = 0,
 }: OwnProps) => (
@@ -160,12 +160,12 @@ const AdminPoolDetails: React.FunctionComponent<OwnProps> = ({
         </Grid>
         <Grid item>
           <Typography className={classes.label}>Fee Balance</Typography>
-          <Typography className={classes.value}>{`${(feeAmountInDai).toFixed(2)} DAI`}</Typography>
+          <Typography className={classes.value}>{`${(feeAmountDai).toFixed(2)} DAI`}</Typography>
         </Grid>
       </Grid>
       <Grid container direction="row">
         <Button onClick={terminatePool} className={classes.terminateButton}>Terminate Pool</Button>
-        {(feeAmountInDai > 0) && <Button onClick={withdrawPoolFee} className={classes.terminateButton}>Withdraw Fee</Button>}
+        {(feeAmountDai > 0) && <Button onClick={withdrawPoolFee} className={classes.terminateButton}>Withdraw Fee</Button>}
       </Grid>
       <Table>
         <TableHead className={classes.tableHeader}>

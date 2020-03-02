@@ -7,7 +7,7 @@ import {
   deposit,
   withdraw,
   withdrawInterest,
-  setUserPoolBalance,
+  // setUserPoolBalance,
   setPoolPenaltyPotBalance,
   setPoolFeeRate,
   setPoolFeeAmount,
@@ -15,6 +15,7 @@ import {
   terminatePool,
   setPoolUserBalances,
   setPoolUserCDaiBalance,
+  setPoolUserPenaltyPotPortion,
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
@@ -79,14 +80,14 @@ function* withdrawFeeListener(poolContract: Pool) {
         //@ts-ignore
         const writeableContract = poolContract.connect(signer);
         try {
-          yield put(setTxContext('Terminating pool'));
+          yield put(setTxContext('Withdraw pool fee'));
           const tx: ContractTransaction = yield call(
             [writeableContract, writeableContract.withdrawAdminFee]);
           yield put(setTxHash(tx.hash));
           yield call([tx, tx.wait]);
           yield put(withdrawPoolFee.success({ poolAddress: poolContract.address }));
           yield put(enqueueSnackbar({
-            message: 'Pool terminated successfully'
+            message: 'Pool Fee Withdrawal Successful'
           }))
         } catch (error) {
           yield put(withdrawPoolFee.failure(error.message));
@@ -277,17 +278,17 @@ function* poolWithdrawInterestListener(poolContract: Pool) {
   }
 }
 
-function* getPoolTotalPenalty(poolContract: Pool) {
-  try {
-    const penaltyPotValue = yield call([poolContract, poolContract.penaltyPotBalance]);
-    yield put(setPoolPenaltyPotBalance({
-      poolAddress: poolContract.address,
-      penaltyPotBalance: Number(formatUnits(penaltyPotValue, 9)),
-    }));
-  } catch (e) {
-    console.log(`There was an error getting the penalty pot balance for pool ${poolContract.address}`);
-  }
-}
+// function* getPoolTotalPenalty(poolContract: Pool) {
+//   try {
+//     const penaltyPotValue = yield call([poolContract, poolContract.penaltyPotBalance]);
+//     yield put(setPoolPenaltyPotBalance({
+//       poolAddress: poolContract.address,
+//       penaltyPotBalance: Number(formatUnits(penaltyPotValue, 9)),
+//     }));
+//   } catch (e) {
+//     console.log(`There was an error getting the penalty pot balance for pool ${poolContract.address}`);
+//   }
+// }
 
 function* getPoolFeeBalance(poolContract: Pool) {
   try {
@@ -298,12 +299,16 @@ function* getPoolFeeBalance(poolContract: Pool) {
   }
 }
 
-function* getPoolUserBalance(poolContract: Pool, ethAddress: string) {
+function* getUserPenaltyPotPortion(poolContract: Pool, ethAddress: string) {
   try {
-    const userBalance = yield call([poolContract, poolContract.getUserBalance], ethAddress);
-    yield put(setUserPoolBalance({ poolAddress: poolContract.address, userBalance: Number(formatUnits(userBalance, 9)) }))
+    const poolFeeAmount = yield call([poolContract, poolContract.getPenaltyPotPortion], ethAddress);
+    yield put(setPoolUserPenaltyPotPortion({ 
+      poolAddress: poolContract.address, 
+      userAddress: ethAddress,
+      penaltyPotPortionCDai: Number(formatUnits(poolFeeAmount, 9)) 
+    }))
   } catch (error) {
-    console.log(`There was an error getting the user's balance for pool ${poolContract.address}`);
+    console.log(`There was an error getting the fee balance for pool ${poolContract.address}`);
   }
 }
 
@@ -312,14 +317,12 @@ function* poolPoller(poolContract: Pool) {
     const ethAddress: string = yield select(selectEthAddress);
     const isAdmin: Boolean = yield select(selectIsAdmin);
 
-
     if (ethAddress) {
-      yield call(getPoolUserBalance, poolContract, ethAddress);
+      yield call(getUserPenaltyPotPortion, poolContract, ethAddress);
     }
 
     if (ethAddress && isAdmin) {
       yield call(getPoolFeeBalance, poolContract);
-      yield call(getPoolTotalPenalty, poolContract)
     }
 
     yield delay(15000);
@@ -373,6 +376,7 @@ function* poolTransactionListener(poolContract: Pool) {
       })
     };
     const penaltyWithdrawnHandler = (penaltyPotCDaiBalance) => {
+      debugger;
       emit({
         type: 'Penalty Withdrawn',
         penaltyPotCDaiBalance,
@@ -411,9 +415,9 @@ function* processPoolTx(provider, poolContract, newTx) {
   const txDate = yield call([provider, provider.getBlock], newTx.blockNumber);
   const latestTxDate = yield select(selectLatestPoolTxTime(poolContract.address));
   const newTxDate = new Date(txDate.timestamp * 1000);
-  if ((newTx.type !== 'Penalty Withdrawn') && 
-    (newTxDate > latestTxDate) || (newTxDate >= latestTxDate && 
-    (newTx.type === 'Penalty' || newTx.type === 'Withdraw' || newTx.type === 'Interest Accrued'))) {
+  if ((newTx.type !== 'Penalty Withdrawn') &&
+    (newTxDate > latestTxDate) || (newTxDate >= latestTxDate &&
+      (newTx.type === 'Penalty' || newTx.type === 'Withdraw' || newTx.type === 'Interest Accrued'))) {
     yield put(addPoolTx({
       poolAddress: poolContract.address,
       userAddress: newTx.address,
@@ -525,25 +529,25 @@ function* poolWatcherSaga(action) {
           amount: Number(formatEther(parsedPenaltyCharged.unitAmount)),
         })
       }));
-    
-      const interestAccruedLogs: Log[] = yield call([provider, provider.getLogs], {
-        ...poolContract.filters.InterestAccrued(null, null),
-        fromBlock: 0,
-        toBlock: 'latest',
-      })
-  
-      const interestAccruedTxActions = yield Promise.all(interestAccruedLogs.map(
-        async log => {
-          const parsedInterestAccrued = poolContract.interface.parseLog(log).values;
-          return addPoolTx({
-            poolAddress: poolContract.address,
-            userAddress: parsedInterestAccrued.user,
-            type: 'Interest Accrued',
-            txHash: log.transactionHash || '0x',
-            time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
-            amount: Number(formatEther(parsedInterestAccrued.unitInterest)),
-          })
-        }));
+
+    const interestAccruedLogs: Log[] = yield call([provider, provider.getLogs], {
+      ...poolContract.filters.InterestAccrued(null, null),
+      fromBlock: 0,
+      toBlock: 'latest',
+    })
+
+    const interestAccruedTxActions = yield Promise.all(interestAccruedLogs.map(
+      async log => {
+        const parsedInterestAccrued = poolContract.interface.parseLog(log).values;
+        return addPoolTx({
+          poolAddress: poolContract.address,
+          userAddress: parsedInterestAccrued.user,
+          type: 'Interest Accrued',
+          txHash: log.transactionHash || '0x',
+          time: new Date((await provider.getBlock(log.blockNumber || 0)).timestamp * 1000),
+          amount: Number(formatEther(parsedInterestAccrued.unitValue)),
+        })
+      }));
     const actions = depositTxActions
       .concat(withdrawTxActions)
       .concat(withdrawInterestTxActions)
@@ -591,6 +595,18 @@ function* poolWatcherSaga(action) {
       cdaiBalance: Number(formatUnits(userInfo[1], 9))
     }))
   };
+
+  const penaltyPotValue = yield call([poolContract, poolContract.penaltyPotBalance]);
+  yield put(setPoolPenaltyPotBalance({
+    poolAddress: poolContract.address,
+    penaltyPotBalance: Number(formatUnits(penaltyPotValue, 9)),
+  }));
+
+  const poolFeeAmount = yield call([poolContract, poolContract.accumulativeFee]);
+  yield put(setPoolFeeAmount({ 
+    poolAddress: poolContract.address, 
+    feeAmount: Number(formatUnits(poolFeeAmount, 9)) 
+  }));
 
   yield fork(poolTransactionListener, poolContract);
   yield fork(poolDepositListener, poolContract);

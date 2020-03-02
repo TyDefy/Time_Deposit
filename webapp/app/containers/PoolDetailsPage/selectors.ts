@@ -20,8 +20,8 @@ export const selectPool = createSelector(
     pool.transactions = pool.transactions?.filter(t => t.userAddress.toLowerCase() === ethAddress)
       .sort((a, b) => (a.time < b.time) ? -1 : 1);
     pool.interestRate = interestRate;
-    pool.contribution = pool.transactions?.reduce((total, transaction) => 
-      (transaction.type === 'Deposit') ? total += transaction.amount : total -= transaction.amount, 0);
+    pool.contribution = ethAddress && pool.daiBalances[ethAddress.toLowerCase()] ? 
+      pool.daiBalances[ethAddress.toLowerCase()] : 0;
 
     if(pool.contribution > 0 && pool.period !== 0){
       pool.nextWithdrawDate = dayjs(new Date()).add(pool.daysUntilAccess, 'day').toDate();
