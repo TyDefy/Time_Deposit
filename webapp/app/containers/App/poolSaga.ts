@@ -15,6 +15,7 @@ import {
   setPoolUserBalances,
   setPoolUserCDaiBalance,
   setPoolUserPenaltyPotPortion,
+  withdrawAll,
 } from "./actions";
 import { getType } from "typesafe-actions";
 import { Contract, ContractTransaction } from "ethers";
@@ -234,6 +235,50 @@ function* poolWithdrawListener(poolContract: Pool) {
   }
 }
 
+function* poolFinalWithdrawListener(poolContract: Pool) {
+  while (true) {
+    const action = yield take(getType(withdrawAll.request));
+    const { signer }: BlockchainContext = yield getContext('blockchain');
+    if (signer) {
+      //@ts-ignore
+      const writeableContract = poolContract.connect(signer);
+      if (action.payload.poolAddress === poolContract.address) {
+        try {
+          //@ts-ignore
+          yield put(setTxContext('Withdrawing funds'));
+          const tx: ContractTransaction = yield call(
+            //@ts-ignore
+            [writeableContract, writeableContract.finalWithdraw],
+          );
+          yield put(setTxHash(tx.hash));
+          yield call([tx, tx.wait]);
+          yield put(withdrawAll.success());
+          yield put(enqueueSnackbar({
+            message: 'Final Withdrawal successful'
+          }))
+        } catch (error) {
+          yield put(withdrawAll.failure(error.message));
+          yield put(enqueueSnackbar({
+            message: 'Something went wrong processing the transaction',
+            options: {
+              variant: 'error',
+            }
+          }))
+        }
+      }
+    } else {
+      yield put(enqueueSnackbar({
+        message: 'Please connect with metamask to continue',
+        options: {
+          variant: 'error'
+        }
+      }))
+      yield put(withdraw.failure('Please connect with metamask'));
+      yield take(getType(connectMetamask.success));
+    }
+  }
+}
+
 function* poolWithdrawInterestListener(poolContract: Pool) {
   while (true) {
     const action = yield take(getType(withdrawInterest.request));
@@ -364,7 +409,6 @@ function* poolTransactionListener(poolContract: Pool) {
       })
     };
     const penaltyWithdrawnHandler = (penaltyPotCDaiBalance) => {
-      debugger;
       emit({
         type: 'Penalty Withdrawn',
         penaltyPotCDaiBalance,
@@ -604,6 +648,7 @@ function* poolWatcherSaga(action) {
   yield fork(poolTerminatedListener, poolContract);
   yield fork(terminatePoolListener, poolContract);
   yield fork(withdrawFeeListener, poolContract);
+  yield fork(poolFinalWithdrawListener, poolContract);
   yield fork(poolPoller, poolContract);
 }
 

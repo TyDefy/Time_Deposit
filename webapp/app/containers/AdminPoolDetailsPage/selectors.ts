@@ -20,12 +20,12 @@ const selectAdminPoolDetails = createSelector(
       .map(participant => {
         const userTransactions = pool.transactions?.filter(t => t.userAddress === participant);
         const userContribution = pool.daiBalances[participant];
-        const userBalance = pool.cdaiBalance[participant];
+        const userBalance = pool.cdaiBalances[participant];
         return {
           address: participant,
           joined: userTransactions?.reduce((minDate, transaction) => minDate < transaction.time ? minDate : transaction.time, new Date()) || new Date(),
           contributed: userContribution,
-          interest: Math.abs((userBalance * exchangeRate) - userContribution), // To be wired up once individual user interest earned can be calculated
+          interest: Math.abs((userBalance * exchangeRate) - userContribution),
         }
       });
     return {

@@ -151,6 +151,12 @@ export const withdraw = createAsyncAction(
   '@TX_FAILURE/WITHDRAW',
 )<{poolAddress: string, amount: number}, undefined, string>();
 
+export const withdrawAll = createAsyncAction(
+  '@TX_REQUEST/WITHDRAW_ALL',
+  '@TX_SUCCESS/WITHDRAW_ALL',
+  '@TX_FAILURE/WITHDRAW_ALL',
+)<{poolAddress: string}, undefined, string>();
+
 export const utilityDeployed = createStandardAction('UTILITY_DEPLOYED')<{
   withdrawAddress: string,
   cycleLength: number,

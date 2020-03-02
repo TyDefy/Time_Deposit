@@ -18,7 +18,7 @@ import WithdrawInterestModal from 'components/WithdrawInterestModal';
 import WithdrawAllModal from 'components/WithdrawAllModal';
 import { RouteComponentProps } from 'react-router-dom';
 import { RootState } from './types';
-import { deposit, withdraw, withdrawInterest } from 'containers/App/actions';
+import { deposit, withdraw, withdrawInterest, withdrawAll } from 'containers/App/actions';
 import { setShowModal } from './actions';
 import { RESTART_ON_REMOUNT } from 'utils/constants';
 import injectSaga from 'utils/injectSaga';
@@ -37,6 +37,7 @@ export interface OwnProps extends RouteComponentProps<RouteParams>,
 interface DispatchProps {
   deposit(amount: number): void;
   withdraw(amount: number): void;
+  withdrawAll(): void;
   withdrawInterest(amount: number): void;
   setShowModal(value: boolean): void;
 }
@@ -64,6 +65,7 @@ const PoolDetailsPage: React.FunctionComponent<Props> = ({
   daiBalance, 
   deposit,
   withdrawInterest,
+  withdrawAll,
   withdraw,
   setShowModal,
   showModal,
@@ -76,7 +78,7 @@ const PoolDetailsPage: React.FunctionComponent<Props> = ({
   }
 
   return <>
-    <PoolDetails {...pool} showModal={displayModal} />
+    <PoolDetails {...pool} showModal={displayModal} withdrawAll={withdrawAll}/>
     <Dialog open={showModal}>
       {(() => {
         switch (modalType) {
@@ -122,6 +124,7 @@ const mapDispatchToProps = (
   return {
     deposit: (amount: number) => dispatch(deposit.request({poolAddress: ownProps.match.params.poolAddress, amount})),
     withdraw: (amount: number) => dispatch(withdraw.request({poolAddress: ownProps.match.params.poolAddress, amount})),
+    withdrawAll: () => dispatch(withdrawAll.request({poolAddress: ownProps.match.params.poolAddress})),
     withdrawInterest: (amount: number) => dispatch(withdrawInterest.request({poolAddress: ownProps.match.params.poolAddress, amount})),
     setShowModal: (value: boolean) => dispatch(setShowModal({showModal: value})),
   };

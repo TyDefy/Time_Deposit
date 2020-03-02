@@ -96,6 +96,7 @@ const styles = ({ spacing , palette }: Theme) =>
 
 interface OwnProps extends WithStyles<typeof styles>, Pool { 
   showModal(value: 'invest' | 'withdrawInterest' | 'withdrawAll'): void
+  withdrawAll(): void;
 }
 
 const PoolDetails: React.FunctionComponent<OwnProps> = ({
@@ -114,6 +115,7 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
   transactions,
   active,
   showModal,
+  withdrawAll
 }: OwnProps) => (
     <Container maxWidth='lg'>
       <Grid container direction='row' className={classes.poolDetailsHeaderRow}>
@@ -191,9 +193,18 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         </TableBody>
       </Table>
       <Grid container direction='row' justify='space-around' className={classes.buttonBar}>
-        <Button className={classes.button} color='primary' onClick={() => showModal('invest')}>INVEST</Button>
-        <Button className={classes.button} color='primary' onClick={() => showModal('withdrawInterest')}>WITHDRAW INTEREST</Button>
-        <Button className={classes.button} color='primary' onClick={() => showModal('withdrawAll')}>WITHDRAW</Button>
+        {
+          active? 
+          <>
+          <Button className={classes.button} color='primary' onClick={() => showModal('invest')}>INVEST</Button>
+          <Button className={classes.button} color='primary' onClick={() => showModal('withdrawInterest')}>WITHDRAW INTEREST</Button>
+          <Button className={classes.button} color='primary' onClick={() => showModal('withdrawAll')}>WITHDRAW</Button> 
+          </>
+          :
+          <Button className={classes.button} color='primary' onClick={() => withdrawAll()}>WITHDRAW</Button> 
+        }
+
+        
       </Grid>
     </Container>
   );
