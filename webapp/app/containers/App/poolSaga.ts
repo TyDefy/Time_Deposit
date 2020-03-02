@@ -7,7 +7,6 @@ import {
   deposit,
   withdraw,
   withdrawInterest,
-  // setUserPoolBalance,
   setPoolPenaltyPotBalance,
   setPoolFeeRate,
   setPoolFeeAmount,
@@ -278,17 +277,6 @@ function* poolWithdrawInterestListener(poolContract: Pool) {
   }
 }
 
-// function* getPoolTotalPenalty(poolContract: Pool) {
-//   try {
-//     const penaltyPotValue = yield call([poolContract, poolContract.penaltyPotBalance]);
-//     yield put(setPoolPenaltyPotBalance({
-//       poolAddress: poolContract.address,
-//       penaltyPotBalance: Number(formatUnits(penaltyPotValue, 9)),
-//     }));
-//   } catch (e) {
-//     console.log(`There was an error getting the penalty pot balance for pool ${poolContract.address}`);
-//   }
-// }
 
 function* getPoolFeeBalance(poolContract: Pool) {
   try {
@@ -403,6 +391,7 @@ function* poolTransactionListener(poolContract: Pool) {
       poolContract.off(poolContract.filters.WithdrawInterest(null, null, null), withdrawInterestHandler);
       poolContract.off(poolContract.filters.PenaltyCharged(null, null, null), penaltyChargedHandler);
       poolContract.off(poolContract.filters.PenaltyWithdrawn(null), penaltyWithdrawnHandler);
+      poolContract.off(poolContract.filters.InterestAccrued(null, null), interestAccruedHandler);
     };
   });
 
