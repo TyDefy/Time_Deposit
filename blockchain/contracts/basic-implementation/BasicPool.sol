@@ -608,8 +608,8 @@ contract BasicPool is WhitelistAdminRole {
         return (
             users_[_user].collateralInvested,
             users_[_user].balance,
-            users_[_user].lastDeposit,
-            users_[_user].lastWithdraw
+            users_[_user].totalPenaltyClaimed,
+            users_[_user].totalInvestment
         );
     }
 
