@@ -16,27 +16,24 @@ const selectAdminPoolDetails = createSelector(
   selectSelectedPoolAddress,
   (pools, exchangeRate, poolAddress) => {
     const pool = pools.filter(p => p.address === poolAddress)[0];
-    const participants = new Set(pool.transactions?.map(p => p.userAddress))
-    const poolParticipants = [...participants]
+    const poolParticipants = Object.keys(pool.daiBalances)
       .map(participant => {
         const userTransactions = pool.transactions?.filter(t => t.userAddress === participant);
-        const userContribution = userTransactions?.reduce((userContributed, transaction) => 
-          transaction.type === 'Deposit' ? 
-            userContributed += transaction.amount : 
-            userContributed -= transaction.amount, 0) || 0;
-        
+        const userContribution = pool.daiBalances[participant];
+        const userBalance = pool.cdaiBalances[participant];
         return {
           address: participant,
           joined: userTransactions?.reduce((minDate, transaction) => minDate < transaction.time ? minDate : transaction.time, new Date()) || new Date(),
           contributed: userContribution,
-          interest: 0, // To be wired up once individual user interest earned can be calculated
+          interest: Math.abs((userBalance * exchangeRate) - userContribution),
         }
       });
     return {
       ...pool,
-      feeAmountInDai: (pool.feeAmountCDai || 0) * exchangeRate,
+      feeAmountDai: (pool.feeAmountCDai || 0) * exchangeRate,
       participantDetails: poolParticipants,
-      totalInterest: poolParticipants.reduce((totalInterest, participant) => totalInterest += participant.interest, 0), 
+      totalInterest: poolParticipants.reduce((totalInterest, participant) => 
+        totalInterest += participant.interest, 0), 
     }
   }
 )

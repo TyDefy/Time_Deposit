@@ -27,6 +27,8 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
           type: 'cDAI', // TODO: Get this from the action payload
           feeRate: 0,
           transactions: [],
+          daiBalances: {},
+          cdaiBalances: {},
         }
       }
     }
@@ -67,15 +69,6 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         }
       }
     }
-    case getType(AppActions.setUserPoolBalance): {
-      return {
-        ...state,
-        [action.payload.poolAddress]: {
-          ...state[action.payload.poolAddress],
-          userBalanceCDai: action.payload.userBalance,
-        }
-      }
-    }
     case getType(AppActions.addPoolTx): {
       return {
         ...state,
@@ -85,6 +78,22 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
             ...state[action.payload.poolAddress]?.transactions,
             action.payload,
           ],
+        }
+      }
+    }
+    case getType(AppActions.setPoolUserBalances): {
+      return {
+        ...state,
+        [action.payload.poolAddress]: {
+          ...state[action.payload.poolAddress],
+          daiBalances: {
+            ...state[action.payload.poolAddress].daiBalances,
+            [action.payload.userAddress.toLowerCase()]: action.payload.daiBalance
+          },
+          cdaiBalances: {
+            ...state[action.payload.poolAddress].cdaiBalances,
+            [action.payload.userAddress.toLowerCase()]: action.payload.cdaiBalance
+          },
         }
       }
     }
@@ -112,6 +121,15 @@ function poolsReducer(state: PoolState = initialState, action: ContainerActions)
         [action.payload.poolAddress]: {
           ...state[action.payload.poolAddress],
           feeAmountCDai: action.payload.feeAmount,
+        }
+      }
+    }
+    case getType(AppActions.setPoolUserPenaltyPotPortion): {
+      return {
+        ...state,
+        [action.payload.poolAddress]: {
+          ...state[action.payload.poolAddress],
+          userPenaltyPotBalanceCDai: action.payload.penaltyPotPortionCDai,
         }
       }
     }

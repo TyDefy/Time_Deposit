@@ -2,13 +2,18 @@ import { createStructuredSelector, createSelector } from 'reselect';
 import { RootState } from 'containers/App/types';
 import { StateProps } from '.';
 import { selectPools } from 'containers/HomePage/selectors';
-import { selectExchangeRate, selectInterestRate } from 'containers/App/selectors';
+import { selectExchangeRate, selectInterestRate, selectEthAddress } from 'containers/App/selectors';
 
-const selectPortfolioPools = createSelector(selectPools,
-  (allPools) => allPools.filter(p => p.contribution && p.contribution > 0))
+const selectPortfolioPools = createSelector(selectPools, selectEthAddress,
+  (allPools, ethAddress) => allPools.filter(p => ethAddress && 
+    p.daiBalances[ethAddress] && p.daiBalances[ethAddress] > 0))
 
-const selectPortfolioTotalHoldings = createSelector(selectPortfolioPools, selectExchangeRate, (pools, exchangeRate) => 
-  pools.reduce((total, pool) => total += pool.userBalanceCDai ?  pool.userBalanceCDai * exchangeRate : 0, 0)
+const selectPortfolioTotalHoldings = createSelector(selectPortfolioPools, 
+  selectEthAddress, 
+  selectExchangeRate, 
+  (pools, ethAddress, exchangeRate) => 
+  pools.reduce((total, pool) => total += ethAddress && pool.cdaiBalances[ethAddress] ? 
+  pool.cdaiBalances[ethAddress] * exchangeRate : 0, 0)
 );
 
 const selectPortfolioContributed = createSelector(selectPortfolioPools,
@@ -18,7 +23,7 @@ const selectPortfolioInterestAccrued = createSelector(selectPortfolioPools,
   pools => pools.reduce((total, pool) => total += pool.interestAccrued || 0, 0));
 
 const selectPortfolioInterestAvailable = createSelector(selectPortfolioPools,
-  pools => pools.reduce((total, pool) => total += pool.interestAccrued || 0, 0));
+  pools => pools.reduce((total, pool) => total += pool.availableInterest || 0, 0));
 
 const selectPortfolioPage = createStructuredSelector<RootState, StateProps>({
   pools: selectPortfolioPools,
