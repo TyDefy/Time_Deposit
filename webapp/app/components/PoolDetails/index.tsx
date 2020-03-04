@@ -162,11 +162,11 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
           <Typography  className={classes.value}>{(contribution || 0).toFixed(2)}</Typography>
         </Grid>
         <Grid item xs={3}>
-          <Typography className={classes.profitLabel}>Profit</Typography>
+          <Typography className={classes.profitLabel}>Interest Earned</Typography>
           <Typography className={classes.profitValue}>{(interestAccrued || 0).toFixed(2)}</Typography>
         </Grid>
         <Grid item xs={3}>
-          <Typography  className={classes.label}>Penalty free withdrawal</Typography>
+          <Typography  className={classes.label}>Available Profit</Typography>
           <Typography  className={classes.value}>{(availableInterest || 0).toFixed(2)}</Typography>
         </Grid>
         <Grid item xs={3}>
@@ -197,8 +197,8 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
           active? 
           <>
           <Button className={classes.button} color='primary' onClick={() => showModal('invest')}>INVEST</Button>
-          <Button className={classes.button} color='primary' onClick={() => showModal('withdrawInterest')}>WITHDRAW INTEREST</Button>
-          <Button className={classes.button} color='primary' onClick={() => showModal('withdrawAll')}>WITHDRAW</Button> 
+          <Button className={classes.button} color='primary' onClick={() => showModal('withdrawInterest')}>WITHDRAW PROFIT</Button>
+          <Button className={classes.button} color='primary' onClick={() => showModal('withdrawAll')}>WITHDRAW INVESTMENT</Button> 
           </>
           :
           <Button className={classes.button} color='primary' onClick={() => withdrawAll()}>WITHDRAW</Button> 
