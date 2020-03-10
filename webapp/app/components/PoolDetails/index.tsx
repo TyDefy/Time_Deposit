@@ -210,12 +210,20 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         {
           active? 
           <>
+          <Tooltip title="Lock in an investment" placement="top">
           <Button className={classes.button} color='primary' onClick={() => showModal('invest')}>INVEST</Button>
+          </Tooltip>
+          <Tooltip title="Withdraw your available profit and rewarded penalties." placement="top">
           <Button className={classes.button} color='primary' onClick={() => showModal('withdrawInterest')}>WITHDRAW PROFIT</Button>
+          </Tooltip>
+          <Tooltip title="Withdraw your full investment and profit. Penalties are incurred if pool terms have not been met." placement="top">
           <Button className={classes.button} color='primary' onClick={() => showModal('withdrawAll')}>WITHDRAW INVESTMENT</Button> 
+          </Tooltip>
           </>
           :
+          <Tooltip title="Withdraw your full investment and profit from terminated pool." placement="top">
           <Button className={classes.button} color='primary' onClick={() => withdrawAll()}>WITHDRAW</Button> 
+          </Tooltip>
         }
 
         
