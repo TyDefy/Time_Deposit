@@ -8,6 +8,7 @@ import React from 'react';
 import { Theme, createStyles, withStyles, WithStyles, Container, Grid, Typography, Chip, Table, TableHead, TableRow, TableCell, TableBody, Button, Tooltip } from '@material-ui/core';
 import dayjs from 'dayjs';
 import { Pool } from 'containers/App';
+import Zoom from '@material-ui/core/Zoom';
 
 const styles = ({ spacing , palette }: Theme) =>
   createStyles({
@@ -139,25 +140,25 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
       <br/>
       <Grid container direction='row' spacing={0} className={classes.poolDetailsRow}>
         <Grid item xs={3}>
-        <Tooltip title="Financial investment instrument used in this Pool" placement="top">
+        <Tooltip enterDelay={500} leaveDelay={200} TransitionComponent={Zoom} title="Financial investment instrument used in this Pool" placement="top">
           <Typography className={classes.label}>Instrument</Typography>
           </Tooltip>
           <Typography className={classes.value}>{type}</Typography>
         </Grid>
         <Grid item xs={3}>
-        <Tooltip title="Total amount invested in this Pool" placement="top">
+        <Tooltip enterDelay={500} leaveDelay={200} TransitionComponent={Zoom} title="Total amount invested in this Pool" placement="top">
           <Typography className={classes.label}>Pool Total</Typography>
           </Tooltip>
           <Typography className={classes.value}>{balance.toFixed(2)}</Typography>
         </Grid>
         <Grid item xs={3}>
-        <Tooltip title="Number of invested participants in the Pool" placement="top">
+        <Tooltip enterDelay={500} leaveDelay={200} TransitionComponent={Zoom} title="Number of invested participants in the Pool" placement="top">
           <Typography className={classes.label}>Pool Participants</Typography>
           </Tooltip>
           <Typography className={classes.value}>{participants}</Typography>
         </Grid>
         <Grid item xs={3}>
-        <Tooltip title="Penalty percentage taken on withdrawals" placement="top">
+        <Tooltip enterDelay={500} leaveDelay={200} TransitionComponent={Zoom} title="Penalty percentage taken on withdrawals" placement="top">
           <Typography className={classes.label}>Pool Penalty</Typography>
           </Tooltip>
           <Typography className={classes.value}>{penaltyRate} %</Typography>
@@ -166,19 +167,19 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
       <br/>
       <Grid container direction='row' className={classes.poolDetailsRow}>
         <Grid item xs={3}>
-        <Tooltip title="Your total invested amount" placement="top">
+        <Tooltip enterDelay={500} leaveDelay={200} TransitionComponent={Zoom} title="Your total invested amount" placement="top">
           <Typography  className={classes.label}>Purchase Value</Typography>
           </Tooltip>
           <Typography  className={classes.value}>{(contribution || 0).toFixed(2)}</Typography>
         </Grid>
         <Grid item xs={3}>
-        <Tooltip title="Your total interest earned on purchase value" placement="top">
+        <Tooltip enterDelay={500} leaveDelay={200} TransitionComponent={Zoom} title="Your total interest earned on purchase value" placement="top">
           <Typography className={classes.profitLabel}>Interest Earned</Typography>
           </Tooltip>
           <Typography className={classes.profitValue}>{(interestAccrued || 0).toFixed(2)}</Typography>
         </Grid>
         <Grid item xs={3}>
-        <Tooltip title="Your available profit that can be withdrawn without penalty (includes penalties)" placement="top">
+        <Tooltip enterDelay={500} leaveDelay={200} TransitionComponent={Zoom} title="Your available profit that can be withdrawn without penalty (includes penalties)" placement="top">
           <Typography  className={classes.label}>Available Profit</Typography>
           </Tooltip>
           <Typography  className={classes.value}>{(availableInterest || 0).toFixed(2)}</Typography>
@@ -210,18 +211,18 @@ const PoolDetails: React.FunctionComponent<OwnProps> = ({
         {
           active? 
           <>
-          <Tooltip title="Lock in an investment" placement="top">
+          <Tooltip enterDelay={500} leaveDelay={200} TransitionComponent={Zoom} title="Lock in an investment" placement="top">
           <Button className={classes.button} color='primary' onClick={() => showModal('invest')}>INVEST</Button>
           </Tooltip>
-          <Tooltip title="Withdraw your available profit and rewarded penalties." placement="top">
+          <Tooltip enterDelay={500} leaveDelay={200} TransitionComponent={Zoom} title="Withdraw your available profit and rewarded penalties." placement="top">
           <Button className={classes.button} color='primary' onClick={() => showModal('withdrawInterest')}>WITHDRAW PROFIT</Button>
           </Tooltip>
-          <Tooltip title="Withdraw your full investment and profit. Penalties are incurred if pool terms have not been met." placement="top">
+          <Tooltip enterDelay={500} leaveDelay={200} TransitionComponent={Zoom} title="Withdraw your full investment and profit. Penalties are incurred if pool terms have not been met." placement="top">
           <Button className={classes.button} color='primary' onClick={() => showModal('withdrawAll')}>WITHDRAW INVESTMENT</Button> 
           </Tooltip>
           </>
           :
-          <Tooltip title="Withdraw your full investment and profit from terminated pool." placement="top">
+          <Tooltip TransitionComponent={Zoom} title="Withdraw your full investment and profit from terminated pool." placement="top">
           <Button className={classes.button} color='primary' onClick={() => withdrawAll()}>WITHDRAW</Button> 
           </Tooltip>
         }
