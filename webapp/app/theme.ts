@@ -18,6 +18,11 @@ const theme = (createMuiTheme)({
   overrides: {
   MuiTypography: {
   },
+  MuiTooltip:{
+    tooltip: {
+      fontSize: '12px',
+    }
+  },
   MuiButton: {
     root: {
       color: 'white',
